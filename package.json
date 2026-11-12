@@ -5,6 +5,7 @@
   "scripts": {
     "experiment:renderer": "node experiments/renderer.mjs",
     "experiment:pdf": "node experiments/pdf.mjs",
+    "experiment:compare-text": "node experiments/compare-text.mjs",
     "review": "node experiments/review.mjs"
   },
   "dependencies": {

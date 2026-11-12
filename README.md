@@ -59,6 +59,31 @@ The renderer produces 28, 44, and 49 main-text lines compared with the PDF probe
 
 One amud is one printed side; one daf comprises two sides. Once a denominator is defined, sum amud fractions to obtain equivalent printed sides, then divide by two to obtain equivalent two-sided dafim.
 
+### Whole-Tractate Text Comparison
+
+```sh
+npm run experiment:compare-text
+```
+
+This separate experiment follows the archive-based approach in [Daf](https://github.com/adblumenthal/Daf): it downloads one pinned Sefaria export per tractate, checks that the amudim are contiguous, and counts Hebrew letter sequences after removing vocalization and supported markup. Punctuation separates sequences, so these are approximate word counts, not a linguistic analysis. Mishnah in the Bavli text is included; neither Rashi nor Tosafot is included.
+
+| Tractate | Amudim covered | Approximate words | Hebrew letters |
+| --- | ---: | ---: | ---: |
+| Horayot, 2a-14a | 25 | 12,924 | 50,492 |
+| Rosh Hashanah, 2a-35a | 67 | 23,791 | 95,366 |
+
+Rosh Hashanah has about 1.84 times as many counted words and 1.89 times as many letters as Horayot. **This is text volume, not printed-page area**, and cannot be converted into printed daf equivalents without validated page geometry. The original source includes editorial markers and may differ from the printed edition. The two downloaded JSON files contain 611,997 bytes in total, before any HTTP compression. The program does not save or redistribute the text.
+
+The archive's merged files list the William Davidson vocalized text; Sefaria identifies that version as CC BY-NC. The [Daf archive helper](https://github.com/adblumenthal/Daf/blob/main/scripts/archive_source.py) caches each complete tractate and selects requested references, which is useful for text retrieval but provides no printed coordinates. Its merged files do not themselves settle licensing or select a specific version for commercial reuse. The Wikisource Talmud Bavli version is identified as CC BY-SA by Sefaria and is a possible alternative to investigate.
+
+The direct PDF probe failed on Horayot 2a and 10a because their type sizes differ from the three Berakhot samples. It ran on Rosh Hashanah 2a and 10a, but that is not validation across the tractate. A trustworthy printed-area comparison requires a common reference area, visually annotated checks including opening, ordinary and final pages, and handling of page-specific font and layout changes.
+
+## Browser and Cost Considerations
+
+The word-count calculation can run locally in a browser using the two archive files, or once in a build step with only precomputed numbers sent to the browser. The latter avoids per-user text downloads and parsing, but source rights for the resulting dataset must still be checked. No AI or paid text API is needed by these experiments. Hosting, bandwidth, manual review, maintenance and any permissions may still cost money; no provider pricing or browser performance benchmark has been established.
+
+The Shas.org PDF GET response checked here did not allow cross-origin browser fetching. A PDF-based live calculation would otherwise require one PDF per amud: 92 requests for these two tractates. The two JSON exports have `Access-Control-Allow-Origin: *` in the checked GitHub response, but availability, rate limits and licenses still matter. The PDF API documents non-commercial redistribution with attribution and the full license text; the linked historical HebrewBooks site terms also restrict automated downloading. Whether those site restrictions apply to use of the separate Shas.org API is unclear, so obtain permission before bulk downloading. Do not assume either the PDFs or derived measurements can be redistributed commercially.
+
 ## Other Research
 
 [Historical Document Analysis](https://github.com/AIStream-Peelout/historical-document-analysis/blob/master/docs/talmud_ocr_segmentation.md) describes a Talmud-specific OCR and language-model pipeline that separates section *text*, not measured page areas. It reports extraction errors and uses ground-truth lengths for some quality checks; its documented setup can require cloud services and credentials. It was not run here.
