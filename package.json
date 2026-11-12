@@ -1,0 +1,16 @@
+{
+  "name": "gemara-daf-counter-research",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "experiment:renderer": "node experiments/renderer.mjs",
+    "experiment:pdf": "node experiments/pdf.mjs",
+    "review": "node experiments/review.mjs"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.1.1",
+    "daf-renderer": "1.1.4",
+    "pdfjs-dist": "^6.5.438",
+    "playwright-core": "1.56.1"
+  }
+}

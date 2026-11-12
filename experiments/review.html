@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Berakhot page review</title>
+  <style>
+    :root { color-scheme: light; font-family: "Avenir Next", Avenir, sans-serif; color: #202827; background: #f3f5f2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: #fff; border-bottom: 1px solid #d5deda; padding: 18px 24px; }
+    header p { margin: 4px 0 0; color: #52635c; font-size: 14px; }
+    h1 { font-family: Georgia, serif; font-size: 26px; font-weight: normal; margin: 0; }
+    main { max-width: 1300px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: minmax(240px, 310px) minmax(0, 1fr); gap: 30px; align-items: start; }
+    h2 { font-size: 14px; margin: 26px 0 12px; }
+    h2:first-child { margin-top: 0; }
+    .tabs { display: flex; gap: 4px; padding: 4px; border: 1px solid #ccd6d1; background: #e8eeea; border-radius: 6px; }
+    .tabs button { flex: 1; border: 0; border-radius: 4px; background: transparent; padding: 10px 6px; color: #41534b; font: inherit; cursor: pointer; }
+    .tabs button[aria-selected="true"] { background: white; color: #14251d; box-shadow: 0 1px 3px #0002; font-weight: 600; }
+    .choice { display: flex; align-items: center; gap: 9px; padding: 11px 0; border-bottom: 1px solid #d9e1dc; font-size: 14px; }
+    .choice input { width: 17px; height: 17px; margin: 0; accent-color: #293d34; }
+    .choice label { display: flex; align-items: center; gap: 8px; flex: 1; cursor: pointer; }
+    .swatch { width: 12px; height: 12px; border-radius: 2px; flex: none; }
+    .value { font-variant-numeric: tabular-nums; font-weight: 600; }
+    .result { margin-top: 28px; border-top: 3px solid #273d33; padding-top: 15px; }
+    .result span { display: block; color: #52635c; font-size: 13px; }
+    .result strong { display: block; font-family: Georgia, serif; font-size: 42px; font-weight: normal; margin: 5px 0; }
+    .note { color: #52635c; font-size: 13px; line-height: 1.5; }
+    .warning { border-left: 3px solid #ba8740; padding-left: 12px; margin-top: 22px; color: #514638; }
+    .preview { min-width: 0; }
+    .preview h2 { margin: 0 0 8px; font-size: 17px; }
+    .preview p { margin: 0 0 15px; }
+    .page { max-width: 760px; position: relative; background: white; box-shadow: 0 2px 12px #172b211a; }
+    .page img, .page svg { display: block; width: 100%; height: 100%; }
+    .page svg { position: absolute; inset: 0; pointer-events: none; }
+    footer { border-top: 1px solid #d9e1dc; margin-top: 24px; padding-top: 12px; }
+    a { color: #27604c; }
+    @media (max-width: 700px) { main { grid-template-columns: 1fr; gap: 24px; padding: 18px; } header { padding: 16px 18px; } .result strong { font-size: 36px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Berakhot page review</h1>
+    <p>Experimental measurements of three printed pages</p>
+  </header>
+  <main>
+    <section aria-label="Page and text selection">
+      <h2>Page</h2>
+      <div class="tabs" role="tablist" aria-label="Berakhot page">
+        <button role="tab" data-page="2a">2a</button>
+        <button role="tab" data-page="2b">2b</button>
+        <button role="tab" data-page="3a">3a</button>
+      </div>
+      <h2>Text included</h2>
+      <div class="choice"><input id="main" type="checkbox" checked><label for="main"><span class="swatch" style="background:#c64f54"></span>Gemara + Mishnah</label><span class="value" id="main-value"></span></div>
+      <div class="choice"><input id="rashi" type="checkbox"><label for="rashi"><span class="swatch" style="background:#4775bf"></span>Rashi</label><span class="value" id="rashi-value"></span></div>
+      <div class="choice"><input id="tosafot" type="checkbox"><label for="tosafot"><span class="swatch" style="background:#3d9665"></span>Tosafot</label><span class="value" id="tosafot-value"></span></div>
+      <div class="result" aria-live="polite"><span>Selected text</span><strong id="total"></strong><span>of the outlined three-text area</span></div>
+      <p class="note">For example, 25% means about one quarter of the outlined area. It does not mean one quarter of the whole sheet.</p>
+      <p class="note warning">Preliminary estimate: some headings and the decorative opening word are not counted. Check the colored lines against the page before relying on the result.</p>
+      <footer class="note">Printed pages provided by <a href="https://www.shas.org/daf-pdf/api/api-documentation.html">Shas.org, HebrewBooks and Moznaim</a>, subject to non-commercial terms.</footer>
+    </section>
+    <section class="preview" aria-label="Printed page and detected text">
+      <h2 id="page-title"></h2>
+      <p class="note">The dashed outline is the area used as 100%. Colored lines are the selected text detected by the experiment.</p>
+      <div class="page" id="page"><img id="scan" alt="Printed Berakhot page"><svg id="overlay" aria-hidden="true"></svg></div>
+    </section>
+  </main>
+  <script id="report-data" type="application/json">__REPORT_DATA__</script>
+  <script>
+    const pages = JSON.parse(document.getElementById("report-data").textContent);
+    const colors = { main: "#c64f54", rashi: "#4775bf", tosafot: "#3d9665" };
+    let active = pages[0];
+    const percent = (fraction) => `${(fraction * 100).toFixed(1)}%`;
+    function render() {
+      document.querySelectorAll("[data-page]").forEach((button) => button.setAttribute("aria-selected", String(button.dataset.page === active.sample)));
+      document.getElementById("page-title").textContent = `Berakhot ${active.sample}`;
+      const image = document.getElementById("scan");
+      image.src = active.image;
+      image.alt = `Printed Berakhot ${active.sample}`;
+      const overlay = document.getElementById("overlay");
+      overlay.setAttribute("viewBox", `0 0 ${active.width} ${active.height}`);
+      overlay.replaceChildren();
+      function rectangle(box, attributes) {
+        const element = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        for (const [key, value] of Object.entries({ ...box, ...attributes })) element.setAttribute(key, value);
+        overlay.append(element);
+      }
+      let total = 0;
+      for (const name of Object.keys(colors)) {
+        const region = active.regions[name];
+        document.getElementById(`${name}-value`).textContent = percent(region.fraction);
+        if (document.getElementById(name).checked) {
+          total += Math.round(region.fraction * 1000);
+          region.rows.forEach((row) => rectangle(row, { fill: colors[name], "fill-opacity": "0.28" }));
+        }
+      }
+      rectangle(active.body, { fill: "none", stroke: "#171e1a", "stroke-width": "2", "stroke-dasharray": "8 5" });
+      document.getElementById("total").textContent = percent(total / 1000);
+    }
+    document.querySelectorAll("[data-page]").forEach((button) => button.addEventListener("click", () => { active = pages.find((page) => page.sample === button.dataset.page); render(); }));
+    document.querySelectorAll('input[type="checkbox"]').forEach((input) => input.addEventListener("change", render));
+    render();
+  </script>
+</body>
+</html>
