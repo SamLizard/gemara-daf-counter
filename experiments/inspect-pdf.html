@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF geometry inspection</title>
+  <style>
+    :root { color-scheme: light; font-family: "Avenir Next", Avenir, sans-serif; color: #202827; background: #f3f5f2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: white; border-bottom: 1px solid #d5deda; padding: 18px 24px; }
+    h1 { font-family: Georgia, serif; font-size: 24px; font-weight: normal; margin: 0; }
+    main { max-width: 1300px; margin: auto; padding: 24px; display: grid; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); gap: 30px; align-items: start; }
+    label { display: block; margin: 0 0 8px; font-weight: 600; }
+    select, button { max-width: 100%; padding: 8px; font: inherit; }
+    select { width: 100%; }
+    button { cursor: pointer; margin: 0 4px 8px 0; }
+    input[type="file"] { max-width: 100%; font: inherit; font-size: 13px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 13px; margin: 12px 0; }
+    .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 5px; background: var(--swatch); }
+    h2 { font-size: 15px; margin: 24px 0 8px; }
+    .note { color: #52635c; font-size: 13px; line-height: 1.5; }
+    .group { display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px solid #d9e1dc; font-size: 14px; }
+    .group label { display: flex; justify-content: space-between; flex: 1; margin: 0; font-weight: normal; cursor: pointer; }
+    .page { max-width: 760px; position: relative; background: white; }
+    .page img, .page svg { display: block; width: 100%; height: auto; }
+    .page svg { position: absolute; inset: 0; height: 100%; touch-action: none; cursor: crosshair; }
+    @media (max-width: 700px) { main { grid-template-columns: 1fr; gap: 20px; padding: 18px; } }
+  </style>
+</head>
+<body>
+  <header><h1>PDF geometry inspection</h1></header>
+  <main>
+    <section>
+      <label for="page-select">Page</label><select id="page-select"></select>
+      <h2>Manual regions</h2>
+      <label for="region-type">Text identity</label>
+      <select id="region-type"><option value="main">Mishnah / Gemara</option><option value="rashi">Rashi</option><option value="tosafot">Tosafot</option><option value="other">Other / uncertain</option></select>
+      <p class="note">Drag on the page to mark a region. Use separate regions for wrapped text. These rectangles are review annotations, not measured line areas.</p>
+      <div class="legend"><span style="--swatch:#ce3d41">Main</span><span style="--swatch:#326da1">Rashi</span><span style="--swatch:#178164">Tosafot</span><span style="--swatch:#995e14">Other / uncertain</span></div>
+      <button id="undo" type="button">Undo region</button><button id="export" type="button">Export annotations</button>
+      <label for="import">Import annotations</label><input id="import" type="file" accept="application/json,.json">
+      <p id="import-status" class="note" role="status"></p>
+      <p id="region-count" class="note" aria-live="polite"></p>
+      <h2>Text sizes</h2>
+      <p class="note">Select a size to see its extracted text boxes. Sizes are not semantic labels; compare them with the printed page.</p>
+      <div id="groups"></div>
+      <p class="note">Boxes are approximate and omit image-only content. A missing group does not prove that the text is absent.</p>
+    </section>
+    <section class="page"><img id="scan" alt="Printed page"><svg id="overlay" aria-hidden="true"></svg></section>
+  </main>
+  <script id="report-data" type="application/json">__REPORT_DATA__</script>
+  <script>
+    const pages = JSON.parse(document.getElementById("report-data").textContent);
+    const select = document.getElementById("page-select");
+    const groups = document.getElementById("groups");
+    const overlay = document.getElementById("overlay");
+    const regionType = document.getElementById("region-type");
+    const colors = { main: "#ce3d41", rashi: "#326da1", tosafot: "#178164", other: "#995e14" };
+    const annotations = pages.map(() => []);
+    let drawing = null;
+    pages.forEach((page, index) => select.add(new Option(page.name, index)));
+    function renderRegions() {
+      const page = pages[Number(select.value)];
+      const regions = annotations[Number(select.value)];
+      const layer = document.getElementById("regions");
+      layer.replaceChildren();
+      const visible = drawing?.preview && drawing.page === Number(select.value) ? [...regions, drawing.preview] : regions;
+      visible.forEach((region) => {
+        const rectangle = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rectangle.setAttribute("x", region.x * page.width);
+        rectangle.setAttribute("y", region.y * page.height);
+        rectangle.setAttribute("width", region.width * page.width);
+        rectangle.setAttribute("height", region.height * page.height);
+        rectangle.setAttribute("fill", colors[region.type]);
+        rectangle.setAttribute("fill-opacity", "0.25");
+        rectangle.setAttribute("stroke", colors[region.type]);
+        rectangle.setAttribute("stroke-width", "2");
+        layer.append(rectangle);
+      });
+      document.getElementById("region-count").textContent = `${regions.length} region(s) on this page`;
+    }
+    function point(event) {
+      const bounds = overlay.getBoundingClientRect();
+      return { x: Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width)), y: Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height)) };
+    }
+    function renderPage() {
+      const page = pages[Number(select.value)];
+      document.getElementById("scan").src = page.image;
+      document.getElementById("scan").alt = page.name;
+      overlay.setAttribute("viewBox", `0 0 ${page.width} ${page.height}`);
+      overlay.replaceChildren();
+      groups.replaceChildren();
+      Object.entries(page.groups).sort((first, second) => Number(second[0]) - Number(first[0])).forEach(([size, boxes], index) => {
+        const row = document.createElement("div");
+        row.className = "group";
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.id = `size-${index}`;
+        const label = document.createElement("label");
+        label.htmlFor = input.id;
+        const title = document.createElement("span");
+        title.textContent = `${size} pt`;
+        const count = document.createElement("span");
+        count.textContent = boxes.length;
+        label.append(title, count);
+        row.append(input, label);
+        groups.append(row);
+        const layer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        layer.setAttribute("display", "none");
+        boxes.forEach((box) => {
+          const rectangle = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          Object.entries(box).forEach(([key, value]) => rectangle.setAttribute(key, value));
+          rectangle.setAttribute("fill", "#e43d50");
+          rectangle.setAttribute("fill-opacity", "0.35");
+          layer.append(rectangle);
+        });
+        overlay.append(layer);
+        input.addEventListener("change", () => layer.setAttribute("display", input.checked ? "inline" : "none"));
+      });
+      const regionLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      regionLayer.id = "regions";
+      overlay.append(regionLayer);
+      renderRegions();
+      if (!Object.keys(page.groups).length) groups.textContent = "No extractable text found.";
+    }
+    overlay.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      drawing = { start: point(event), page: Number(select.value), type: regionType.value };
+      overlay.setPointerCapture(event.pointerId);
+    });
+    function updateDrawing(event) {
+      const end = point(event);
+      drawing.preview = { type: drawing.type, x: Math.min(drawing.start.x, end.x), y: Math.min(drawing.start.y, end.y), width: Math.abs(end.x - drawing.start.x), height: Math.abs(end.y - drawing.start.y) };
+    }
+    overlay.addEventListener("pointermove", (event) => {
+      if (!drawing || drawing.page !== Number(select.value)) return;
+      updateDrawing(event);
+      renderRegions();
+    });
+    overlay.addEventListener("pointerup", (event) => {
+      if (!drawing || drawing.page !== Number(select.value)) return;
+      updateDrawing(event);
+      const region = drawing.preview;
+      drawing = null;
+      if (region.width > 0.002 && region.height > 0.002) annotations[Number(select.value)].push(region);
+      renderRegions();
+    });
+    overlay.addEventListener("pointercancel", () => { drawing = null; renderRegions(); });
+    document.getElementById("undo").addEventListener("click", () => { annotations[Number(select.value)].pop(); renderRegions(); });
+    document.getElementById("export").addEventListener("click", () => {
+      const data = { version: 1, pages: pages.map((page, index) => ({ name: page.name, sha256: page.fingerprint, regions: annotations[index] })) };
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+      link.href = url;
+      link.download = "pdf-annotations.json";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+    document.getElementById("import").addEventListener("change", async (event) => {
+      const status = document.getElementById("import-status");
+      try {
+        const data = JSON.parse(await event.target.files[0].text());
+        if (data.version !== 1 || !Array.isArray(data.pages) || data.pages.length !== pages.length) throw new Error("The annotation file does not match this report.");
+        const imported = data.pages.map((item, index) => {
+          if (item.name !== pages[index].name || item.sha256 !== pages[index].fingerprint || !Array.isArray(item.regions)) throw new Error("The PDF files or their order do not match this report.");
+          return item.regions.map((region) => {
+            if (!Object.hasOwn(colors, region.type) || ![region.x, region.y, region.width, region.height].every(Number.isFinite) || region.x < 0 || region.y < 0 || region.width <= 0 || region.height <= 0 || region.x + region.width > 1.000000001 || region.y + region.height > 1.000000001) throw new Error("The annotation file contains an invalid region.");
+            return { type: region.type, x: region.x, y: region.y, width: region.width, height: region.height };
+          });
+        });
+        imported.forEach((regions, index) => { annotations[index] = regions; });
+        renderRegions();
+        status.textContent = "Annotations imported.";
+      } catch (error) {
+        status.textContent = `Import failed: ${error.message}`;
+      }
+      event.target.value = "";
+    });
+    select.addEventListener("change", () => { drawing = null; renderPage(); });
+    renderPage();
+  </script>
+</body>
+</html>

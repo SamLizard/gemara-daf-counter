@@ -5,6 +5,8 @@
   "scripts": {
     "experiment:renderer": "node experiments/renderer.mjs",
     "experiment:pdf": "node experiments/pdf.mjs",
+    "inspect:pdf": "node experiments/inspect-pdf.mjs",
+    "test:inspector": "node --test experiments/inspect-pdf.test.mjs",
     "experiment:compare-text": "node experiments/compare-text.mjs",
     "review": "node experiments/review.mjs"
   },

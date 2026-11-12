@@ -4,11 +4,21 @@ This is a feasibility study, not a finished counter. It compares two ways of est
 
 ## Try the Visual Review
 
-Run `npm install` once, then `npm run review`. Open `results/review.html` in a browser. The command needs internet access to download the three sample pages; the generated report then works offline. It contains third-party page images and is ignored by Git.
+Run `npm install` once. The existing `npm run review` command automatically downloads three sample pages, so use it only after confirming that access is permitted. Open the resulting `results/review.html` in a browser. The report works offline, contains third-party page images, and is ignored by Git.
 
 Choose a page and check the texts you want to count. The colored lines show what was detected, and the dashed rectangle is the reference area used as 100%. The large number is the sum of the displayed estimates for the selected texts. For example, 25% means roughly one quarter of that rectangle, not one quarter of the entire sheet.
 
 This is a way to inspect the experiment, not a finished counter: some headings and the decorative opening word are missing, and the results have not been validated across other pages or tractates.
+
+For locally obtained single-page PDFs, the separate geometry inspector does not download anything:
+
+```sh
+npm run inspect:pdf -- /path/to/first.pdf /path/to/second.pdf
+```
+
+Open `results/inspect-pdf.html`. Select font sizes to inspect approximate extracted boxes, or drag regions labeled Mishnah/Gemara, Rashi, Tosafot, or other/uncertain. Export the annotations as JSON and import them into a report generated from the same PDF files in the same order. The import checks filenames and SHA-256 fingerprints. Export before closing the report; annotations are not automatically saved. Drawn rectangles may include whitespace and overlap, and are not measurements or verified ground truth. Image-only text and some ornaments will not appear in the font-size overlays.
+
+Run `npm run test:inspector` to exercise the annotation workflow in Chrome at desktop and mobile widths. Set `CHROME_PATH` if Chrome is installed elsewhere.
 
 ## Page layout
 
@@ -33,12 +43,9 @@ This fetches the Wikisource Talmud Bavli version and linked commentary from Sefa
 ### 2. PDF.js and original printed pages
 
 ```sh
-curl -fLsS 'https://www.shas.org/daf-pdf/api/?masechta=berachos&daf=2&amud=a' -o /tmp/gemara-berakhot-2a.pdf
-curl -fLsS 'https://www.shas.org/daf-pdf/api/?masechta=berachos&daf=2&amud=b' -o /tmp/gemara-berakhot-2b.pdf
-curl -fLsS 'https://www.shas.org/daf-pdf/api/?masechta=berachos&daf=3&amud=a' -o /tmp/gemara-berakhot-3a.pdf
-npm run experiment:pdf -- /tmp/gemara-berakhot-2a.pdf a
-npm run experiment:pdf -- /tmp/gemara-berakhot-2b.pdf b
-npm run experiment:pdf -- /tmp/gemara-berakhot-3a.pdf a
+npm run experiment:pdf -- /path/to/berakhot-2a.pdf a
+npm run experiment:pdf -- /path/to/berakhot-2b.pdf b
+npm run experiment:pdf -- /path/to/berakhot-3a.pdf a
 ```
 
 Mozilla PDF.js extracts positioned text items. On these samples, the probe identifies the main text by its observed font size and identifies the two commentary streams by PDF content order and inner/outer position. It groups items into lines, approximates each line by its leftmost and rightmost extents and median baseline pitch, and divides their area by an estimated rectangle surrounding the three main text streams. It does not count individual ink pixels. The PDFs' underlying character encodings are partly garbled; classification currently uses geometry and content order, not reliable transcription.
@@ -77,6 +84,21 @@ Rosh Hashanah has about 1.84 times as many counted words and 1.89 times as many 
 The archive's merged files list the William Davidson vocalized text; Sefaria identifies that version as CC BY-NC. The [Daf archive helper](https://github.com/adblumenthal/Daf/blob/main/scripts/archive_source.py) caches each complete tractate and selects requested references, which is useful for text retrieval but provides no printed coordinates. Its merged files do not themselves settle licensing or select a specific version for commercial reuse. The Wikisource Talmud Bavli version is identified as CC BY-SA by Sefaria and is a possible alternative to investigate.
 
 The direct PDF probe failed on Horayot 2a and 10a because their type sizes differ from the three Berakhot samples. It ran on Rosh Hashanah 2a and 10a, but that is not validation across the tractate. A trustworthy printed-area comparison requires a common reference area, visually annotated checks including opening, ordinary and final pages, and handling of page-specific font and layout changes.
+
+## Historical Layout Checks
+
+For layout research, eight amudim were drawn without replacement from the two tractates using a 32-bit LCG, seed `20260304`, multiplier `1664525`, increment `1013904223`, and four draws per tractate in the order shown. Candidates were inspected as individual images in the Internet Archive uploader's 1883 and 1887 Vilna scans. The 2a and 4b Rosh Hashanah text and the Horayot 3a header anchor the leaf mapping; other references use the observed leaf order, with printed folio or page numbering where visible. These are bitmap scans, not the native-text PDFs used by the detector; they cannot validate the detector or establish that a different edition has the same layout.
+
+| Tractate | Sampled amudim and archive image leaves | Observations |
+| --- | --- | --- |
+| Rosh Hashanah | 7b (0021), 6b (0019), 21a (0048), 18b (0043) | Side text can extend above and below the central text. On 18b the main text expands into space on only one side. The outer margin can contain separately headed Rabbeinu Chananel. |
+| Horayot | 6b (0235), 3a (0228), 10a (0242), 3b (0229) | Main text can widen below both side columns. On 3a and 3b a separately headed Tosafot section sits below the main text, while the margin has Tosafot HaRosh. On 6b a chapter ending and a new Mishnah share the page. |
+
+The images are in [Rosh Hashanah's volume](https://archive.org/details/talmud-bavli-shas-vilna_images/Talmud_Bavli_Shas_Vilna_A_V05_Rosh-Hashanah_Yoma_Shekalim_Sukkah_1887_images/page/n10/mode/1up) and [Horayot's volume](https://archive.org/details/talmud-bavli-shas-vilna_images/Talmud_Bavli_Shas_Vilna_A_V16_Avodah-Zarah_Horayot_%27Eduyyot_Makkot_Avot_Masekhtot-Ketanot_1883_images/page/n228/mode/1up); replace the `n` number in the viewer URL with a leaf number above. The opening Rosh Hashanah 2a has commentary continuing below the main text. Its final 35a is followed by [leaf 0077](https://archive.org/details/talmud-bavli-shas-vilna_images/Talmud_Bavli_Shas_Vilna_A_V05_Rosh-Hashanah_Yoma_Shekalim_Sukkah_1887_images/page/n77/mode/1up), a completion-prayer and Tosafot-summary page with no Gemara or Mishnah. It is an extra physical page, not evidence of an empty amud within the counted 2a-35a range. A page with Mishnah but no Gemara must still count as main text.
+
+These observations disprove an unconditional three-column or fixed-side classifier. They do not establish which work occupies every region, validate the PDF detector, or verify examples where Rashi or Tosafot independently occupy both sides of the main text. Those edge cases and a labeled sample remain necessary before aggregation. Separate segmentation from identification; treat font and position as evidence, not proof, and allow uncertain regions to be reviewed. Define one stable reference area and measure non-overlapping line regions before calculating equivalent sides or dafim.
+
+The archive uploader marks the historical scans as public domain and attributes them to Duke; those statements and scan reuse rights have not been independently verified. Internet Archive access is subject to its [terms](https://archive.org/about/terms.php). The repository does not include these images.
 
 ## Browser and Cost Considerations
 
