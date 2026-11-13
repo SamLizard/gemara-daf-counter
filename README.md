@@ -4,9 +4,9 @@ This research estimates the printed area occupied by Mishnah and Gemara, Rashi, 
 
 ## Full Shas JSON
 
-The generated [results/shas-metrics.json](results/shas-metrics.json) is a frontend-oriented export for 40 separately named sections. The latest local run measured at least the main text on 5,400 of 5,405 sides; five sides remain unresolved. Six sections have all three categories classified on every side, while 34 are partial. These counts describe the classifier's coverage, not verified accuracy. There are 992 sides with at least one unknown category, including 294 where a commentary's absence is inferred rather than established.
+The generated [results/shas-metrics.json](results/shas-metrics.json) is a frontend-oriented export for 40 separately named sections. The latest fresh-source run attempted all 5,405 sides and measured at least the main text on 5,401; four sides remain unresolved. Six sections have all three categories classified on every side, while 34 are partial. These counts describe the classifier's coverage, not verified accuracy. There are 985 measured sides with at least one unknown category, including 191 where a commentary's absence is inferred rather than established. Across these partial and unresolved sides, 494 attempts failed classification; existing main measurements are preserved where available, but their commentary values are unknown.
 
-The five unresolved sides are Nedarim 40b and 45b, Nazir 33a and 33b, and Zevachim 71a. Shekalim, Kinnim, Tamid, Middot, and Keritot have main-text-only measurements. Their fitted frames also use unclassified printed text, not identified Rashi or Tosafot; they are provisional. Shekalim is checked against the Jerusalem Talmud, Kinnim and Middot against Mishnah, and Tamid against Bavli Tamid. For these four sections, matches are against the entire work because its reference pagination differs from the PDF; this is weaker than a page-specific match. The source lists the Jerusalem Talmud Shekalim version's license as unknown.
+The four unresolved sides are Nedarim 40b and 45b, Nazir 33b, and Zevachim 71a. Shekalim, Kinnim, Tamid, Middot, and Keritot have main-text-only measurements. Their fitted frames also use unclassified printed text, not identified Rashi or Tosafot; they are provisional. Shekalim is checked against the Jerusalem Talmud, Kinnim and Middot against Mishnah, and Tamid against Bavli Tamid. For these four sections, matches are against the entire work because its reference pagination differs from the PDF; this is weaker than a page-specific match. The source lists the Jerusalem Talmud Shekalim version's license as unknown.
 
 The file is local and Git-ignored. Check source and derived-data rights before publishing it. PDF and commentary sources and attribution are recorded in the JSON; original PDF files and source texts are not included.
 
@@ -16,6 +16,7 @@ The file is local and Git-ignored. Check source and derived-data rights before p
 - `tractates[]` gives a stable `id`, title, order, first/last amud, status, coverage, fitted frame, category totals, and one entry per expected printed side. Kinnim, Tamid, and Middot use disjoint ranges of the Meilah volume and are not double-counted.
 - `coverage.knownByCategory` counts sides with a numeric value for each category. `measured` means at least main text was measured, not that every category is known.
 - `pages[].fractions` is a fraction of that tractate's frame for each of `main`, `rashi`, and `tosafot`. `main` includes Mishnah. `null` means unknown, never zero; `inferredAbsent` is evidence of possible absence but remains unknown.
+- Pages include `tosafotEvidence`, with the run ID, Wikisource revision when available, source status, decision, basis, and PDF SHA-256 when classification succeeded. `confirmedAbsent` identifies a source-backed zero; most such decisions use the community index and classified PDF streams, not a manual inspection of every page. Unreviewed omissions or atypical type may still be missed. `lastClassificationError` reports failed reclassifications; a prior main measurement can remain available while the commentary is unknown.
 - `pages[].method` is `classified` or `main-only`. A main-only recovery includes the original failure reason and match evidence; `referenceScope` distinguishes page-specific from whole-tractate matching.
 - `totals.sides` and `totals.dafim` contain separate category totals. An individual total is `null` if that category is unknown on any side; the entire `totals` object is `null` when a side is unresolved or pending. Add categories only when every selected total is numeric. One equivalent daf is two equivalent printed sides.
 - `frame.provisional` means the frame can change as missing text is resolved. `referenceBasis` is `classified-text`, `main-and-unclassified-text`, or `main-text-only`. A frame using unclassified or only main text is particularly uncertain. Different tractates' frames are not a common physical area.
@@ -34,21 +35,29 @@ const total = selected.every((value) => typeof value === "number")
 
 ### Reproduce The Export
 
-The two calibrated tractates must first be generated with the corpus commands below. The other pages are fetched four at a time into memory; compact, versioned checkpoints are written under ignored `results/shas-work/`. Confirm permission and applicable source terms before bulk downloads. The runner stops on HTTP 403, 429, and server errors and resumes without replacing previously recovered measurements.
+The legacy calibrated corpus can be generated with the corpus commands below. For a fresh Shas run, page references are fetched directly from Wikisource without using a disk cache, and PDFs are fetched four at a time into memory. Compact checkpoints are written under ignored `results/shas-work/` for resuming a run. Confirm permission and applicable source terms before bulk downloads. The runner stops on PDF HTTP 403, 429, and server errors and preserves previously recovered measurements as unknown where appropriate.
 
 ```sh
-npm run measure:corpus
-npm run measure:shas
-npm run measure:shas -- --recover-main
+npm run measure:shas -- --wikisource
 npm run export:shas
 npm run test:shas
 ```
 
-To limit a run, pass `--limit=100` after `--`. Pass one or more catalog IDs to select tractates; `--retry-unresolved` retries full classification, and `--recover-main --refresh-main` refreshes existing main-only results. The latter refetches pages. Older classifier checkpoints are excluded and reprocessed rather than silently mixed into the current export.
+Each new `--wikisource` invocation generates a run ID and reprocesses all selected PDFs, even if a previous checkpoint exists. To resume an interrupted run, pass its printed `--run-id=<id>`; already processed pages are skipped, but Wikisource references are still fetched afresh. Use `--retry-unresolved` with the same run ID to retry unknown decisions. To limit a run, pass `--limit=100` after `--`; pass one or more catalog IDs to select tractates. Other runner modes retain their separate legacy checkpoint behavior.
 
-## Whole-Tractate Results
+For a Sotah-only fresh rerun:
 
-One equivalent printed side is the area of that tractate's fitted text-body rectangle described below; one equivalent daf is two such sides. These are area equivalents, not the number of physical folios in the edition or the number of actual pages containing text. Each tractate uses a different reference area, so its equivalents are fractions of its own page format, not a common physical area.
+```sh
+npm run measure:shas -- sotah --wikisource
+```
+
+The current run uses only regular `תוספות` or `תוס'` sections, not Tosafot Shantz or other named commentators, and records the page revision. Missing or empty sections are unknown outside Sotah unless an explicit absence notice is present. For Sotah, missing sections are treated as absent only when the PDF commentary streams classify as Rashi. Sotah 35a's two short Tosafot lines and the absence on 44a were reviewed visually and the overrides apply only to the reviewed PDF hashes. If an override no longer applies and the automated match is insufficient, the result remains unknown. Missing Wikisource entries, alternate pagination, and failed or ambiguous matches remain unknown. The PDF classification is approximate, and the community transcription may be incomplete or differ from the printed edition. HebrewBooks' own text site forbids automated access and returned HTTP 403, so this workflow does not scrape it. Rashi still uses Sefaria's per-page commentary references, which may follow semantic anchors rather than physical printed placement.
+
+The current Sotah rerun is `complete` for classifier coverage: 96/96 sides have all category values, including 16 source-backed or manually reviewed Tosafot zeroes. It estimates 16.17 equivalent dafim of Gemara and Mishnah, 13.03 of Rashi, and 9.90 of Tosafot, or 39.10 combined. These are estimates, not manually verified totals.
+
+## Historical Calibrated Results
+
+These are the earlier Sefaria-based calibrated results, not the current Wikisource-based Shas export. One equivalent printed side is the area of that tractate's fitted text-body rectangle described below; one equivalent daf is two such sides. These are area equivalents, not the number of physical folios in the edition or the number of actual pages containing text. Each tractate uses a different reference area, so its equivalents are fractions of its own page format, not a common physical area.
 
 | Tractate | Gemara + Mishnah | Add Rashi | Add Rashi and Tosafot |
 | --- | ---: | ---: | ---: |
@@ -67,7 +76,7 @@ The earlier 59.0% and 34.3% for 10a used a smaller rectangle fitted to that page
 
 No universal maximum line counts were obtained from the internet or assumed. As a geometric illustration, Horayot's rectangle height divided by its spacing allows approximately 71.8 full-height main-text line spacings, 88.1 Rashi spacings, or 114.0 Tosafot spacings. The corresponding Rosh Hashanah values are 63.0 and 71.7 for main text and commentary. These are not limits on the number of actual lines, since lines can occupy different columns, and are not universal properties of printed Talmud pages.
 
-Commentary streams are classified by matching decoded Hebrew against pinned Sefaria Rashi and Tosafot exports, rather than assuming fixed sides. Bold openings are included using their PDF text order within the identified commentary streams, including larger initial words and bold-only lines; selected inline citations are also included. Horayot's Tosafot is in two lower columns and ends at 8b; its opening introductory paragraph is excluded. On Rosh Hashanah 31a both side columns are Rashi and a short Tosafot block is embedded beside the main text.
+The historical corpus classifies commentary streams by matching decoded Hebrew against pinned Sefaria Rashi and Tosafot exports, rather than assuming fixed sides. The newer Shas run uses page-specific Wikisource Tosafot where available. Bold openings are included using their PDF text order within the identified commentary streams, including larger initial words and bold-only lines; selected inline citations are also included. Horayot's Tosafot is in two lower columns and ends at 8b; its opening introductory paragraph is excluded. On Rosh Hashanah 31a both side columns are Rashi and a short Tosafot block is embedded beside the main text.
 
 The method measures line boxes, not ink pixels. Tall bold words contribute their width times the normal commentary line spacing; their extra approximate highlight is not added as a second area. Marginal works are excluded, as are some headings, decorations and fragments in other type sizes; spacing is estimated from sampled baselines. Short gaps between fragments within a line are included, and small same-category line-box overlaps are not subtracted. The selected categories do not overlap one another in this corpus. The opening pages and other overlays have been spot-checked, not manually annotated on every page, so classification errors or omitted text remain possible and no accuracy margin has been established.
 
@@ -83,7 +92,7 @@ npm run test:corpus
 npm run review:corpus
 ```
 
-Open [results/corpus-review.html](results/corpus-review.html) after generating it. Select a tractate, an amud, and text types to inspect the colored line boxes, dashed tractate rectangle, page percentage, and tractate total. The report and PDFs are local and ignored by Git. The tests use Chrome at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` by default; set `CHROME_PATH` to another compatible browser. Corpus-specific integration checks are skipped until the measurements have been generated.
+Open [results/corpus-review.html](results/corpus-review.html) after generating it. This viewer shows the earlier calibrated corpus, not the current Shas JSON. Select a tractate, an amud, and text types to inspect the colored line boxes, dashed tractate rectangle, page percentage, and tractate total. The report and PDFs are local and ignored by Git. The tests use Chrome at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` by default; set `CHROME_PATH` to another compatible browser. Corpus-specific integration checks are skipped until the measurements have been generated.
 
 ## Try the Visual Review
 
@@ -210,4 +219,4 @@ The Shas.org PDF GET response checked here did not allow cross-origin browser fe
 
 ## Data Licenses
 
-The Sefaria main-text version used here is CC BY-SA; linked commentary reports its own version and license in the experiment output. The Shas.org PDFs are supplied by HebrewBooks and Moznaim for free non-commercial redistribution, subject to attribution and inclusion of the full license terms. See the [API documentation](https://www.shas.org/daf-pdf/api/api-documentation.html) before redistributing them. The PDFs are not included in this repository. Check the renderer's bundled font licenses before redistribution.
+The Sefaria main-text version used here is CC BY-SA; linked commentary reports its own version and license in the experiment output. The page index uses Hebrew Wikisource content, generally offered under CC BY-SA 4.0; revision links are retained for attribution and checking individual pages. The Shas.org PDFs are supplied by HebrewBooks and Moznaim for free non-commercial redistribution, subject to attribution and inclusion of the full license terms. See the [API documentation](https://www.shas.org/daf-pdf/api/api-documentation.html) before redistributing them. The PDFs are not included in this repository. Check the renderer's bundled font licenses before redistribution.

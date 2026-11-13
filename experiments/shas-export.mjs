@@ -18,7 +18,7 @@ export function buildShasExport(catalog, data) {
     const byName = new Map(pages.map((page) => [page.name, page]));
     const output = expected.map((amud) => {
       const entry = entries[amud];
-      if (!entry?.page) return { amud, status: entry?.error ? "unresolved" : "pending", reason: entry?.error || null, mainRecoveryError: entry?.mainRecoveryError || null, fractions: null };
+      if (!entry?.page) return { amud, status: entry?.error || entry?.tosafotEvidence?.state === "error" ? "unresolved" : "pending", reason: entry?.lastClassificationError || entry?.error || null, mainRecoveryError: entry?.mainRecoveryError || null, ...(entry?.tosafotEvidence ? { confirmedAbsent: [], tosafotEvidence: entry.tosafotEvidence, lastClassificationError: entry.lastClassificationError || null } : {}), fractions: null };
       const page = byName.get(entry.page.name);
       const unknownCategories = [...new Set([...(entry.unknownCategories || []), ...(entry.inferredAbsent || [])])];
       const mainSource = `https://raw.githubusercontent.com/Sefaria/Sefaria-Export-Archive/3f1013631fdfe452e953a93a2c5f921319e394ed/${`json/Talmud/Bavli/Seder ${tractate.order}/${tractate.title}/Hebrew/merged.json`.split("/").map(encodeURIComponent).join("/")}`;
@@ -30,6 +30,7 @@ export function buildShasExport(catalog, data) {
         mainMatch: entry.recovery ? { referenceScope: "page", source: mainSource, ...entry.recovery.mainMatch } : null,
         unknownCategories,
         inferredAbsent: entry.inferredAbsent || [],
+        ...(entry.tosafotEvidence ? { confirmedAbsent: entry.confirmedAbsent || [], tosafotEvidence: entry.tosafotEvidence, lastClassificationError: entry.lastClassificationError || null } : {}),
         fractions: Object.fromEntries(kinds.map((kind) => [kind, unknownCategories.includes(kind) ? null : page.areas[kind].fraction])),
       };
     });
@@ -53,10 +54,11 @@ export function buildShasExport(catalog, data) {
       unit: "fractions of the tractate's fitted text-body rectangle per printed side",
       mainIncludes: ["Gemara", "Mishnah"],
       equivalentDaf: "two equivalent printed sides",
-      warning: "Automatic line-box estimates, not ink area or fully hand-verified. Complete means classifier coverage, not verified accuracy. Different tractates have different reference rectangles. Null means unknown, not zero; inferred absence remains unknown. Partial frames are provisional and may change with further measurements; unclassified or main-only frame bases are less certain. Other commentators, including Rashbam and Ran, are not included under Rashi or Tosafot.",
+      warning: "Automatic line-box estimates, not ink area or fully hand-verified. Complete means classifier coverage, not verified accuracy. Different tractates have different reference rectangles. Null means unknown, not zero; inferred absence remains unknown. Source-backed absence uses a community index and PDF classification, not a manual inspection of every zero. Partial frames are provisional and may change with further measurements; unclassified or main-only frame bases are less certain. Other commentators, including Rashbam and Ran, are not included under Rashi or Tosafot.",
       pdfSource: "https://www.shas.org/daf-pdf/api/",
       pdfAttribution: "Shas.org, HebrewBooks.org and Moznaim (הוצאת ח. וגשל)",
       commentarySource: "https://github.com/Sefaria/Sefaria-Export-Archive/tree/3f1013631fdfe452e953a93a2c5f921319e394ed",
+      tosafotSource: "https://he.wikisource.org/ (revision and evidence recorded per page when used)",
     },
     coverage: { tractates: books.length, complete: books.filter((book) => book.status === "complete").length, partial: books.filter((book) => book.status === "partial").length, unresolved: books.filter((book) => book.status === "unresolved").length, pending: books.filter((book) => book.status === "pending").length },
     tractates: books,

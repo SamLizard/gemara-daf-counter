@@ -2,8 +2,72 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { calculateAreas, calculateFrame, decodePdfText, groupRows, includeStreamFragments, matchMainGlyphs, matchScore, normalizeHebrew, redistributeLeadingFragments, splitRuns } from "./measure-corpus.mjs";
+import { applySotahPdfReview, classifySotahTosafot, loadWikisourcePages, parseTosafotSection, sotahWikiTitle, wikisourceTitle } from "./sotah-wikisource.mjs";
 
 const item = (text, x, y, width = 20) => ({ str: text, transform: [0, 0, 0, 0, x, y], width });
+
+test("distinguishes regular Wikisource Tosafot from other commentaries and empty chapter markers", () => {
+  assert.deepEqual(parseTosafotSection('==רש"י==\nרש"י\n==ראשונים נוספים==\n===תוספות שאנץ==='), { status: "unknown", text: "" });
+  assert.deepEqual(parseTosafotSection('==רש"י==\nרש"י\n==ראשונים נוספים==\n===תוספות שאנץ===', { missingSectionStatus: "absent" }), { status: "absent", text: "" });
+  assert.deepEqual(parseTosafotSection('==תוספות==\n<קטע התחלה=ת/> מרים המתינה למשה שעה אחת <קטע סוף=ת/>\n==רש"י=='), { status: "present", text: "מריםהמתינהלמשהשעהאחת" });
+  assert.deepEqual(parseTosafotSection("==תוס'==\nמרים המתינה למשה שעה אחת\n==תוס' ר\"י הזקן==\nאחר"), { status: "present", text: "מריםהמתינהלמשהשעהאחת" });
+  assert.deepEqual(parseTosafotSection("==תוספות==\n<center>פרק תשיעי - עגלה ערופה</center>\n ( אין תוספות לפרק זה )"), { status: "absent", text: "" });
+  assert.deepEqual(parseTosafotSection("==תוספות==\n<קטע התחלה=ת/>"), { status: "unknown", text: "" });
+});
+
+test("constructs Sotah Wikisource titles including special Hebrew numerals", () => {
+  assert.equal(sotahWikiTitle("9b"), "סוטה ט ב");
+  assert.equal(sotahWikiTitle("11a"), "סוטה יא א");
+  assert.equal(sotahWikiTitle("15b"), "סוטה טו ב");
+  assert.equal(sotahWikiTitle("16a"), "סוטה טז א");
+  assert.equal(sotahWikiTitle("43b"), "סוטה מג ב");
+  assert.throws(() => sotahWikiTitle("50a"));
+});
+
+test("constructs page titles for the whole catalog and leaves unsupported pagination unknown", () => {
+  assert.equal(wikisourceTitle({ slug: "bava-basra" }, "176b"), "בבא בתרא קעו ב");
+  assert.equal(wikisourceTitle({ slug: "shabbos" }, "115a"), "שבת קטו א");
+  assert.equal(wikisourceTitle({ slug: "kinim" }, "22b"), null);
+  assert.throws(() => wikisourceTitle({ slug: "sotah" }, "1a"));
+});
+
+test("fetches Wikisource pages afresh and treats missing and redirect pages as unknown", async () => {
+  let calls = 0;
+  const fetcher = async (_url, options) => {
+    calls++;
+    assert.equal(options.headers["Cache-Control"], "no-cache");
+    return { ok: true, json: async () => ({ query: { pages: [
+      { title: "שקלים ב א", revisions: [{ revid: 1, slots: { main: { content: "#הפניה [[ירושלמי]]" } } }] },
+      { title: "שקלים ב ב", missing: true },
+    ] } }) };
+  };
+  const tractate = { slug: "shekalim", first: "2a", last: "2b" };
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const pages = await loadWikisourcePages(tractate, { fetcher });
+    assert.equal(pages["2a"].status, "unknown");
+    assert.equal(pages["2b"].status, "unknown");
+  }
+  assert.equal(calls, 2);
+});
+
+test("applies reviewed Sotah PDF corrections only to the reviewed bytes", () => {
+  const page = { sha256: "f70bff2057641ae9e7253a33c62ffe98fcbc761ab6af2fd2ca6f3a9f01bc94a4", groups: { rashi: [{ baseline: 594.5987621604, kind: "rashi" }, { baseline: 584.1587663364, kind: "rashi" }, { baseline: 648, kind: "rashi" }], tosafot: [] } };
+  assert.equal(applySotahPdfReview("35a", page), "manual-pdf-review");
+  assert.deepEqual(page.groups.rashi.map((row) => row.baseline), [648]);
+  assert.deepEqual(page.groups.tosafot.map((row) => row.kind), ["tosafot", "tosafot"]);
+  assert.equal(applySotahPdfReview("44a", { sha256: "changed", groups: { tosafot: [] } }), null);
+  assert.equal(applySotahPdfReview("44a", { sha256: "6d67f2550bdf5959bd7c2008592937f102ed9030649aed6db0e2412acf9ca9d0", groups: { tosafot: [] } }), "manual-pdf-review");
+});
+
+test("requires source and PDF evidence to resolve Sotah Tosafot", () => {
+  const page = { sha256: "pdf", groups: { tosafot: [] }, matches: [{ kind: "rashi" }] };
+  const reference = { title: "test", revision: 42, status: "absent" };
+  assert.equal(classifySotahTosafot("9b", page, reference).decision, "absent");
+  assert.equal(classifySotahTosafot("9b", page, { ...reference, revision: null }).decision, "unknown");
+  assert.equal(classifySotahTosafot("9b", { ...page, matches: [] }, reference).decision, "unknown");
+  assert.equal(classifySotahTosafot("9b", page, { ...reference, status: "present" }).decision, "unknown");
+  assert.equal(classifySotahTosafot("44a", page, { ...reference, status: "unknown" }).decision, "unknown");
+});
 
 test("decodes Hebrew text and preserves already decoded Hebrew", () => {
   assert.equal(decodePdfText("àëä ïçëùàãë ïä éðú éúëåã ìëá"), "בכל דוכתי תני הן כדאשכחן הכא");

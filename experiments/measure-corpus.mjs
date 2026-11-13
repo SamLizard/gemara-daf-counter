@@ -115,9 +115,9 @@ export function redistributeLeadingFragments(items, previous, current) {
   }
 }
 
-export async function loadTexts(definition) {
+export async function loadTexts(definition, { works = ["Rashi", "Tosafot"] } = {}) {
   const texts = {};
-  for (const work of ["Rashi", "Tosafot"]) {
+  for (const work of works) {
     const file = `json/Talmud/Bavli/Rishonim on Talmud/${work}/Seder ${definition.order}/${work} on ${definition.title}/Hebrew/merged.json`;
     const response = await fetch(archive + file.split("/").map(encodeURIComponent).join("/"), { signal: AbortSignal.timeout(60000) });
     if (!response.ok) throw new Error(`${work} on ${definition.title}: HTTP ${response.status}`);

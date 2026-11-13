@@ -47,6 +47,27 @@ test("keeps inferred absence unknown rather than counting it as zero", () => {
   assert.equal(book.coverage.knownByCategory.tosafot, 0);
 });
 
+test("exports source-backed absence and its evidence", () => {
+  const catalog = [{ slug: "sotah", title: "Sotah", order: "Nashim", first: "2a", last: "2a" }];
+  const page = { name: "sotah-2a", groups: { main: [{ left: 0, right: 10, baseline: 5, pitch: 10 }], rashi: [], tosafot: [] } };
+  const tosafotEvidence = { revision: 42, decision: "absent", basis: "wikisource-section-and-pdf-classification" };
+  const book = buildShasExport(catalog, { sotah: { "2a": { page, confirmedAbsent: ["tosafot"], tosafotEvidence } } }).tractates[0];
+  assert.equal(book.status, "complete");
+  assert.equal(book.pages[0].fractions.tosafot, 0);
+  assert.deepEqual(book.pages[0].confirmedAbsent, ["tosafot"]);
+  assert.deepEqual(book.pages[0].tosafotEvidence, tosafotEvidence);
+});
+
+test("preserves source evidence and the latest error for an unmeasured page", () => {
+  const catalog = [{ slug: "example", title: "Example", order: "Moed", first: "2a", last: "2a" }];
+  const evidence = { state: "error", revision: 42, runId: "fresh-run" };
+  const book = buildShasExport(catalog, { example: { "2a": { error: "old error", lastClassificationError: "new error", tosafotEvidence: evidence } } }).tractates[0];
+  assert.equal(book.pages[0].status, "unresolved");
+  assert.equal(book.pages[0].reason, "new error");
+  assert.deepEqual(book.pages[0].tosafotEvidence, evidence);
+  assert.equal(book.pages[0].fractions, null);
+});
+
 test("uses unclassified text only to fit the frame", () => {
   const catalog = [{ slug: "example", title: "Example", order: "Moed", first: "2a", last: "2a" }];
   const page = { name: "example-2a", groups: { main: [{ left: 0, right: 10, baseline: 5, pitch: 10 }], rashi: [], tosafot: [] }, frameRows: [{ left: -10, right: 20, baseline: 5, pitch: 10 }] };
