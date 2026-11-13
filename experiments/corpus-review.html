@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tractate area review</title>
+  <style>
+    :root { color-scheme: light; font-family: "Avenir Next", Avenir, sans-serif; color: #202827; background: #f3f5f2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: white; border-bottom: 1px solid #d5deda; padding: 18px 24px; }
+    h1 { font-family: Georgia, serif; font-size: 24px; font-weight: normal; margin: 0; }
+    main { max-width: 1300px; margin: auto; padding: 24px; display: grid; grid-template-columns: minmax(230px, 300px) minmax(0, 1fr); gap: 30px; align-items: start; }
+    label { display: block; font-size: 14px; font-weight: 600; margin: 14px 0 6px; }
+    select { width: 100%; padding: 8px; font: inherit; }
+    h2 { font-size: 15px; margin: 24px 0 8px; }
+    .choice { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #d9e1dc; padding: 8px 0; }
+    .choice label { display: flex; align-items: center; gap: 8px; flex: 1; margin: 0; font-weight: normal; cursor: pointer; }
+    .swatch { width: 12px; height: 12px; flex: none; }
+    .value { font-variant-numeric: tabular-nums; font-size: 13px; }
+    .result { border-top: 3px solid #273d33; margin-top: 24px; padding-top: 12px; }
+    .result strong { display: block; font-family: Georgia, serif; font-size: 32px; font-weight: normal; }
+    .note { color: #52635c; font-size: 13px; line-height: 1.5; }
+    .page { max-width: 760px; position: relative; background: white; }
+    .page img, .page svg { display: block; width: 100%; height: auto; }
+    .page svg { position: absolute; inset: 0; height: 100%; pointer-events: none; }
+    @media (max-width: 700px) { main { grid-template-columns: 1fr; gap: 20px; padding: 18px; } }
+  </style>
+</head>
+<body>
+  <header><h1>Tractate area review</h1></header>
+  <main>
+    <section>
+      <label for="tractate">Tractate</label>
+      <select id="tractate"><option value="horayos">Horayot</option><option value="rosh-hashanah">Rosh Hashanah</option></select>
+      <label for="page-select">Amud</label><select id="page-select"></select>
+      <h2>Include</h2>
+      <div class="choice"><input id="main" type="checkbox" checked><label for="main"><span class="swatch" style="background:#c64f54"></span>Gemara + Mishnah</label><span class="value" id="main-value"></span></div>
+      <div class="choice"><input id="rashi" type="checkbox"><label for="rashi"><span class="swatch" style="background:#4775bf"></span>Rashi</label><span class="value" id="rashi-value"></span></div>
+      <div class="choice"><input id="tosafot" type="checkbox"><label for="tosafot"><span class="swatch" style="background:#3d9665"></span>Tosafot</label><span class="value" id="tosafot-value"></span></div>
+      <div class="result" aria-live="polite"><span class="note">Selected amud</span><strong id="page-total"></strong><span class="note">of the shared rectangle</span></div>
+      <div class="result" aria-live="polite"><span class="note">Complete tractate</span><strong id="daf-total"></strong><span id="side-total" class="note"></span></div>
+      <p class="note">Estimates use measured line widths and line spacing. Some headings, ornaments, and differently sized fragments are omitted. The same rectangle is used for every page.</p>
+      <p class="note">Page images: Shas.org, HebrewBooks and Moznaim. This local report is for non-commercial research.</p>
+    </section>
+    <section class="page"><img id="scan" alt="Printed page"><svg id="overlay" aria-hidden="true"></svg></section>
+  </main>
+  <script id="report-data" type="application/json">__REPORT_DATA__</script>
+  <script>
+    const data = JSON.parse(document.getElementById("report-data").textContent);
+    const tractate = document.getElementById("tractate");
+    const select = document.getElementById("page-select");
+    const overlay = document.getElementById("overlay");
+    const colors = { main: "#c64f54", rashi: "#4775bf", tosafot: "#3d9665" };
+    function render() {
+      const page = data.pages.find((entry) => entry.name === select.value);
+      const image = document.getElementById("scan");
+      image.src = `corpus-images/${page.name}.png`;
+      image.alt = page.name.replaceAll("-", " ");
+      overlay.setAttribute("viewBox", `0 0 ${page.width} ${page.height}`);
+      overlay.replaceChildren();
+      function rectangle(box, attributes) {
+        const element = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        for (const [key, value] of Object.entries({ ...box, ...attributes })) element.setAttribute(key, value);
+        overlay.append(element);
+      }
+      let fraction = 0;
+      let sides = 0;
+      for (const kind of Object.keys(colors)) {
+        document.getElementById(`${kind}-value`).textContent = `${(page.regions[kind].fraction * 100).toFixed(1)}%`;
+        if (document.getElementById(kind).checked) {
+          fraction += page.regions[kind].fraction;
+          sides += data.totals[tractate.value][kind];
+          page.regions[kind].rows.forEach((row) => rectangle(row, { fill: colors[kind], "fill-opacity": "0.28" }));
+        }
+      }
+      rectangle(page.body, { fill: "none", stroke: "#171e1a", "stroke-width": "2", "stroke-dasharray": "8 5" });
+      document.getElementById("page-total").textContent = `${(fraction * 100).toFixed(1)}%`;
+      document.getElementById("daf-total").textContent = `${(sides / 2).toFixed(2)} dafim`;
+      document.getElementById("side-total").textContent = `${sides.toFixed(2)} equivalent printed sides`;
+    }
+    function selectTractate() {
+      select.replaceChildren();
+      data.pages.filter((page) => page.name.startsWith(`${tractate.value}-`)).forEach((page) => select.add(new Option(page.name.slice(tractate.value.length + 1), page.name)));
+      render();
+    }
+    tractate.addEventListener("change", selectTractate);
+    select.addEventListener("change", render);
+    document.querySelectorAll('input[type="checkbox"]').forEach((input) => input.addEventListener("change", render));
+    selectTractate();
+  </script>
+</body>
+</html>
