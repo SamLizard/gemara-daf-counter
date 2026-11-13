@@ -60,12 +60,26 @@ export function matchScore(items, reference) {
   }, 0);
 }
 
-function lines(items, pitch, kind) {
-  return groupRows(items).map(({ baseline, left, right }) => ({ baseline, left, right, pitch, kind }));
+function lines(items, pitch, kind, tolerance) {
+  return groupRows(items, tolerance).map(({ baseline, left, right, items: fragments }) => ({
+    baseline, left, right, pitch, kind,
+    top: Math.max(baseline + pitch / 2, ...fragments.map((fragment) => fragment.transform[5] + fragment.height)),
+    bottom: Math.min(baseline - pitch / 2, ...fragments.map((fragment) => fragment.transform[5] - fragment.height / 4)),
+    tallFragments: fragments.filter((fragment) => fragment.height > pitch * 1.4).map((fragment) => ({
+      left: fragment.transform[4], right: fragment.transform[4] + fragment.width,
+      top: fragment.transform[5] + fragment.height, bottom: fragment.transform[5] - fragment.height / 4,
+    })),
+  }));
 }
 
 function itemsOfSize(items, sizes) {
   return items.filter((item) => sizes.some((size) => Math.abs(item.height - size) < 0.02));
+}
+
+export function includeStreamFragments(items, run, sizes, start) {
+  const end = items.indexOf(run.at(-1));
+  if (end < start) throw new Error("Commentary stream is not in PDF text order");
+  return [...run, ...itemsOfSize(items.slice(start, end + 1), sizes)];
 }
 
 async function loadTexts(definition) {
@@ -124,18 +138,22 @@ async function processPage(definition, index, references) {
         const result = identifyRun(tosafot, references, name);
         if (result.kind !== "tosafot") throw new Error(`${name}: lower commentary did not match Tosafot`);
         matches.push(result);
-        if (tosafot.some((item) => item.transform[4] < 330 && item.transform[4] + item.width > 330)) throw new Error(`${name}: Tosafot crosses the column divider`);
+        const start = Math.max(0, items.indexOf(tosafot[0]) - 2);
+        const expanded = includeStreamFragments(items, tosafot, [7.08, 8.04], start).filter((item) => index !== 0 || item.transform[5] < 480);
+        if (expanded.some((item) => item.transform[4] < 330 && item.transform[4] + item.width > 330)) throw new Error(`${name}: Tosafot crosses the column divider`);
         for (const side of ["left", "right"]) {
-          const column = tosafot.filter((item) => side === "left" ? item.transform[4] < 330 : item.transform[4] >= 330);
+          const column = expanded.filter((item) => side === "left" ? item.transform[4] < 330 : item.transform[4] >= 330);
           groups.tosafot.push(...lines(column, definition.tosafotPitch, "tosafot"));
         }
       }
     } else {
       const runs = splitRuns(itemsOfSize(items, [11.16, 11.4]));
+      let start = 0;
       for (const run of runs) {
         const result = identifyRun(run, references, name);
         matches.push(result);
-        groups[result.kind].push(...lines(run, definition.commentaryPitch, result.kind));
+        groups[result.kind].push(...lines(includeStreamFragments(items, run, [8.94, 11.94, 16.38], start), definition.commentaryPitch, result.kind, 2));
+        start = items.indexOf(run.at(-1)) + 1;
       }
     }
     return { name, sha256: createHash("sha256").update(bytes).digest("hex"), view: page.view, groups, matches };
@@ -144,14 +162,14 @@ async function processPage(definition, index, references) {
   }
 }
 
-export function calculateFrame(pages) {
+export function calculateFrame(pages, { horizontal = 0, vertical = 0 } = {}) {
   const all = pages.flatMap((page) => Object.values(page.groups).flat());
   if (!all.length) throw new Error("No measured lines");
   return {
-    left: Math.min(...all.map((row) => row.left)),
-    right: Math.max(...all.map((row) => row.right)),
-    bottom: Math.min(...all.map((row) => row.baseline - row.pitch / 2)),
-    top: Math.max(...all.map((row) => row.baseline + row.pitch / 2)),
+    left: Math.min(...all.map((row) => row.left)) - horizontal,
+    right: Math.max(...all.map((row) => row.right)) + horizontal,
+    bottom: Math.min(...all.map((row) => row.bottom ?? row.baseline - row.pitch / 2)) - vertical,
+    top: Math.max(...all.map((row) => row.top ?? row.baseline + row.pitch / 2)) + vertical,
   };
 }
 
@@ -177,17 +195,19 @@ async function main() {
       pages.push(await processPage(definition, index, references));
     }
   }
-  const frame = calculateFrame(pages);
-  const frameArea = calculateAreas(pages, frame);
   const totals = {};
+  const frames = {};
+  const frameAreas = {};
   for (const definition of definitions) {
     const selected = pages.filter((page) => page.name.startsWith(`${definition.slug}-`));
+    frames[definition.slug] = calculateFrame(selected, { horizontal: 2, vertical: 2 });
+    frameAreas[definition.slug] = calculateAreas(selected, frames[definition.slug]);
     totals[definition.slug] = Object.fromEntries(["main", "rashi", "tosafot"].map((kind) => [kind, selected.reduce((sum, page) => sum + page.areas[kind].fraction, 0)]));
   }
-  const report = { frame, frameArea, definitions, totals, pages, warning: "Exploratory line-box estimates; headings, ornaments, and unrecognized type variants may be omitted." };
+  const report = { frames, frameAreas, definitions, totals, pages, warning: "Exploratory line-box estimates; ornaments and unrecognized type variants may be omitted." };
   await mkdir("results", { recursive: true });
   await writeFile(join("results", "corpus-measurements.json"), JSON.stringify(report, null, 2));
-  console.log(JSON.stringify({ frame, frameArea, totals, pages: pages.length }, null, 2));
+  console.log(JSON.stringify({ frames, frameAreas, totals, pages: pages.length }, null, 2));
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await main();

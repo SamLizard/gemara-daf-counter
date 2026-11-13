@@ -13,6 +13,7 @@ const fixture = {
   ],
   totals: { horayos: { main: 8.84, rashi: 6.98, tosafot: 0.69 }, "rosh-hashanah": { main: 20.7, rashi: 14.66, tosafot: 17.34 } },
 };
+fixture.pages[1].regions.tosafot.tallFragments = [box];
 
 test("review switches pages and combines selections on desktop and mobile", async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", headless: true });
@@ -32,7 +33,9 @@ test("review switches pages and combines selections on desktop and mobile", asyn
       assert.equal(await page.locator("#page-select").inputValue(), "rosh-hashanah-31a");
       assert.equal(await page.locator("#page-total").textContent(), "82.5%");
       assert.equal(await page.locator("#daf-total").textContent(), "26.35 dafim");
-      assert.equal(await page.locator("#overlay rect").count(), 4);
+      assert.equal(await page.locator("#overlay rect").count(), 5);
+      await page.locator("#tosafot").uncheck();
+      assert.equal(await page.locator("#overlay rect").count(), 3);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true);
       assert.deepEqual(errors, []);
       await page.close();

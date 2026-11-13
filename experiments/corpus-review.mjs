@@ -31,10 +31,13 @@ for (const [index, measured] of report.pages.entries()) {
       const [secondX, secondY] = viewport.convertToViewportPoint(coordinates[2], coordinates[3]);
       return { x: Math.min(firstX, secondX), y: Math.min(firstY, secondY), width: Math.abs(secondX - firstX), height: Math.abs(secondY - firstY) };
     };
-    const frame = report.frame;
+    const slug = report.definitions.find((definition) => measured.name.startsWith(`${definition.slug}-`))?.slug;
+    const frame = report.frames[slug];
+    if (!frame) throw new Error(`${measured.name}: missing tractate frame`);
     const regions = Object.fromEntries(Object.entries(measured.groups).map(([kind, rows]) => [kind, {
       fraction: measured.areas[kind].fraction,
       rows: rows.map((row) => rectangle([row.left, row.baseline - row.pitch / 2, row.right, row.baseline + row.pitch / 2])),
+      tallFragments: rows.flatMap((row) => (row.tallFragments || []).map((fragment) => rectangle([fragment.left, fragment.bottom, fragment.right, fragment.top]))),
     }]));
     pages.push({ name: measured.name, width: viewport.width, height: viewport.height, body: rectangle([frame.left, frame.bottom, frame.right, frame.top]), regions });
   } finally {

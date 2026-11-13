@@ -38,9 +38,9 @@
       <div class="choice"><input id="main" type="checkbox" checked><label for="main"><span class="swatch" style="background:#c64f54"></span>Gemara + Mishnah</label><span class="value" id="main-value"></span></div>
       <div class="choice"><input id="rashi" type="checkbox"><label for="rashi"><span class="swatch" style="background:#4775bf"></span>Rashi</label><span class="value" id="rashi-value"></span></div>
       <div class="choice"><input id="tosafot" type="checkbox"><label for="tosafot"><span class="swatch" style="background:#3d9665"></span>Tosafot</label><span class="value" id="tosafot-value"></span></div>
-      <div class="result" aria-live="polite"><span class="note">Selected amud</span><strong id="page-total"></strong><span class="note">of the shared rectangle</span></div>
+      <div class="result" aria-live="polite"><span class="note">Selected amud</span><strong id="page-total"></strong><span class="note">of the tractate's rectangle</span></div>
       <div class="result" aria-live="polite"><span class="note">Complete tractate</span><strong id="daf-total"></strong><span id="side-total" class="note"></span></div>
-      <p class="note">Estimates use measured line widths and line spacing. Some headings, ornaments, and differently sized fragments are omitted. The same rectangle is used for every page.</p>
+      <p class="note">Estimates use measured line widths and line spacing. Some ornaments and differently sized fragments are omitted. Each tractate uses a fitted rectangle shared by its pages.</p>
       <p class="note">Page images: Shas.org, HebrewBooks and Moznaim. This local report is for non-commercial research.</p>
     </section>
     <section class="page"><img id="scan" alt="Printed page"><svg id="overlay" aria-hidden="true"></svg></section>
@@ -72,6 +72,7 @@
           fraction += page.regions[kind].fraction;
           sides += data.totals[tractate.value][kind];
           page.regions[kind].rows.forEach((row) => rectangle(row, { fill: colors[kind], "fill-opacity": "0.28" }));
+          (page.regions[kind].tallFragments || []).forEach((fragment) => rectangle(fragment, { fill: colors[kind], "fill-opacity": "0.20" }));
         }
       }
       rectangle(page.body, { fill: "none", stroke: "#171e1a", "stroke-width": "2", "stroke-dasharray": "8 5" });

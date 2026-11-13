@@ -4,28 +4,28 @@ This research measures the printed area occupied by Mishnah and Gemara, Rashi, a
 
 ## Whole-Tractate Results
 
-One equivalent printed side is the area of the common text-body rectangle described below; one equivalent daf is two such sides. These are area equivalents, not the number of physical folios in the edition or the number of actual pages containing text.
+One equivalent printed side is the area of that tractate's fitted text-body rectangle described below; one equivalent daf is two such sides. These are area equivalents, not the number of physical folios in the edition or the number of actual pages containing text. Each tractate uses a different reference area, so its equivalents are fractions of its own page format, not a common physical area.
 
 | Tractate | Gemara + Mishnah | Add Rashi | Add Rashi and Tosafot |
 | --- | ---: | ---: | ---: |
-| Horayot, 25 sides | 8.84 sides / 4.42 dafim | 15.82 sides / 7.91 dafim | 16.52 sides / 8.26 dafim |
-| Rosh Hashanah, 67 sides | 20.70 sides / 10.35 dafim | 35.36 sides / 17.68 dafim | 52.69 sides / 26.35 dafim |
+| Horayot, 25 sides | 9.58 sides / 4.79 dafim | 17.15 sides / 8.58 dafim | 17.97 sides / 8.99 dafim |
+| Rosh Hashanah, 67 sides | 20.61 sides / 10.31 dafim | 35.29 sides / 17.64 dafim | 53.68 sides / 26.84 dafim |
 
-Rosh Hashanah has about 2.34 times Horayot's main-text area, and 3.19 times the area when both commentaries are included. Totals can vary if a different edition, reference rectangle, or font classification is used.
+Totals can vary if a different edition, reference rectangle, or font classification is used.
 
 ### How It Is Measured
 
-PDF.js extracts the position and width of each text fragment. The program groups fragments into lines, preserves separate commentary columns, and uses the actual measured left-to-right width of each line. Each line's area is its width multiplied by the baseline spacing for its text type. The line areas are added and divided by a fixed rectangle of approximately 419.82 by 760.47 PDF units, or 319,260 square units. That rectangle is the bounding union of the detected main text and both commentaries across all 92 pages, not the entire PDF sheet and not an independently established historical standard. All PDFs share the same page coordinates. The same denominator is used throughout; summing fractions yields equivalent sides, and dividing by two yields equivalent dafim.
+PDF.js extracts the position and width of each text fragment. The program groups fragments into lines, preserves separate commentary columns, and uses the actual measured left-to-right width of each line. Each line's area is its width multiplied by the baseline spacing for its text type. The line areas are added and divided by a rectangle fitted separately to the detected text and conservative glyph heights across each tractate, with a two-unit allowance at each edge. Horayot's rectangle is approximately 382.46 by 769.96 PDF units (294,479 square units); Rosh Hashanah's is 423.82 by 756.58 units (320,653 square units). Each rectangle is fixed across all pages of that tractate, not the entire sheet or an independently established historical standard. Summing fractions yields equivalent sides, and dividing by two yields equivalent dafim.
 
-On Horayot 10a, the 52 main-text lines are 31 narrow and 21 wide; their typical widths are about 152.7 and 377.1 PDF units respectively. The 84 Rashi lines are 76 narrow and 8 medium, typically about 99.6 and 183.7 units wide. The terms narrow and wide are not shared widths across text types. The measured main lines have a combined width of 12,650.03 units and spacing of 10.66825, producing 134,954 square units, or 42.3% of the shared rectangle. Rashi's corresponding figures are 9,020.43 units, 8.69562 spacing, 78,438 square units, and 24.6%. Rounding each displayed percentage separately can cause a 0.1 percentage-point difference from the combined result.
+On Horayot 10a, the 52 main-text lines are 31 narrow and 21 wide; their typical widths are about 152.7 and 377.1 PDF units respectively. The 84 Rashi lines are 76 narrow and 8 medium, typically about 99.6 and 183.7 units wide. The terms narrow and wide are not shared widths across text types. The measured main lines have a combined width of 12,650.03 units and spacing of 10.66825, producing 134,954 square units, or 45.8% of the Horayot rectangle. Rashi's corresponding figures are 9,020.43 units, 8.69562 spacing, 78,438 square units, and 26.6%. Rounding each displayed percentage separately can cause a 0.1 percentage-point difference from the combined result.
 
-The earlier 59.0% and 34.3% for 10a used a smaller rectangle fitted to that page alone. The shared rectangle extends into space unused by those texts on 10a, making its percentages smaller while keeping a consistent scale for both tractates.
+The earlier 59.0% and 34.3% for 10a used a smaller rectangle fitted to that page alone; the previous 42.3% and 24.6% used one larger rectangle for both tractates. The current Horayot rectangle is fitted to the whole tractate and extends into space unused by those texts on 10a.
 
-No universal maximum line counts were obtained from the internet or assumed. As a geometric illustration, the shared rectangle's height divided by Horayot's spacing allows approximately 71.3 full-height main-text line spacings, 87.5 Rashi spacings, or 113.2 Tosafot spacings. The corresponding Rosh Hashanah values are 64.0 and 72.8 for main text and commentary. These are not limits on the number of actual lines, since lines can occupy different columns, and are not universal properties of printed Talmud pages.
+No universal maximum line counts were obtained from the internet or assumed. As a geometric illustration, Horayot's rectangle height divided by its spacing allows approximately 72.2 full-height main-text line spacings, 88.5 Rashi spacings, or 114.6 Tosafot spacings. The corresponding Rosh Hashanah values are 63.7 and 72.5 for main text and commentary. These are not limits on the number of actual lines, since lines can occupy different columns, and are not universal properties of printed Talmud pages.
 
-Commentary streams are classified by matching decoded Hebrew against pinned Sefaria Rashi and Tosafot exports, rather than assuming fixed sides. Horayot's Tosafot is in two lower columns and ends at 8b; its opening introductory paragraph is excluded. On Rosh Hashanah 31a both side columns are Rashi and a short Tosafot block is embedded beside the main text.
+Commentary streams are classified by matching decoded Hebrew against pinned Sefaria Rashi and Tosafot exports, rather than assuming fixed sides. Bold openings are included using their PDF text order within the identified commentary streams, including larger initial words and bold-only lines; selected inline citations are also included. Horayot's Tosafot is in two lower columns and ends at 8b; its opening introductory paragraph is excluded. On Rosh Hashanah 31a both side columns are Rashi and a short Tosafot block is embedded beside the main text.
 
-The method measures line boxes, not ink pixels. Marginal works are excluded, as are some headings, decorations and fragments in other type sizes; spacing is estimated from sampled baselines. Short gaps between fragments within a line are included, and small same-category line-box overlaps are not subtracted. The selected categories do not overlap one another in this corpus. The overlays have been spot-checked, not manually annotated on every page, so classification errors or omitted text remain possible and no accuracy margin has been established.
+The method measures line boxes, not ink pixels. Tall bold words contribute their width times the normal commentary line spacing; their extra approximate highlight is not added as a second area. Marginal works are excluded, as are some headings, decorations and fragments in other type sizes; spacing is estimated from sampled baselines. Short gaps between fragments within a line are included, and small same-category line-box overlaps are not subtracted. The selected categories do not overlap one another in this corpus. The opening pages and other overlays have been spot-checked, not manually annotated on every page, so classification errors or omitted text remain possible and no accuracy margin has been established.
 
 ## Reproduce the Corpus Review
 
@@ -39,7 +39,7 @@ npm run test:corpus
 npm run review:corpus
 ```
 
-Open [results/corpus-review.html](results/corpus-review.html) after generating it. Select a tractate, an amud, and text types to inspect the colored line boxes, dashed shared rectangle, page percentage, and tractate total. The report and PDFs are local and ignored by Git. The tests use Chrome at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` by default; set `CHROME_PATH` to another compatible browser. Corpus-specific integration checks are skipped until the measurements have been generated.
+Open [results/corpus-review.html](results/corpus-review.html) after generating it. Select a tractate, an amud, and text types to inspect the colored line boxes, dashed tractate rectangle, page percentage, and tractate total. The report and PDFs are local and ignored by Git. The tests use Chrome at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` by default; set `CHROME_PATH` to another compatible browser. Corpus-specific integration checks are skipped until the measurements have been generated.
 
 ## Try the Visual Review
 
@@ -101,7 +101,7 @@ Percentages below are exploratory line-box areas relative to each method's own e
 | 2b | 39.7% / 25.9% / 26.2% | 39.3% / 25.5% / 22.9% |
 | 3a | 40.8% / 24.7% / 26.1% | 42.3% / 21.1% / 25.8% |
 
-The renderer produces 28, 44, and 49 main-text lines compared with the PDF probe's 34, 52, and 50. Its reconstruction is therefore unsuitable as an unvalidated measurement of the actual printed layout. The direct PDF approach is more closely tied to the printed layout; the newer corpus measurement above adds a shared denominator and commentary matching, but retains the stated limitations.
+The renderer produces 28, 44, and 49 main-text lines compared with the PDF probe's 34, 52, and 50. Its reconstruction is therefore unsuitable as an unvalidated measurement of the actual printed layout. The direct PDF approach is more closely tied to the printed layout; the newer corpus measurement above adds a fixed denominator per tractate and commentary matching, but retains the stated limitations.
 
 One amud is one printed side; one daf comprises two sides. Once a denominator is defined, sum amud fractions to obtain equivalent printed sides, then divide by two to obtain equivalent two-sided dafim.
 
@@ -148,7 +148,7 @@ node --test experiments/measure-horayot-10a.test.mjs
 
 The script deliberately rejects layouts that do not match these specific counts and spacing; it is not a general classifier. Historical archive hOCR cannot simply fill the geometry gap: on Horayot 10a its detected lines sometimes combine the main text and side commentary. It requires a different segmentation method and validation before it can support totals.
 
-These observations disprove an unconditional three-column or fixed-side classifier. Matching commentary text and using a shared rectangle addresses some of these problems, but a labeled sample remains necessary to quantify accuracy.
+These observations disprove an unconditional three-column or fixed-side classifier. Matching commentary text and using a fixed rectangle per tractate addresses some of these problems, but a labeled sample remains necessary to quantify accuracy.
 
 The archive uploader marks the historical scans as public domain and attributes them to Duke; those statements and scan reuse rights have not been independently verified. Internet Archive access is subject to its [terms](https://archive.org/about/terms.php). The repository does not include these images.
 
