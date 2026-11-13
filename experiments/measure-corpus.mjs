@@ -67,7 +67,7 @@ function lines(items, pitch, kind, tolerance) {
     bottom: Math.min(baseline - pitch / 2, ...fragments.map((fragment) => fragment.transform[5] - fragment.height / 4)),
     tallFragments: fragments.filter((fragment) => fragment.height > pitch * 1.4).map((fragment) => ({
       left: fragment.transform[4], right: fragment.transform[4] + fragment.width,
-      top: fragment.transform[5] + fragment.height, bottom: fragment.transform[5] - fragment.height / 4,
+      top: fragment.transform[5] + fragment.height * 0.65, bottom: fragment.transform[5] - fragment.height / 4,
     })),
   }));
 }
@@ -169,7 +169,7 @@ export function calculateFrame(pages, { horizontal = 0, vertical = 0 } = {}) {
     left: Math.min(...all.map((row) => row.left)) - horizontal,
     right: Math.max(...all.map((row) => row.right)) + horizontal,
     bottom: Math.min(...all.map((row) => row.bottom ?? row.baseline - row.pitch / 2)) - vertical,
-    top: Math.max(...all.map((row) => row.top ?? row.baseline + row.pitch / 2)) + vertical,
+    top: Math.max(...all.map((row) => row.baseline + row.pitch * 0.7)) + vertical,
   };
 }
 

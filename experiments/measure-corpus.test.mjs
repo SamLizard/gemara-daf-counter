@@ -36,11 +36,14 @@ test("uses the same reference area for all pages in a tractate", () => {
     { groups: { main: [{ left: 0, right: 10, baseline: 5, pitch: 10 }], rashi: [], tosafot: [] } },
     { groups: { main: [{ left: 0, right: 5, baseline: 5, pitch: 10 }], rashi: [], tosafot: [] } },
   ];
-  const frame = calculateFrame(pages);
+  const frame = { left: 0, right: 10, bottom: 0, top: 10 };
   assert.equal(calculateAreas(pages, frame), 100);
   assert.equal(pages[0].areas.main.fraction, 1);
   assert.equal(pages[1].areas.main.fraction, 0.5);
-  assert.deepEqual(calculateFrame(pages, { horizontal: 2, vertical: 4 }), { left: -2, right: 12, bottom: -4, top: 14 });
+  assert.equal(calculateFrame(pages).top, 12);
+  assert.deepEqual(calculateFrame(pages, { horizontal: 2, vertical: 4 }), { left: -2, right: 12, bottom: -4, top: 16 });
+  pages[0].groups.main[0].top = 100;
+  assert.equal(calculateFrame(pages, { vertical: 4 }).top, 16);
 });
 
 test("calibrated 10a and embedded 31a preserve the known classifications", async (context) => {
@@ -77,7 +80,7 @@ test("calibrated 10a and embedded 31a preserve the known classifications", async
     for (const row of Object.values(page.groups).flat()) {
       assert.ok(row.left > frame.left && row.right < frame.right);
       assert.ok(row.baseline - row.pitch / 2 > frame.bottom && row.baseline + row.pitch / 2 < frame.top);
-      assert.ok(row.bottom > frame.bottom && row.top < frame.top);
+      assert.ok(row.bottom > frame.bottom);
     }
     for (const firstKind of ["main", "rashi", "tosafot"]) {
       for (const secondKind of ["main", "rashi", "tosafot"]) {
@@ -90,4 +93,6 @@ test("calibrated 10a and embedded 31a preserve the known classifications", async
       }
     }
   }
+  assert.ok(report.frames["rosh-hashanah"].top < 1140);
+  assert.ok(report.frames["rosh-hashanah"].top > 1138);
 });
