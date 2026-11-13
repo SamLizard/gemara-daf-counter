@@ -1,6 +1,50 @@
 # Gemara Page Measurement Research
 
-This research measures the printed area occupied by Mishnah and Gemara, Rashi, and Tosafot on Horayot 2a-14a and Rosh Hashanah 2a-35a. Mishnah is included with the main text. The results are estimates from one PDF edition, not manually verified exact totals.
+This research estimates the printed area occupied by Mishnah and Gemara, Rashi, and Tosafot across Shas. It was initially calibrated on Horayot 2a-14a and Rosh Hashanah 2a-35a. Mishnah is included with the main text. The results are estimates from one PDF edition, not manually verified exact totals.
+
+## Full Shas JSON
+
+The generated [results/shas-metrics.json](results/shas-metrics.json) is a frontend-oriented export for 40 separately named sections. The latest local run measured at least the main text on 5,400 of 5,405 sides; five sides remain unresolved. Six sections have all three categories classified on every side, while 34 are partial. These counts describe the classifier's coverage, not verified accuracy. There are 992 sides with at least one unknown category, including 294 where a commentary's absence is inferred rather than established.
+
+The five unresolved sides are Nedarim 40b and 45b, Nazir 33a and 33b, and Zevachim 71a. Shekalim, Kinnim, Tamid, Middot, and Keritot have main-text-only measurements. Their fitted frames also use unclassified printed text, not identified Rashi or Tosafot; they are provisional. Shekalim is checked against the Jerusalem Talmud, Kinnim and Middot against Mishnah, and Tamid against Bavli Tamid. For these four sections, matches are against the entire work because its reference pagination differs from the PDF; this is weaker than a page-specific match. The source lists the Jerusalem Talmud Shekalim version's license as unknown.
+
+The file is local and Git-ignored. Check source and derived-data rights before publishing it. PDF and commentary sources and attribution are recorded in the JSON; original PDF files and source texts are not included.
+
+### JSON Contract
+
+- `schemaVersion` and `classifierVersion` identify the export structure and measurement method.
+- `tractates[]` gives a stable `id`, title, order, first/last amud, status, coverage, fitted frame, category totals, and one entry per expected printed side. Kinnim, Tamid, and Middot use disjoint ranges of the Meilah volume and are not double-counted.
+- `coverage.knownByCategory` counts sides with a numeric value for each category. `measured` means at least main text was measured, not that every category is known.
+- `pages[].fractions` is a fraction of that tractate's frame for each of `main`, `rashi`, and `tosafot`. `main` includes Mishnah. `null` means unknown, never zero; `inferredAbsent` is evidence of possible absence but remains unknown.
+- `pages[].method` is `classified` or `main-only`. A main-only recovery includes the original failure reason and match evidence; `referenceScope` distinguishes page-specific from whole-tractate matching.
+- `totals.sides` and `totals.dafim` contain separate category totals. An individual total is `null` if that category is unknown on any side; the entire `totals` object is `null` when a side is unresolved or pending. Add categories only when every selected total is numeric. One equivalent daf is two equivalent printed sides.
+- `frame.provisional` means the frame can change as missing text is resolved. `referenceBasis` is `classified-text`, `main-and-unclassified-text`, or `main-text-only`. A frame using unclassified or only main text is particularly uncertain. Different tractates' frames are not a common physical area.
+
+Other commentators such as Ran and Rashbam are not renamed Rashi or Tosafot. Unrecognized type sizes, headings, decorations, and other works can be omitted; some line boxes or frames can be incorrectly fitted. No accuracy margin has been established. A section marked `complete` only means the automatic classifier produced all category values, not that the pages were manually verified.
+
+For example, a frontend can add selected categories only when they are all available:
+
+```js
+const book = data.tractates.find((tractate) => tractate.id === "berachos");
+const selected = [book.totals?.dafim.main, book.totals?.dafim.rashi];
+const total = selected.every((value) => typeof value === "number")
+	? selected.reduce((sum, value) => sum + value, 0)
+	: null;
+```
+
+### Reproduce The Export
+
+The two calibrated tractates must first be generated with the corpus commands below. The other pages are fetched four at a time into memory; compact, versioned checkpoints are written under ignored `results/shas-work/`. Confirm permission and applicable source terms before bulk downloads. The runner stops on HTTP 403, 429, and server errors and resumes without replacing previously recovered measurements.
+
+```sh
+npm run measure:corpus
+npm run measure:shas
+npm run measure:shas -- --recover-main
+npm run export:shas
+npm run test:shas
+```
+
+To limit a run, pass `--limit=100` after `--`. Pass one or more catalog IDs to select tractates; `--retry-unresolved` retries full classification, and `--recover-main --refresh-main` refreshes existing main-only results. The latter refetches pages. Older classifier checkpoints are excluded and reprocessed rather than silently mixed into the current export.
 
 ## Whole-Tractate Results
 
@@ -9,7 +53,7 @@ One equivalent printed side is the area of that tractate's fitted text-body rect
 | Tractate | Gemara + Mishnah | Add Rashi | Add Rashi and Tosafot |
 | --- | ---: | ---: | ---: |
 | Horayot, 25 sides | 9.63 sides / 4.81 dafim | 17.24 sides / 8.62 dafim | 18.06 sides / 9.03 dafim |
-| Rosh Hashanah, 67 sides | 20.83 sides / 10.41 dafim | 35.65 sides / 17.83 dafim | 54.23 sides / 27.12 dafim |
+| Rosh Hashanah, 67 sides | 20.83 sides / 10.41 dafim | 35.67 sides / 17.84 dafim | 54.25 sides / 27.13 dafim |
 
 Totals can vary if a different edition, reference rectangle, or font classification is used.
 

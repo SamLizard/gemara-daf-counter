@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
-import { calculateAreas, calculateFrame, decodePdfText, groupRows, includeStreamFragments, matchScore, normalizeHebrew, splitRuns } from "./measure-corpus.mjs";
+import { calculateAreas, calculateFrame, decodePdfText, groupRows, includeStreamFragments, matchMainGlyphs, matchScore, normalizeHebrew, redistributeLeadingFragments, splitRuns } from "./measure-corpus.mjs";
 
 const item = (text, x, y, width = 20) => ({ str: text, transform: [0, 0, 0, 0, x, y], width });
 
@@ -13,6 +13,13 @@ test("decodes Hebrew text and preserves already decoded Hebrew", () => {
 test("matches a fragmented right-to-left line against commentary", () => {
   const items = [item("וירא", 80, 100), item("לולי", 50, 100), item("כי ידין", 10, 100)];
   assert.ok(matchScore(items, normalizeHebrew("זכור ירכבהו וירא לולי כי ידין ככתוב")) >= 8);
+});
+
+test("matches mapped main-text fragments without joining unknown glyphs", () => {
+  const text = normalizeHebrew("כינויי נדרים כנדרים וחרמים כחרמים");
+  const items = [item("\u00cc\u00c8\u00af\u201e\u0005\u00ce \u00cc\u00c8\u00af\u201e\u0005 \u00c8\u00c8\u00c2\u0005\u00c8\u00ce", 10, 100), item("\u00cc\u00c8\u00d3\u00af\u00c1\u00ce \u00cc\u00c8\u00d3\u00af\u00c1\u00c2", 10, 90)];
+  assert.deepEqual(matchMainGlyphs(items, text), { fragments: 2, letters: 29 });
+  assert.deepEqual(matchMainGlyphs([{ ...items[0], str: "\u00cc\u00c8\u00af\u201e\u0005?\u00c8\u00c8\u00c2\u0005\u00c8\u00ce" }], text), { fragments: 0, letters: 0 });
 });
 
 test("splits vertically restarted commentary and measures each line", () => {
@@ -29,6 +36,19 @@ test("includes bold fragments in the commentary stream but not a following margi
   const margin = { ...item("margin", 300, 90, 10), height: 11.94 };
   const items = [bold, body, margin];
   assert.deepEqual(includeStreamFragments(items, [body], [11.94], 0), [body, bold]);
+});
+
+test("assigns trailing bold fragments to the adjacent preceding commentary", () => {
+  const previousBody = item("previous", 221, 100, 93);
+  const bold1 = item("bold1", 110, 100, 74);
+  const bold2 = item("bold2", 191, 100, 24);
+  const nextBody = item("next", 326, 100, 200);
+  const items = [previousBody, bold1, bold2, nextBody];
+  const previous = { run: [previousBody], expanded: [previousBody] };
+  const current = { run: [nextBody], expanded: [nextBody, bold1, bold2] };
+  redistributeLeadingFragments(items, previous, current);
+  assert.deepEqual(previous.expanded, [previousBody, bold1, bold2]);
+  assert.deepEqual(current.expanded, [nextBody]);
 });
 
 test("uses the same reference area for all pages in a tractate", () => {
@@ -68,6 +88,7 @@ test("calibrated 10a and embedded 31a preserve the known classifications", async
   assert.equal(rosh.groups.tosafot.length, 7);
   assert.ok(horayotFirst.groups.tosafot.some((row) => Math.abs(row.baseline - 479.2) < 1 && row.right > 519));
   assert.ok(roshFirst.groups.tosafot.some((row) => Math.abs(row.baseline - 1129.6) < 1 && row.right > 330));
+  assert.ok(roshFirst.groups.rashi.some((row) => Math.abs(row.baseline - 1129.6) < 1 && row.right > 548));
   assert.ok(roshFirst.groups.tosafot.some((row) => Math.abs(row.baseline - 1129.6) < 1 && row.tallFragments.length > 0));
   assert.ok(roshFirst.groups.tosafot.some((row) => Math.abs(row.baseline - 826.2) < 1 && row.right > 190));
   assert.ok(roshFirst.groups.tosafot.some((row) => Math.abs(row.baseline - 1025) < 2 && row.right > 239.3));

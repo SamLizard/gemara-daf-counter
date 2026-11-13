@@ -6,6 +6,7 @@ import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 
 const archive = "https://raw.githubusercontent.com/Sefaria/Sefaria-Export-Archive/3f1013631fdfe452e953a93a2c5f921319e394ed/";
 const decoder = new TextDecoder("windows-1255");
+export const classifierVersion = 2;
 const definitions = [
   { slug: "horayos", title: "Horayot", order: "Nezikin", count: 25, mainSize: 12.24, mainPitch: 10.66825, commentaryPitch: 8.69562, tosafotPitch: 6.72 },
   { slug: "rosh-hashanah", title: "Rosh Hashanah", order: "Moed", count: 67, mainSize: 13.68, mainPitch: 11.88, commentaryPitch: 10.44 },
@@ -60,6 +61,21 @@ export function matchScore(items, reference) {
   }, 0);
 }
 
+export function matchMainGlyphs(items, reference) {
+  const encoded = [..."\u00ce\u00c8\u0005\u00c2\u201e\u00af\u00cc\u00c1\u00d3\u02d8\u00b7\u00da\u02d9\u00ca\u2030\u2021\u00cf\u00cd\u00d9\u02dc"];
+  const decoded = [..."\u05db\u05d9\u05e0\u05d5\u05d3\u05e8\u05dd\u05d7\u05de\u05e9\u05d1\u05e2\u05ea\u05d6\u05d4\u05d0\u05dc\u05da\u05e4\u05e7"];
+  const glyphs = new Map(encoded.map((character, index) => [character, decoded[index]]));
+  const matches = new Set();
+  for (const item of items) {
+    const text = [...item.str].reverse().map((character) => glyphs.get(character) || (/^[\s.,:;'"()\-]$/.test(character) ? character : "|")).join("");
+    for (const part of text.split("|")) {
+      const fragment = normalizeHebrew(part);
+      if (fragment.length >= 10 && reference.includes(fragment)) matches.add(fragment);
+    }
+  }
+  return { fragments: matches.size, letters: [...matches].reduce((sum, fragment) => sum + fragment.length, 0) };
+}
+
 function lines(items, pitch, kind, tolerance) {
   return groupRows(items, tolerance).map(({ baseline, left, right, items: fragments }) => ({
     baseline, left, right, pitch, kind,
@@ -82,7 +98,24 @@ export function includeStreamFragments(items, run, sizes, start) {
   return [...run, ...itemsOfSize(items.slice(start, end + 1), sizes)];
 }
 
-async function loadTexts(definition) {
+export function redistributeLeadingFragments(items, previous, current) {
+  const first = items.indexOf(current.run[0]);
+  const leading = current.expanded.filter((item) => items.indexOf(item) < first);
+  const previousRows = groupRows(previous.run, 2);
+  const currentRows = groupRows(current.run, 2);
+  const distance = (fragment, rows) => Math.min(Infinity, ...rows.filter((row) => Math.abs(row.baseline - fragment.baseline) < 2)
+    .map((row) => Math.max(0, row.left - fragment.right, fragment.left - row.right)));
+  for (const fragment of groupRows(leading, 2)) {
+    const previousDistance = distance(fragment, previousRows);
+    if (previousDistance < 20 && previousDistance < distance(fragment, currentRows)) {
+      const moved = new Set(fragment.items);
+      previous.expanded.push(...fragment.items);
+      current.expanded = current.expanded.filter((item) => !moved.has(item));
+    }
+  }
+}
+
+export async function loadTexts(definition) {
   const texts = {};
   for (const work of ["Rashi", "Tosafot"]) {
     const file = `json/Talmud/Bavli/Rishonim on Talmud/${work}/Seder ${definition.order}/${work} on ${definition.title}/Hebrew/merged.json`;
@@ -95,6 +128,51 @@ async function loadTexts(definition) {
   return texts;
 }
 
+export async function loadMainTexts(definition) {
+  const special = {
+    shekalim: ["Jerusalem Talmud Shekalim", "json/Talmud/Yerushalmi/Seder Moed/Jerusalem Talmud Shekalim/Hebrew/Venice Edition.json"],
+    kinim: ["Mishnah Kinnim", "json/Mishnah/Seder Kodashim/Mishnah Kinnim/Hebrew/Mishnah, ed. Romm, Vilna 1913.json"],
+    tamid: ["Tamid", "json/Talmud/Bavli/Seder Kodashim/Tamid/Hebrew/Wikisource Talmud Bavli.json"],
+    middos: ["Mishnah Middot", "json/Mishnah/Seder Kodashim/Mishnah Middot/Hebrew/Mishnah, ed. Romm, Vilna 1913.json"],
+  }[definition.slug];
+  const title = special?.[0] || definition.title;
+  const file = special?.[1] || `json/Talmud/Bavli/Seder ${definition.order}/${definition.title}/Hebrew/merged.json`;
+  const response = await fetch(archive + file.split("/").map(encodeURIComponent).join("/"), { signal: AbortSignal.timeout(60000) });
+  if (!response.ok) throw new Error(`${title}: HTTP ${response.status}`);
+  const data = await response.json();
+  if (data.title !== title || !Array.isArray(data.text)) throw new Error(`Unexpected ${title} export`);
+  return {
+    scope: special ? "tractate" : "page",
+    source: archive + file.split("/").map(encodeURIComponent).join("/"),
+    texts: special ? [normalizeHebrew(data.text.flat(Infinity).join(" "))] : data.text.map((segments) => normalizeHebrew((segments || []).flat(Infinity).join(" "))),
+  };
+}
+
+export async function processMainPage(definition, index, reference, pdfBytes) {
+  const daf = Math.floor(index / 2) + 2;
+  const side = index % 2 ? "b" : "a";
+  const name = `${definition.slug}-${daf}${side}`;
+  const packageUrl = import.meta.resolve("pdfjs-dist/package.json");
+  const task = getDocument({
+    data: new Uint8Array(pdfBytes),
+    standardFontDataUrl: fileURLToPath(new URL("standard_fonts/", packageUrl)),
+    wasmUrl: fileURLToPath(new URL("wasm/", packageUrl)),
+  });
+  try {
+    const document = await task.promise;
+    if (document.numPages !== 1) throw new Error(`${name}: expected one page`);
+    const page = await document.getPage(1);
+    const items = (await page.getTextContent()).items.filter((item) => item.str?.trim() && item.width > 0 && item.height > 0);
+    const mainItems = itemsOfSize(items, [definition.mainSize]);
+    const evidence = matchMainGlyphs(mainItems, reference);
+    if (evidence.fragments < 2 || evidence.letters < 30) throw new Error(`${name}: insufficient main-text match`);
+    const frameRows = definition.frameSizes ? lines(itemsOfSize(items, definition.frameSizes), definition.framePitch, "unclassified") : [];
+    return { name, sha256: createHash("sha256").update(pdfBytes).digest("hex"), view: page.view, groups: { main: lines(mainItems, definition.mainPitch, "main"), rashi: [], tosafot: [] }, frameRows, matches: [], mainMatch: evidence };
+  } finally {
+    await task.destroy();
+  }
+}
+
 function identifyRun(run, references, name) {
   const scores = { rashi: matchScore(run, references.rashi), tosafot: matchScore(run, references.tosafot) };
   const kind = scores.rashi > scores.tosafot ? "rashi" : "tosafot";
@@ -103,11 +181,11 @@ function identifyRun(run, references, name) {
   return { kind, scores };
 }
 
-async function processPage(definition, index, references) {
+export async function processPage(definition, index, references, pdfBytes) {
   const daf = Math.floor(index / 2) + 2;
   const side = index % 2 ? "b" : "a";
   const name = `${definition.slug}-${daf}${side}`;
-  const bytes = await readFile(join("results", "pdfs", `${name}.pdf`));
+  const bytes = pdfBytes || await readFile(join("results", "pdfs", `${name}.pdf`));
   const packageUrl = import.meta.resolve("pdfjs-dist/package.json");
   const task = getDocument({
     data: new Uint8Array(bytes),
@@ -147,14 +225,24 @@ async function processPage(definition, index, references) {
         }
       }
     } else {
-      const runs = splitRuns(itemsOfSize(items, [11.16, 11.4]));
+      const runs = splitRuns(itemsOfSize(items, definition.commentarySizes || [11.16, 11.4]));
+      if (!runs.length) throw new Error(`${name}: commentary type not found`);
       let start = 0;
+      const streams = [];
       for (const run of runs) {
         const result = identifyRun(run, references, name);
         matches.push(result);
-        groups[result.kind].push(...lines(includeStreamFragments(items, run, [8.94, 11.94, 16.38], start), definition.commentaryPitch, result.kind, 2));
+        const rows = groupRows(run);
+        const expanded = includeStreamFragments(items, run, definition.boldSizes || [8.88, 8.94, 11.88, 11.94, 13.92, 16.32, 16.38], start).filter((item) => {
+          if (!(definition.adjacentBoldSizes || [13.92]).some((size) => Math.abs(item.height - size) < 0.02)) return true;
+          return rows.some((row) => Math.abs(row.baseline - item.transform[5]) < 2 && Math.max(0, row.left - item.transform[4] - item.width, item.transform[4] - row.right) < 20);
+        });
+        const stream = { run, expanded, kind: result.kind };
+        if (streams.length) redistributeLeadingFragments(items, streams.at(-1), stream);
+        streams.push(stream);
         start = items.indexOf(run.at(-1)) + 1;
       }
+      for (const stream of streams) groups[stream.kind].push(...lines(stream.expanded, definition.commentaryPitch, stream.kind, 2));
     }
     return { name, sha256: createHash("sha256").update(bytes).digest("hex"), view: page.view, groups, matches };
   } finally {

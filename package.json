@@ -12,7 +12,10 @@
     "fetch:pages": "node experiments/fetch-pages.mjs",
     "measure:corpus": "node experiments/measure-corpus.mjs",
     "review:corpus": "node experiments/corpus-review.mjs",
-    "test:corpus": "node --test experiments/measure-corpus.test.mjs experiments/corpus-review.test.mjs"
+    "test:corpus": "node --test experiments/measure-corpus.test.mjs experiments/corpus-review.test.mjs",
+    "measure:shas": "node experiments/measure-shas.mjs",
+    "export:shas": "node experiments/shas-export.mjs",
+    "test:shas": "node --test experiments/shas-catalog.test.mjs experiments/shas-export.test.mjs"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.1.1",
