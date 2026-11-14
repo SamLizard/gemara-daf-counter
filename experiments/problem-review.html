@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Problem page review</title>
+  <style>
+    :root { color-scheme: light; font-family: "Avenir Next", Avenir, sans-serif; color: #202827; background: #f3f5f2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: white; border-bottom: 1px solid #d5deda; padding: 18px 24px; }
+    h1 { font-family: Georgia, serif; font-size: 24px; font-weight: normal; margin: 0; }
+    main { max-width: 1300px; margin: auto; padding: 24px; display: grid; grid-template-columns: minmax(240px, 310px) minmax(0, 1fr); gap: 30px; align-items: start; }
+    label.control { display: block; font-size: 14px; font-weight: 600; margin: 16px 0 6px; }
+    label.control:first-child { margin-top: 0; }
+    select, button { font: inherit; }
+    select { width: 100%; padding: 8px; border: 1px solid #aebfb5; border-radius: 4px; background: white; color: inherit; }
+    .navigation { display: flex; gap: 8px; margin-top: 10px; }
+    button { flex: 1; padding: 8px; border: 1px solid #aebfb5; border-radius: 4px; background: white; color: #234b39; cursor: pointer; }
+    button:disabled { opacity: .45; cursor: default; }
+    h2 { font-size: 15px; margin: 24px 0 8px; }
+    .choice { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #d9e1dc; padding: 9px 0; }
+    .choice input { width: 17px; height: 17px; margin: 0; accent-color: #293d34; }
+    .choice label { display: flex; align-items: center; gap: 8px; flex: 1; font-size: 14px; cursor: pointer; }
+    .swatch { width: 12px; height: 12px; flex: none; border-radius: 2px; }
+    .value { font-variant-numeric: tabular-nums; font-size: 13px; font-weight: 600; }
+    .result { border-top: 3px solid #273d33; margin-top: 24px; padding-top: 12px; }
+    .result strong { display: block; font-family: Georgia, serif; font-size: 32px; font-weight: normal; }
+    .note { color: #52635c; font-size: 13px; line-height: 1.5; }
+    .warning { border-left: 3px solid #ba8740; padding-left: 12px; color: #514638; overflow-wrap: anywhere; }
+    .preview { min-width: 0; }
+    .preview h2 { margin: 0 0 8px; font-size: 18px; }
+    .page { max-width: 760px; position: relative; background: white; box-shadow: 0 2px 12px #172b211a; }
+    .page img, .page svg { display: block; width: 100%; height: auto; }
+    .page svg { position: absolute; inset: 0; height: 100%; pointer-events: none; }
+    .page[hidden], [hidden] { display: none; }
+    a { color: #27604c; }
+    @media (max-width: 700px) { main { grid-template-columns: 1fr; gap: 22px; padding: 18px; } header { padding: 16px 18px; } }
+  </style>
+</head>
+<body>
+  <header><h1>Problem page review</h1></header>
+  <main>
+    <section aria-label="Page and text selection">
+      <label class="control" for="filter">Issue</label>
+      <select id="filter">
+        <option value="all">All problematic pages</option>
+        <option value="all-pages">All pages</option>
+        <option value="overlap">Overlapping boxes</option>
+        <option value="unresolved">Unresolved or pending</option>
+        <option value="main">Unknown Gemara + Mishnah</option>
+        <option value="rashi">Unknown Rashi</option>
+        <option value="tosafot">Unknown Tosafot</option>
+        <option value="source-zero">Source-only commentary zero</option>
+        <option value="user-zero">User-attested commentary absence</option>
+      </select>
+      <label class="control" for="tractate">Tractate</label>
+      <select id="tractate"></select>
+      <label class="control" for="page-select">Page</label>
+      <select id="page-select"></select>
+      <div class="navigation"><button id="previous" type="button">Previous</button><button id="next" type="button">Next</button></div>
+      <p class="note" id="page-count" aria-live="polite"></p>
+      <h2>Text</h2>
+      <div class="choice"><input id="main" type="checkbox" checked><label for="main"><span class="swatch" style="background:#c64f54"></span>Gemara + Mishnah</label><span class="value" id="main-value"></span></div>
+      <div class="choice"><input id="rashi" type="checkbox" checked><label for="rashi"><span class="swatch" style="background:#4775bf"></span>Rashi</label><span class="value" id="rashi-value"></span></div>
+      <div class="choice"><input id="tosafot" type="checkbox" checked><label for="tosafot"><span class="swatch" style="background:#3d9665"></span>Tosafot</label><span class="value" id="tosafot-value"></span></div>
+      <div class="choice" id="other-choice" hidden><input id="other" type="checkbox" checked><label for="other"><span class="swatch" style="background:#a575a5"></span><span id="other-label">Other commentary</span></label><span class="value" id="other-value">Not counted</span></div>
+      <div class="result" aria-live="polite"><span class="note">Selected text</span><strong id="total"></strong><span class="note">of the tractate's fitted area</span></div>
+      <p class="note warning" id="classification"></p>
+      <p class="note" id="source-note" hidden>Source-only Rashi or Tosafot zero: Wikisource may omit printed text.</p>
+      <p class="note" id="user-note" hidden>User-attested Rashi or Tosafot absence in Yerushalmi Shekalim; not a Wikisource finding or independent visual verification. Other printed commentaries remain unclassified and the fitted frame remains provisional.</p>
+      <p class="note" id="exclusion-note" hidden>Tosafot is excluded by user choice; 0% does not mean absent or measured.</p>
+      <p class="note">Page images: <a href="https://www.shas.org/daf-pdf/api/api-documentation.html">Shas.org, HebrewBooks and Moznaim</a>. Estimates are not manually verified.</p>
+    </section>
+    <section class="preview" aria-label="Printed page and detected text">
+      <h2 id="page-title"></h2>
+      <p class="note" id="scan-status" aria-live="polite"></p>
+      <div class="page" id="page" hidden><img id="scan" alt="Printed page"><svg id="overlay" aria-hidden="true"></svg></div>
+    </section>
+  </main>
+  <script id="report-data" type="application/json">__REPORT_DATA__</script>
+  <script>
+    let pages = JSON.parse(document.getElementById("report-data").textContent);
+    const colors = { main: "#c64f54", rashi: "#4775bf", tosafot: "#3d9665" };
+    const filter = document.getElementById("filter");
+    const tractate = document.getElementById("tractate");
+    const select = document.getElementById("page-select");
+    const previous = document.getElementById("previous");
+    const next = document.getElementById("next");
+    const overlay = document.getElementById("overlay");
+    const scan = document.getElementById("scan");
+    let active = null;
+    let displayed = null;
+    let sequence = 0;
+    let revision = null;
+    let controller;
+    const percent = (fraction) => fraction === null ? "Unknown" : `${(fraction * 100).toFixed(1)}%`;
+    const key = (page) => `${page.tractate}:${page.amud}`;
+    function matches(page) {
+      if (filter.value === "all-pages") return true;
+      if (filter.value === "all") return page.problem ?? true;
+      if (filter.value === "overlap") return page.error?.startsWith("overlap between ");
+      if (filter.value === "unresolved") return page.status === "unresolved" || page.status === "pending";
+      if (filter.value === "source-zero") return page.sourceOnlyZero;
+      if (filter.value === "user-zero") return page.userAttestedZero;
+      return page.unknownCategories.includes(filter.value);
+    }
+    function refreshTractates() {
+      const current = tractate.value;
+      const books = [...new Map(pages.filter(matches).map((page) => [page.tractate, page.title]))];
+      tractate.replaceChildren(new Option("All tractates", "all"), ...books.map(([id, title]) => new Option(title, id)));
+      if ([...tractate.options].some((option) => option.value === current)) tractate.value = current;
+      refreshPages();
+    }
+    function refreshPages() {
+      const current = active && key(active);
+      const filtered = pages.filter((page) => matches(page) && (tractate.value === "all" || page.tractate === tractate.value));
+      select.replaceChildren(...filtered.map((page) => new Option(`${page.title} ${page.amud} (${page.status})`, key(page))));
+      if (filtered.some((page) => key(page) === current)) select.value = current;
+      select.disabled = !filtered.length;
+      if (filtered.length) activate();
+      else {
+        active = null; displayed = null; sequence++; controller?.abort();
+        previous.disabled = next.disabled = true;
+        document.getElementById("page-count").textContent = "No matching pages";
+        document.getElementById("page-title").textContent = "No matching pages";
+        document.getElementById("scan-status").textContent = "";
+        document.getElementById("classification").textContent = "";
+        document.getElementById("page").hidden = true;
+        document.getElementById("other-choice").hidden = true;
+        document.getElementById("source-note").hidden = true;
+        document.getElementById("user-note").hidden = true;
+        document.getElementById("exclusion-note").hidden = true;
+        for (const kind of Object.keys(colors)) document.getElementById(`${kind}-value`).textContent = "";
+        document.getElementById("total").textContent = "";
+      }
+    }
+    function draw() {
+      if (!active) return;
+      let total = 0;
+      let unknown = false;
+      for (const kind of Object.keys(colors)) {
+        const fraction = active.fractions[kind];
+        document.getElementById(`${kind}-value`).textContent = percent(fraction);
+        if (document.getElementById(kind).checked) {
+          if (fraction === null) unknown = true;
+          else total += fraction;
+        }
+      }
+      const otherFraction = active.otherCommentary?.fraction;
+      document.getElementById("other-value").textContent = typeof otherFraction === "number" ? percent(otherFraction) : "Not counted";
+      if (document.getElementById("other").checked && typeof otherFraction === "number") total += otherFraction;
+      document.getElementById("total").textContent = percent(unknown ? null : total);
+      overlay.replaceChildren();
+      if (!displayed) return;
+      overlay.setAttribute("viewBox", `0 0 ${displayed.width} ${displayed.height}`);
+      function rectangle(box, attributes) {
+        const element = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        for (const [name, value] of Object.entries({ ...box, ...attributes })) element.setAttribute(name, value);
+        overlay.append(element);
+      }
+      for (const kind of Object.keys(colors)) {
+        if (!document.getElementById(kind).checked) continue;
+        const region = displayed.regions[kind];
+        region.rows.forEach((row) => rectangle(row, { fill: colors[kind], "fill-opacity": region.provisional ? "0.16" : "0.28", ...(region.provisional ? { stroke: colors[kind], "stroke-width": "1", "stroke-dasharray": "4 3" } : {}) }));
+      }
+      const other = displayed.regions.other;
+      document.getElementById("other-choice").hidden = !other?.rows.length;
+      document.getElementById("other-label").textContent = active.otherCommentary?.sources.join(", ") || "Other commentary";
+      if (other && document.getElementById("other").checked) other.rows.forEach((row) => rectangle(row, { fill: "#a575a5", "fill-opacity": other.provisional ? "0.16" : "0.28", ...(other.provisional ? { stroke: "#a575a5", "stroke-width": "1", "stroke-dasharray": "4 3" } : {}) }));
+      displayed.overlaps.filter((row) => row.kinds.every((kind) => document.getElementById(kind).checked)).forEach(({ kinds, ...row }) => rectangle(row, { fill: "none", stroke: "#d76a00", "stroke-width": "3" }));
+      if (displayed.body) rectangle(displayed.body, { fill: "none", stroke: "#171e1a", "stroke-width": "2", "stroke-dasharray": "8 5" });
+    }
+    async function activate() {
+      const selected = pages.find((page) => key(page) === select.value);
+      if (!selected) return;
+      const changed = !active || key(active) !== key(selected);
+      active = selected;
+      previous.disabled = select.selectedIndex <= 0;
+      next.disabled = select.selectedIndex >= select.options.length - 1;
+      document.getElementById("page-count").textContent = `${select.selectedIndex + 1} of ${select.options.length} matching pages`;
+      document.getElementById("page-title").textContent = `${active.title} ${active.amud}`;
+      document.getElementById("classification").textContent = `${active.status}${active.method ? ` (${active.method})` : ""}${active.error ? `: ${active.error}` : ""}. Unknown: ${active.unknownCategories.join(", ") || "none"}.`;
+      document.getElementById("source-note").hidden = !active.sourceOnlyZero;
+      document.getElementById("user-note").hidden = !active.userAttestedZero;
+      document.getElementById("exclusion-note").hidden = !active.excludedCategories?.includes("tosafot");
+      if (!changed && displayed) { draw(); return; }
+      displayed = null;
+      const current = ++sequence;
+      controller?.abort();
+      controller = new AbortController();
+      document.getElementById("page").hidden = true;
+      document.getElementById("other-choice").hidden = true;
+      document.getElementById("scan-status").textContent = "Loading page...";
+      draw();
+      try {
+        const query = new URLSearchParams({ tractate: active.tractate, amud: active.amud });
+        const response = await fetch(`/api/page?${query}`, { signal: controller.signal });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+        if (current !== sequence) return;
+        displayed = result;
+        scan.src = result.image;
+        scan.alt = `Printed ${active.title} ${active.amud}`;
+        document.getElementById("page").hidden = false;
+        document.getElementById("scan-status").textContent = result.note;
+        draw();
+      } catch (error) {
+        if (current !== sequence || error.name === "AbortError") return;
+        document.getElementById("scan-status").textContent = `Could not load this page: ${error.message}`;
+      }
+    }
+    filter.addEventListener("change", refreshTractates);
+    tractate.addEventListener("change", refreshPages);
+    select.addEventListener("change", activate);
+    previous.addEventListener("click", () => { select.selectedIndex--; activate(); });
+    next.addEventListener("click", () => { select.selectedIndex++; activate(); });
+    document.querySelectorAll('input[type="checkbox"]').forEach((input) => input.addEventListener("change", draw));
+    refreshTractates();
+    setInterval(async () => {
+      try {
+        const response = await fetch(`/api/index${revision ? `?revision=${encodeURIComponent(revision)}` : ""}`, { cache: "no-store" });
+        if (response.status === 204) return;
+        if (!response.ok) return;
+        const index = await response.json();
+        revision = index.revision;
+        const updated = index.pages;
+        if (JSON.stringify(updated) !== JSON.stringify(pages)) {
+          pages = updated;
+          displayed = null;
+          refreshTractates();
+        }
+      } catch (error) {
+        document.getElementById("scan-status").textContent = `Review update unavailable: ${error.message}`;
+      }
+    }, 5000);
+  </script>
+</body>
+</html>

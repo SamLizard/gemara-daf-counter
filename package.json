@@ -9,13 +9,14 @@
     "test:inspector": "node --test experiments/inspect-pdf.test.mjs",
     "experiment:compare-text": "node experiments/compare-text.mjs",
     "review": "node experiments/review.mjs",
+    "review:problems": "node experiments/problem-review.mjs",
     "fetch:pages": "node experiments/fetch-pages.mjs",
     "measure:corpus": "node experiments/measure-corpus.mjs",
     "review:corpus": "node experiments/corpus-review.mjs",
     "test:corpus": "node --test experiments/measure-corpus.test.mjs experiments/corpus-review.test.mjs",
     "measure:shas": "node experiments/measure-shas.mjs",
     "export:shas": "node experiments/shas-export.mjs",
-    "test:shas": "node --test experiments/shas-catalog.test.mjs experiments/shas-export.test.mjs"
+    "test:shas": "node --test experiments/shas-catalog.test.mjs experiments/shas-export.test.mjs experiments/shekalim-absence.test.mjs experiments/nedarim-audit.test.mjs experiments/problem-review.test.mjs experiments/pdf-cache.test.mjs"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.1.1",

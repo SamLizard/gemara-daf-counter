@@ -4,24 +4,30 @@ This research estimates the printed area occupied by Mishnah and Gemara, Rashi, 
 
 ## Full Shas JSON
 
-The generated [results/shas-metrics.json](results/shas-metrics.json) is a frontend-oriented export for 40 separately named sections. The latest fresh-source run attempted all 5,405 sides and measured at least the main text on 5,401; four sides remain unresolved. Six sections have all three categories classified on every side, while 34 are partial. These counts describe the classifier's coverage, not verified accuracy. There are 985 measured sides with at least one unknown category, including 191 where a commentary's absence is inferred rather than established. Across these partial and unresolved sides, 494 attempts failed classification; existing main measurements are preserved where available, but their commentary values are unknown.
+The generated [results/shas-metrics.json](results/shas-metrics.json) is a frontend-oriented export for 40 separately named sections. All 5,405 sides now have a numeric main-text measurement, including a confirmed zero on Nazir 33b. Twenty-nine sections have all three categories classified on every side, while 11 are partial; 308 sides have at least one unknown category. These counts describe the classifier's coverage, not verified accuracy. There are 300 Wikisource-only Rashi zeroes and 383 numeric Tosafot zeroes, including 151 whose recorded basis is the Wikisource-only section check and 180 deliberately excluded on Nedarim. Forty Shekalim sides have user-attested Rashi and Tosafot zeroes.
 
-The four unresolved sides are Nedarim 40b and 45b, Nazir 33b, and Zevachim 71a. Shekalim, Kinnim, Tamid, Middot, and Keritot have main-text-only measurements. Their fitted frames also use unclassified printed text, not identified Rashi or Tosafot; they are provisional. Shekalim is checked against the Jerusalem Talmud, Kinnim and Middot against Mishnah, and Tamid against Bavli Tamid. For these four sections, matches are against the entire work because its reference pagination differs from the PDF; this is weaker than a page-specific match. The source lists the Jerusalem Talmud Shekalim version's license as unknown.
+Shekalim, Kinnim, Tamid, Middot, and Keritot have main-text-only measurements. Their fitted frames also use unclassified printed text, not identified Rashi or Tosafot; they are provisional. Shekalim is checked against the Jerusalem Talmud, Kinnim and Middot against Mishnah, and Tamid against Bavli Tamid. For these four sections, matches are against the entire work because its reference pagination differs from the PDF; this is weaker than a page-specific match. The source lists the Jerusalem Talmud Shekalim version's license as unknown.
 
-The file is local and Git-ignored. Check source and derived-data rights before publishing it. PDF and commentary sources and attribution are recorded in the JSON; original PDF files and source texts are not included.
+Kinnim and Middot have Mishnah but no Gemara in either Talmud ([Kinnim](https://en.wikipedia.org/wiki/Kinnim), [Middot](https://en.wikipedia.org/wiki/Middot_(Talmud))). The printed Kinnim edition includes Tosafot and a commentary attributed to Rashi, alongside other commentaries ([Vilna commentary list](https://he.wikipedia.org/wiki/%D7%9E%D7%A1%D7%9B%D7%AA_%D7%A7%D7%99%D7%A0%D7%99%D7%9D)). The Middot PDF names Rambam and Rabbi Shemaiah, and also prints Rosh; a complete attribution and page-by-page absence audit are still needed. Both sections' Rashi and Tosafot values remain unknown, not zero.
+
+Kinnim begins on the lower portion of the shared Meilah 22a PDF, after Meilah ends. The catalog assigns that side to Meilah and begins Kinnim at 22b; the Kinnim portion of 22a has not been measured. A future correction must split that side by tractate rather than double-count the PDF.
+
+The export and the source cache are local and Git-ignored. Check source and derived-data rights before publishing. PDF and commentary sources and attribution are recorded in the JSON; original PDFs and source texts are not included in the export.
 
 ### JSON Contract
 
 - `schemaVersion` and `classifierVersion` identify the export structure and measurement method.
 - `tractates[]` gives a stable `id`, title, order, first/last amud, status, coverage, fitted frame, category totals, and one entry per expected printed side. Kinnim, Tamid, and Middot use disjoint ranges of the Meilah volume and are not double-counted.
 - `coverage.knownByCategory` counts sides with a numeric value for each category. `measured` means at least main text was measured, not that every category is known.
-- `pages[].fractions` is a fraction of that tractate's frame for each of `main`, `rashi`, and `tosafot`. `main` includes Mishnah. `null` means unknown, never zero; `inferredAbsent` is evidence of possible absence but remains unknown.
-- Pages include `tosafotEvidence`, with the run ID, Wikisource revision when available, source status, decision, basis, and PDF SHA-256 when classification succeeded. `confirmedAbsent` identifies a source-backed zero; most such decisions use the community index and classified PDF streams, not a manual inspection of every page. Unreviewed omissions or atypical type may still be missed. `lastClassificationError` reports failed reclassifications; a prior main measurement can remain available while the commentary is unknown.
+- `pages[].fractions` is a fraction of that tractate's frame for each of `main`, `rashi`, and `tosafot`. `main` includes Mishnah. `null` means unknown, never zero; `inferredAbsent` is evidence of possible absence but remains unknown. A zero indicates confirmed absence unless the category appears in `excludedCategories`, where it is a deliberate exclusion rather than an absence finding. An unresolved side can have `{ main: null, rashi: null, tosafot: 0 }` if a source indicates absence or the category is excluded even though the PDF was not measured.
+- Pages can include `rashiEvidence` or `tosafotEvidence`, with the source, revision when available, decision, basis, and PDF SHA-256 when available. `confirmedAbsent` identifies a recorded zero backed by source evidence or explicit user attestation; some rely only on Wikisource section content and have not been verified against the PDF. An incomplete transcription can produce an incorrect zero. User attestation is distinguished by `sourceType: "user-attestation"`, not represented as a source or visual finding. `lastClassificationError` reports failed reclassifications; a prior main measurement can remain available while commentary is unknown.
 - `pages[].method` is `classified` or `main-only`. A main-only recovery includes the original failure reason and match evidence; `referenceScope` distinguishes page-specific from whole-tractate matching.
+- `pages[].otherCommentary` records independently measured other commentary where available, including its sources, rows, and frame fraction. It is not included in the three standard fractions or their totals.
 - `totals.sides` and `totals.dafim` contain separate category totals. An individual total is `null` if that category is unknown on any side; the entire `totals` object is `null` when a side is unresolved or pending. Add categories only when every selected total is numeric. One equivalent daf is two equivalent printed sides.
-- `frame.provisional` means the frame can change as missing text is resolved. `referenceBasis` is `classified-text`, `main-and-unclassified-text`, or `main-text-only`. A frame using unclassified or only main text is particularly uncertain. Different tractates' frames are not a common physical area.
+- `frame.provisional` means the frame can change as missing text is resolved. `referenceBasis` is `classified-text`, `main-and-unclassified-text`, or `main-text-only`. Shekalim frames remain provisional when using recovered main text or unclassified commentary, even if all category values become numeric. Different tractates' frames are not a common physical area.
+- `frame.coordinateSpace: "shekalim-aligned-v1"` and `frame.sideOffsets: { a: 85.08, b: 0 }` are additive schema-version-1 fields. For a printed `amud`, add `frame.sideOffsets[amud.at(-1)]` to both `frame.left` and `frame.right` before converting PDF coordinates to viewport coordinates; leave `top` and `bottom` unchanged. Frames without `sideOffsets` remain absolute PDF coordinates. The offset comes from the existing Shekalim profile, not a second frontend constant.
 
-Other commentators such as Ran and Rashbam are not renamed Rashi or Tosafot. Unrecognized type sizes, headings, decorations, and other works can be omitted; some line boxes or frames can be incorrectly fitted. No accuracy margin has been established. A section marked `complete` only means the automatic classifier produced all category values, not that the pages were manually verified.
+Other commentators such as Ran and Rashbam are not renamed Rashi or Tosafot. Ran is measured separately where supported on Nedarim; Rashbam remains unmeasured. Unrecognized type sizes, headings, decorations, and other works can be omitted; some line boxes or frames can be incorrectly fitted. No accuracy margin has been established. A section marked `complete` only means the automatic classifier produced all category values, not that the pages were manually verified.
 
 For example, a frontend can add selected categories only when they are all available:
 
@@ -35,7 +41,7 @@ const total = selected.every((value) => typeof value === "number")
 
 ### Reproduce The Export
 
-The legacy calibrated corpus can be generated with the corpus commands below. For a fresh Shas run, page references are fetched directly from Wikisource without using a disk cache, and PDFs are fetched four at a time into memory. Compact checkpoints are written under ignored `results/shas-work/` for resuming a run. Confirm permission and applicable source terms before bulk downloads. The runner stops on PDF HTTP 403, 429, and server errors and preserves previously recovered measurements as unknown where appropriate.
+The legacy calibrated corpus can be generated with the corpus commands below. Shas runs use independently cached Wikisource page texts under ignored `results/wikisource-cache/`, except for Horayot, which uses the pinned Sefaria archive. Missing Wikisource pages are fetched even when Sefaria data is available. PDFs are fetched up to four at a time and cached under ignored `results/pdf-cache/`; matching PDFs in `results/pdfs/` are also reused. Add `--cached-pdfs-only` to fail on missing PDFs instead of downloading them; this does not disable Wikisource or Sefaria requests. Retries verify saved fingerprints before replacing results. Compact checkpoints are written under ignored `results/shas-work/` for resuming a run. Confirm permission and applicable source terms before bulk downloads. The runner stops on PDF HTTP 403, 429, and server errors and preserves previously recovered measurements as unknown where appropriate.
 
 ```sh
 npm run measure:shas -- --wikisource
@@ -43,7 +49,110 @@ npm run export:shas
 npm run test:shas
 ```
 
-Each new `--wikisource` invocation generates a run ID and reprocesses all selected PDFs, even if a previous checkpoint exists. To resume an interrupted run, pass its printed `--run-id=<id>`; already processed pages are skipped, but Wikisource references are still fetched afresh. Use `--retry-unresolved` with the same run ID to retry unknown decisions. To limit a run, pass `--limit=100` after `--`; pass one or more catalog IDs to select tractates. Other runner modes retain their separate legacy checkpoint behavior.
+Each new `--wikisource` invocation generates a run ID and reprocesses all selected PDFs, even if a previous checkpoint exists. To resume an interrupted run, pass its printed `--run-id=<id>`; already processed pages are skipped. Add `--refresh-wikisource` to fetch the selected Wikisource pages again instead of using cached copies. Use `--retry-unresolved` with the same run ID to retry unknown decisions. To limit a run, pass `--limit=100` after `--`; pass one or more catalog IDs to select tractates. Other runner modes retain their separate legacy checkpoint behavior. The generic runner skips Nedarim in broad runs and rejects explicit Nedarim selections; use the dedicated audit below.
+
+To recheck unknown Tosafot absences without downloading the PDFs again, run `npm run measure:shas -- --recheck-absences`. This uses cached Wikisource pages and fetches missing ones; `--refresh-wikisource` refreshes the eligible unknown sides. It stops on Wikisource HTTP 403, 429, and server errors. Resume later with the same command or specify catalog IDs. Existing numeric Tosafot values, including previous zeroes, are preserved.
+
+Run `npm run measure:shas -- --recheck-rashi-absences` for the corresponding Rashi recheck. An unknown Rashi value can become zero when a usable Wikisource page has an empty or missing regular Rashi section and no Rashi was detected in the PDF. An attributed Rashi heading prevents this inference. Missing or redirected source pages do not establish absence. Existing numeric values and confirmed zeroes are preserved. These source-only zeroes can be wrong if Wikisource omits printed text.
+
+To retry pages with saved overlap failures, run `npm run measure:shas -- --wikisource --retry-overlaps --run-id=<id>`. A retry preserves prior measurements when classification still fails, and reusing the same run ID skips attempted pages. The `continuation-fix-20261113` run retried 169 pages: 14 were fully classified and 155 still failed the overlap check. A subsequent shared-quotation fix classified one more, leaving 154 saved overlap failures.
+
+A bounded commentary retry can target any one tractate with `npm run measure:shas -- <tractate> --wikisource --retry-commentary --limit=100 --run-id=<id>`. Optionally pass `--amudim=2a,2b` to select specific pages and `--cached-pdfs-only` to forbid PDF downloads. Existing measurements and confirmed zeroes are protected, and repeating a run ID skips attempted pages. A successful retry can still leave categories unknown, particularly for main-only tractates.
+
+Commentary catchwords are excluded only when a short, inset, standalone stream-tail word follows a source-supported completed row, the current stream has independent source support, and the next printed side's same commentary opens with exactly that word. Wikisource snapshots record the tractate, commentary, amud, revision URL, raw-content SHA-256, and a SHA-256 binding the normalized evidence text to its opening word. Ambiguous geometry, unsupported markup, absent sources, or changed fingerprints leave the fragment intact; the overlap check is unchanged. Removed rows remain frame-only geometry and do not contribute commentary area. Checkpoint `page.fragmentOwnership` records both source snapshots' provenance and the retained frame row.
+
+Megillah 10b and 16a now include their separately classified Tosafot body text: the body font is approximately 10.62 points, compared with approximately 10.14 for Rashi. Their Tosafot catchwords use the Rashi size, and were reattributed only with matching PDF geometry and current/next-page Wikisource fingerprints. Larger 15.60-point opening words remain unmeasured because their separate baselines do not meet the adjacency guard; the reported areas may therefore undercount these headings.
+
+The local hash-pinned regressions verify Arakhin 2a Rashi/Tosafot and Menachot 6a Tosafot, unchanged frames and all other boxes, and genuine Arakhin 3b Rashi retention. Arakhin 3b's separate commentary candidate remains untouched because a detached marker breaks the strict terminal-row geometry. Menachot 97b/99b are not verified. No data retry is part of these tests. For a later bounded retry of the two verified overlap pages:
+
+```sh
+npm run measure:shas -- arachin --wikisource --retry-overlaps --cached-pdfs-only --cached-wikisource-only --amudim=2a --limit=1 --run-id=commentary-catchwords-arachin-20261114
+npm run measure:shas -- menachos --wikisource --retry-overlaps --cached-pdfs-only --cached-wikisource-only --amudim=6a --limit=1 --run-id=commentary-catchwords-menachos-20261114
+```
+
+These commands select only saved overlap failures, require cached current/successor Wikisource revisions and matching cached PDFs, and write checkpoints and the export. The existing runner still requests its pinned Sefaria Rashi archive; the two cache flags do not make it fully offline. Do not run these commands under a no-source-fetch constraint. Reusing each run ID skips already attempted pages; use a new explicit ID for another attempt.
+
+Run `npm run review:problems` and open the printed local URL to browse partial, unresolved, and pending pages. Choose `All pages` to inspect completed pages as well. A fully classified recovery is not a problem solely because it retains its original recovery reason; active classification errors remain problems. Filter by issue or tractate and use the page selector or Previous and Next buttons. The list refreshes when the export changes. The server reuses the disk PDF cache and downloads a missing PDF only when selected; it checks saved fingerprints and never changes the checkpoints or export. For overlap errors, it attempts to reconstruct the candidate boxes using the matching cached Wikisource revision; dashed colors and orange intersections are provisional, while the displayed percentages are the saved values. Suspect commentary highlights are hidden after a failed legacy audit. Rashbam is displayed separately and not included in the selected total. A source-only Rashi or Tosafot zero is identified separately. A scan may be unavailable, or its fingerprint may differ, in which case saved highlights cannot be shown. The generated `results/problem-review.html` requires the local server and should be opened through the printed URL.
+
+### Nedarim Audit
+
+Nedarim's side Tosafot is deliberately excluded from measurement at the user's request. All 180 sides export `tosafot: 0` with `excludedCategories: ["tosafot"]`; this is not a claim that Tosafot is absent. The generic runner does not classify it. The audit separately matches the printed commentary attributed to Rashi and Ran against pinned PDF and Wikisource evidence; Ran is exported as `otherCommentary`. An attributed Rashi heading must not be interpreted as evidence that Rashi is absent. Legacy classifications are retained as history but untrusted commentary measurements were cleared.
+
+Main text is measured on all 180 sides, and attributed Rashi and Ran are measured on 104; the other 76 remain unknown. The provisional shared frame excludes column labels at the top and includes Ran below the main text. Nedarim 40b and 86b were recovered, while 45b still has unknown commentary.
+
+Run `node experiments/nedarim-audit.mjs --retry-unknown` for an offline dry run against cached, pinned inputs. Add `--apply` to atomically stage and replace the checkpoint and export after validation; do not run it alongside measurement or export writers. Ambiguous or missing evidence remains unknown. The most recent protected retries scanned all 180 Nedarim sides and attempted 201 cached non-Nedarim problem sides; 76 of the latter were applied without resolving their unknown categories, while 125 failed. This was not a full reclassification of the 5,405-side corpus.
+
+The current bounded fixes also cover Nazir 33b, Gittin 76b, Kiddushin 36b and 77a, Sanhedrin 57a, Avodah Zarah 35b and 38b, and Zevachim 51b and 71a. They rely on specific source or PDF evidence and remain estimates, not a visual audit of every page.
+
+### Shekalim Frame Geometry
+
+Shekalim's body shifts horizontally between printed sides. Only its frame-only items are filtered, before grouping, to normalized x104-534; side a is offset by +85.08 PDF units relative to side b. Main groups are never filtered or translated in the checkpoint. The existing font-size basis is unchanged. Tests pin the cached PDFs for 2a, 2b, 9b, 14a, and 22b, preserving 9b's genuine left commentary and 14a's main rows reaching x616.38. Marginal references end near normalized x98 or start near x540, outside the body window.
+
+The geometry-only migration has been applied to all 42 saved sides and the full export. The common frame is x104.18843913259376-533.8471179031455 on side b and x189.26843913259376-618.9271179031455 on side a, y344.73885950439995-1140.3795471679998, including the usual two-unit padding. Every side uses the same width, height, and denominator (341853.92663763557 PDF units squared). With saved checkpoint pages, `frameForPage(frame, page)` performs the translation. Export-only consumers can place it using the printed amud:
+
+```js
+const offset = book.frame.sideOffsets?.[amud.at(-1)] ?? 0;
+const pdfFrame = {
+	...book.frame,
+	left: book.frame.left + offset,
+	right: book.frame.right + offset,
+};
+```
+
+All 42 saved main groups and all category numerators are unchanged. Main text is numeric on all 42 sides, totaling 10.017160696096097 equivalent sides / 5.008580348048048 equivalent dafim under the corrected denominator. Rashi and Tosafot are zero on all 42 sides: 2a and 16b are Wikisource-only, and the other 40 rely on user confirmation. Shekalim 2a's source uses the alternate title `שקלים א א`, accepted only when its page header identifies the printed side as 2a. Source-only zeroes can be wrong if the transcription is incomplete. The other commentaries remain unclassified; headings, unrecognized type sizes, and 22b's separate closing-prayer appendix are not newly measured.
+
+Shekalim in this edition is Jerusalem Talmud, not a Bavli Gemara. Its printed commentaries include Korban HaEdah, Rivevan, Tiklin Chadtin and Mishnat Eliyahu; these are not renamed Rashi or Tosafot. The [Kollel Iyun HaDaf introduction](https://dafyomi.co.il/shekalim/sk-in-biblio.htm) describes the 22-daf Vilna layout and its commentaries. The [2a Wikisource revision](https://he.wikisource.org/?oldid=863058) identifies Korban HaEdah and Rivevan, but omits some commentary visible in the PDF. Those linked references alone do not establish the absence of regular Rashi and Tosafot on the other 40 sides.
+
+**TODO:** Identify and measure the printed Yerushalmi commentaries, including Korban HaEdah, Rivevan, Tiklin Chadtin and Mishnat Eliyahu, as separately selectable categories, with source evidence and per-page measurements like Rashi and Tosafot.
+
+### User-Authorized Shekalim Absence
+
+The user explicitly confirmed that Yerushalmi has no Rashi or Tosafot. Shekalim (2a-22b, 42 sides) is the only Yerushalmi section in this catalog. Kinnim and Middot are Mishnah, and Tamid is Bavli; none is covered by this decision. This decision has been applied to the saved results.
+
+To repeat the bounded, offline decision from the workspace root:
+
+```sh
+npm run measure:shas -- shekalim --confirm-yerushalmi-absence
+```
+
+This exact mode accepts only Shekalim and no other flags. It reads the existing 42-side checkpoint, converts genuinely unknown Rashi/Tosafot categories without detected rows, and records `basis: "user-confirmed-yerushalmi-no-rashi-or-tosafot"`, `sourceType: "user-attestation"`, `source: null`, and the consistent saved `pdfSha256`. Old unknown evidence is retained under `previousEvidence`. It preserves numeric values, detected rows, existing confirmed absences, and source evidence, including the independent Wikisource zeroes on 2a and 16b. Missing or disagreeing fingerprints and detected-row conflicts leave categories untouched and produce a nonzero exit status; unrelated eligible categories can still be applied. Unmeasured pages retain their pending/unresolved state and unknown main value.
+
+No PDFs are read or fetched, no sources are requested, and no measurement is run. The checkpoint uses the runner's temporary-file/atomic-rename convention, then the export is rebuilt using saved data only. Stop concurrent measurement/export writers first. The checkpoint and export are not a single transaction; if export generation fails after the checkpoint is saved, run `npm run export:shas` to rebuild from it. Repeating the confirmation makes no checkpoint/export writes when no categories change. Ordinary measurement never automatically applies this decision to new unknown work, and later retries retain the attestation and reject conflicting detected commentary.
+
+User attestation is not a Wikisource or independently verified visual finding. Numeric coverage can make a section `complete` without establishing accuracy: Shekalim's main-only/unclassified frame remains provisional and its actual Yerushalmi commentaries remain unmeasured. Problem review includes a separate `User-attested commentary absence` filter and note; the existing source-only filter still identifies only Wikisource zeroes.
+
+Focused checks use synthetic pages and temporary directories, without changing saved results or loading PDFs:
+
+```sh
+node --test experiments/shekalim-absence.test.mjs experiments/shas-export.test.mjs
+node --test --test-name-pattern='source-only|user-attested|filters, navigates' experiments/problem-review.test.mjs
+```
+
+Read-only local preview, with no source requests, checkpoint changes, or generated report/export writes:
+
+```sh
+SHEKALIM_FRAME_PREVIEW=1 npm run review:problems
+node --test --test-name-pattern=Shekalim experiments/measure-corpus.test.mjs experiments/shas-export.test.mjs experiments/problem-review.test.mjs
+```
+
+The preview remains available after application. It verifies each saved PDF hash and rebuilds only Shekalim frame geometry in memory. Its fractions use the rebuilt denominator and remain identified as a preview. Missing or mismatched cached PDFs block it. Cache-dependent tests explicitly skip when fixtures are unavailable; skips are not successful PDF validation.
+
+Reproduce the implemented, offline migration from the workspace root; do not run a data remeasurement:
+
+```sh
+node --test experiments/migrate-shekalim-frame.test.mjs experiments/shas-export.test.mjs
+node experiments/migrate-shekalim-frame.mjs
+```
+
+The utility rejects active measurement/export writers and concurrent migrations; read-only review processes may remain running. It loads all saved tractate data and the current export, hashes every cached/corpus PDF, and rebuilds only Shekalim frame geometry in memory using exact saved SHA-256 fingerprints and PDF views. It compares every saved entry after deleting ONLY `frameRows`/`frameGeometry`, checks all 42 raw main groups and category numerators, zeroes/unknowns, row containment, common denominators, unchanged export metadata, and byte-identical non-Shekalim tractates. It requires the existing export's canonical two-space JSON format for that byte comparison. Any unreconcilable input aborts before replacement.
+
+The applied run hash-checked 971 PDFs. Four unpinned caches belong to saved unresolved entries (Nazir 33b, Nedarim 40b/45b, Zevachim 71a) and have no saved measurement fingerprint: they are recorded separately in the audit and verified unchanged between staging and commit, not authenticated against a prior fingerprint or used for geometry. No source was fetched and no missing commentary zero was inferred.
+
+Before replacing results, the utility creates a unique timestamped temporary directory outside the workspace, containing byte-exact originals, staged checkpoint/export files, and `validation.json` with input/output/PDF hashes and invariant counts. It rechecks every saved JSON input and the entire PDF cache immediately before commit, writes same-directory temporary result files, and renames the checkpoint followed by the export. It verifies both replacements and writes `applied.json`; normal replacement/reporting failures restore originals. Backups are temporary and may be removed by OS cleanup. Each file replacement is atomic, but the pair is not a filesystem-wide transaction: a process crash or power loss between renames requires recovery from those backups, and a reader can briefly observe different generations. Saved `page.areas`, if any, remain untouched; the export recomputes all fractions on cloned pages with the new denominator instead of trusting cached fractions. Repeating the migration is idempotent for checkpoint/export content and creates a new backup/audit directory. Stale or mixed Shekalim geometry still fails closed; the classifier version is not globally bumped.
+
+Bava Batra's Rashbam is matched against the pinned Sefaria archive as separate commentary, not Rashi or Tosafot. The `rashbam-20261113` pass reclassified 295 partial sides, preserving six source-backed Tosafot zeroes; their previously unknown Rashi values were subsequently set to Wikisource-only zeroes. To repeat a bounded pass, use `npm run measure:shas -- bava-basra --wikisource --retry-commentary --limit=400 --run-id=<id>`. Reuse the same ID to resume; matching PDF fingerprints and Wikisource revisions are required when previously recorded.
+
+Pesachim 99b-121b was also audited for Rashbam, including previously complete sides. A later source-supported stream split classified the mixed Tosafot and Rashbam blocks on 110a, 111a, 111b, 113a, 118b, and 119a; 121b subsequently received a Wikisource-only Rashi zero. The audit can be repeated with `npm run measure:shas -- pesachim --wikisource --retry-commentary --include-classified --limit=50 --run-id=<id>`; sides already attempted with that ID are skipped.
 
 For a Sotah-only fresh rerun:
 
@@ -51,7 +160,9 @@ For a Sotah-only fresh rerun:
 npm run measure:shas -- sotah --wikisource
 ```
 
-The current run uses only regular `תוספות` or `תוס'` sections, not Tosafot Shantz or other named commentators, and records the page revision. Missing or empty sections are unknown outside Sotah unless an explicit absence notice is present. For Sotah, missing sections are treated as absent only when the PDF commentary streams classify as Rashi. Sotah 35a's two short Tosafot lines and the absence on 44a were reviewed visually and the overrides apply only to the reviewed PDF hashes. If an override no longer applies and the automated match is insufficient, the result remains unknown. Missing Wikisource entries, alternate pagination, and failed or ambiguous matches remain unknown. The PDF classification is approximate, and the community transcription may be incomplete or differ from the printed edition. HebrewBooks' own text site forbids automated access and returned HTTP 403, so this workflow does not scrape it. Rashi still uses Sefaria's per-page commentary references, which may follow semantic anchors rather than physical printed placement.
+The measurement uses regular `תוספות` or `תוס'` text, not Tosafot Shantz or other named commentators, and records the Wikisource revision. An unknown value becomes zero if the regular Tosafot section is explicitly empty, or if there is no populated Tosafot-named section. Detected PDF Tosafot is not replaced. This source-only rule also applies to main-only recoveries and failed PDF classifications, without changing their other unknown values. It is an estimate, not a visual review: Wikisource can omit printed text, Sefaria can follow semantic anchors, and the PDF classifier can miss text. Missing and redirected Wikisource pages are not treated as absence. Sotah 35a's two short Tosafot lines and the absence on 44a were reviewed visually and the overrides apply only to the reviewed PDF hashes. HebrewBooks' own text site forbids automated access and returned HTTP 403, so this workflow does not scrape it. Rashi matching uses Sefaria's per-page commentary references; its source-only absence rule uses Wikisource.
+
+Horayot instead uses its earlier pinned Sefaria Rashi and Tosafot exports and the calibrated Horayot PDF layout. The regular printed Tosafot ends at 8b; pages from 9a onward receive a source-backed zero only when no Tosafot is detected and both commentary runs match Rashi. Sefaria's commentary references can follow semantic anchors rather than physical printed placement, so these results retain that limitation. Run `npm run measure:shas -- horayos --wikisource` to fetch the Horayot PDFs again using this exception.
 
 The current Sotah rerun is `complete` for classifier coverage: 96/96 sides have all category values, including 16 source-backed or manually reviewed Tosafot zeroes. It estimates 16.17 equivalent dafim of Gemara and Mishnah, 13.03 of Rashi, and 9.90 of Tosafot, or 39.10 combined. These are estimates, not manually verified totals.
 
@@ -101,6 +212,8 @@ Run `npm install` once. The existing `npm run review` command automatically down
 Choose a page and check the texts you want to count. The colored lines show what was detected, and the dashed rectangle is the reference area used as 100%. The large number is the sum of the displayed estimates for the selected texts. For example, 25% means roughly one quarter of that rectangle, not one quarter of the entire sheet.
 
 This earlier three-page experiment is separate from the complete corpus review above.
+
+To inspect the Eruvin 12b Shas result, run `npm run review -- eruvin 12b` and open [results/review.html](results/review.html). It downloads the PDF again, verifies its fingerprint, and displays the saved classifications when they match the reconstructed boxes. If classification is partial, reconstructed commentary is provisional and orange outlines show main/Tosafot overlaps. The review does not change the Shas export.
 
 For locally obtained single-page PDFs, the separate geometry inspector does not download anything:
 
