@@ -275,7 +275,7 @@ export async function migrateShekalimFrame({ resultsDirectory = "results", works
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
-    assert.equal(process.argv.length, 2, "Usage: node experiments/migrate-shekalim-frame.mjs (run at workspace root)");
+    assert.equal(process.argv.length, 2, "Usage: node src/migrate-shekalim-frame.mjs (run at workspace root)");
     console.log(serialize(await migrateShekalimFrame()));
   } catch (error) {
     console.error(error.stack);

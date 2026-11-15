@@ -76,11 +76,11 @@ test("bottom Tosafot block text must be Tosafot, tolerating only isolated transc
   assert.throws(() => findBottomTosafotBlock(page(label(), body(500, 0)), spec, { rashi }, "kereisos-x"), /requires a Tosafot reference/);
 });
 
-test("Keritot rejects an unpinned Rashi source and the generic runner", async () => {
+test("Keritot rejects an unpinned Rashi source and non-Wikisource generic runs", async () => {
   await assert.rejects(classifyKereisosPage({ sefariaRashi: ["text"] }), /fingerprint required/);
-  const command = spawnSync(process.execPath, ["experiments/measure-shas.mjs", "kereisos"], { encoding: "utf8" });
+  const command = spawnSync(process.execPath, ["src/measure-shas.mjs", "kereisos"], { encoding: "utf8" });
   assert.notEqual(command.status, 0);
-  assert.match(command.stderr, /offline Keritot staging runner/);
+  assert.match(command.stderr, /measured only with --wikisource/);
 });
 
 test("staged Keritot runner refuses outputs inside results and PDFs with another fingerprint", async (context) => {

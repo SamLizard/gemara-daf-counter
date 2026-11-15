@@ -1,27 +1,30 @@
 {
-  "name": "gemara-daf-counter-research",
+  "name": "gemara-daf-counter",
+  "version": "1.0.0",
   "private": true,
+  "description": "Measures how much of each page of the Vilna Shas is Gemara, Rashi, Tosafot and other commentary.",
   "type": "module",
   "scripts": {
-    "experiment:renderer": "node experiments/renderer.mjs",
-    "experiment:pdf": "node experiments/pdf.mjs",
-    "inspect:pdf": "node experiments/inspect-pdf.mjs",
-    "test:inspector": "node --test experiments/inspect-pdf.test.mjs",
-    "experiment:compare-text": "node experiments/compare-text.mjs",
-    "review": "node experiments/review.mjs",
-    "review:problems": "node experiments/problem-review.mjs",
-    "fetch:pages": "node experiments/fetch-pages.mjs",
-    "measure:corpus": "node experiments/measure-corpus.mjs",
-    "review:corpus": "node experiments/corpus-review.mjs",
-    "test:corpus": "node --test experiments/measure-corpus.test.mjs experiments/corpus-review.test.mjs",
-    "measure:shas": "node experiments/measure-shas.mjs",
-    "export:shas": "node experiments/shas-export.mjs",
-    "test:shas": "node --test experiments/shas-catalog.test.mjs experiments/shas-export.test.mjs experiments/shekalim-absence.test.mjs experiments/nedarim-audit.test.mjs experiments/problem-review.test.mjs experiments/pdf-cache.test.mjs"
+    "build": "node src/build.mjs",
+    "compare": "node src/compare-metrics.mjs",
+    "test": "node --test src/*.test.mjs research/*.test.mjs",
+    "measure:shas": "node src/measure-shas.mjs",
+    "export:shas": "node src/shas-export.mjs",
+    "review:problems": "node src/problem-review.mjs",
+    "research:renderer": "node research/renderer.mjs",
+    "research:pdf": "node research/pdf.mjs",
+    "research:inspect-pdf": "node research/inspect-pdf.mjs",
+    "research:compare-text": "node research/compare-text.mjs",
+    "research:review": "node research/review.mjs",
+    "research:fetch-pages": "node research/fetch-pages.mjs",
+    "research:review-corpus": "node research/corpus-review.mjs"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.1.1",
+    "pdfjs-dist": "^6.5.438"
+  },
+  "devDependencies": {
     "daf-renderer": "1.1.4",
-    "pdfjs-dist": "^6.5.438",
     "playwright-core": "1.56.1"
   }
 }

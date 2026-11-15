@@ -41,8 +41,6 @@ const runIdArg = args.find((argument) => argument.startsWith("--run-id="));
 const runId = allWikisource ? (runIdArg?.slice("--run-id=".length) || new Date().toISOString()) : null;
 const specialMainReferences = ["shekalim", "kinim", "tamid", "middos"];
 const requested = args.filter((argument) => !argument.startsWith("--"));
-if (requested.includes("nedarim")) throw new Error("Nedarim requires the offline Nedarim audit; the generic runner does not respect its marginal Tosafot exclusion");
-if (requested.includes("kereisos")) throw new Error("Keritot requires the offline Keritot staging runner; the generic runner uses a main-only profile");
 if (sotahWikisource && (requested.length !== 1 || requested[0] !== "sotah" || recoverMain)) throw new Error("--sotah-wikisource requires sotah and cannot be combined with --recover-main");
 if (allWikisource && (sotahWikisource || recoverMain)) throw new Error("--wikisource cannot be combined with --sotah-wikisource or --recover-main");
 if ((recheckingAbsences && (useWikisource || recoverMain)) || (recheckAbsences && recheckRashiAbsences)) throw new Error("Absence rechecks cannot be combined with measurement modes or each other");
@@ -53,8 +51,8 @@ if (selectedAmudim && (!(retryCommentary || retryOverlaps) || requested.length !
   || !selectedAmudim.length || selectedAmudim.some((amud) => !amudim(tractates.find((tractate) => tractate.slug === requested[0]) || {}).includes(amud)))) throw new Error("--amudim requires a protected retry and valid pages in one tractate");
 if (retryAmbiguous && (!allWikisource || !cachedPdfsOnly || retryOverlaps || retryCommentary || retry || recheckAbsences || requested.length !== 1 || requested[0] !== "eruvin" || !Number.isInteger(limit) || !Number.isFinite(limit) || !runIdArg?.slice("--run-id=".length).trim())) throw new Error("--retry-ambiguous requires --wikisource --cached-pdfs-only eruvin, a finite integer --limit, and an explicit --run-id; it cannot be combined with other retry modes");
 for (const slug of requested) if (!tractates.some((tractate) => tractate.slug === slug)) throw new Error(`Unknown tractate: ${slug}`);
-const selected = tractates.filter((tractate) => !["nedarim", "kereisos"].includes(tractate.slug) && (!requested.length || requested.includes(tractate.slug)));
-if (!requested.length) console.log("Nedarim and Keritot skipped: use their offline staging runners");
+if (!allWikisource && requested.some((slug) => ["nedarim", "kereisos"].includes(slug))) throw new Error("Nedarim and Keritot are measured only with --wikisource");
+const selected = tractates.filter((tractate) => (allWikisource || !["nedarim", "kereisos"].includes(tractate.slug)) && (!requested.length || requested.includes(tractate.slug)));
 const workDirectory = join("results", "shas-work");
 const wikiOptions = { cacheDirectory: join("results", "wikisource-cache"), refresh: refreshWikisource, requestDelay: 5000, cacheOnly: args.includes("--cached-wikisource-only") };
 await mkdir(workDirectory, { recursive: true });
@@ -86,6 +84,30 @@ for (const tractate of selected) {
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
     work = { slug: tractate.slug, pages: Object.fromEntries(Object.entries(initialData[tractate.slug] || {}).map(([amud, entry]) => [amud, { ...entry, classifierVersion }])) };
+  }
+  if (tractate.slug === "nedarim") {
+    if (recheckingAbsences || retryOverlaps || retryCommentary || retryAmbiguous) continue;
+    const todo = amudim(tractate).filter((amud) => work.pages[amud]?.nedarimAudit?.runId !== runId).slice(0, limit - attempted);
+    if (!todo.length) continue;
+    await loadWikisourcePages(tractate, wikiOptions);
+    const wikiPages = JSON.parse(await readFile(join(wikiOptions.cacheDirectory, "nedarim.json"), "utf8"));
+    const { measureNedarimSide } = await import("./nedarim-audit.mjs");
+    const definition = shasDefinition(tractate);
+    const loadPdf = async (_definition, amud, expectedHash) => (await getCachedPdf(tractate, amud, { expectedHash, cacheOnly: cachedPdfsOnly })).bytes;
+    for (const [position, amud] of todo.entries()) {
+      attempted++;
+      const entry = await measureNedarimSide(amud, { definition, expected: amudim(tractate), wikiPages, loadPdf });
+      entry.nedarimAudit.runId = runId;
+      work.pages[amud] = entry;
+      if ((position + 1) % 20 === 0 || position + 1 === todo.length) {
+        await save(work);
+        console.log(`nedarim: ${position + 1}/${todo.length} attempted, ${Object.values(work.pages).filter((page) => page.nedarimAudit?.outcome === "fallback").length} fallback`);
+      }
+    }
+    await save(work);
+    await writeShasExport();
+    if (attempted >= limit) break;
+    continue;
   }
   if (recheckingAbsences) {
     const candidates = amudim(tractate).filter((amud) => {
@@ -123,7 +145,7 @@ for (const tractate of selected) {
   const retryTodo = protectedRetry ? amudim(tractate).filter((amud) => (!selectedAmudim || selectedAmudim.includes(amud)) && (retryCommentary ? isCommentaryRetryCandidate(work.pages[amud], runId) || (includeClassified && amudIndex(amud) >= amudIndex(tractate.slug === "pesachim" ? "99b" : "29a") && isLegacyCommentaryAuditCandidate(work.pages[amud], runId)) : retryAmbiguous ? isAmbiguousRetryCandidate(work.pages[amud], runId) : isOverlapRetryCandidate(work.pages[amud], runId))).slice(0, limit - attempted) : null;
   if (protectedRetry && !retryTodo.length) continue;
   const nextAmud = (amud) => amudim(tractate)[amudim(tractate).indexOf(amud) + 1];
-  const mainOnly = recoverMain || (allWikisource && [...specialMainReferences, "kereisos"].includes(tractate.slug));
+  const mainOnly = recoverMain || (allWikisource && specialMainReferences.includes(tractate.slug));
   const wikiTodo = protectedRetry && !mainOnly ? [...new Set([...retryTodo, ...retryTodo.map(nextAmud).filter(Boolean)])] : retryTodo;
   const wikiPages = usePageWikisource ? await loadWikisourcePages(tractate, { ...wikiOptions, ...(protectedRetry ? { selectedAmudim: wikiTodo } : {}) }) : null;
   const todo = protectedRetry ? retryTodo : amudim(tractate).filter((amud) => allWikisource
@@ -221,7 +243,7 @@ for (const tractate of selected) {
         if (usePageWikisource) references.commentarySources = Object.fromEntries(["rashi", "tosafot"].map((kind) => [kind, {
           current: wikiPages[amud]?.commentarySources?.[kind], next: wikiPages[nextAmud(amud)]?.commentarySources?.[kind],
         }]));
-        if (tractate.slug === "arachin" && protectedRetry && wikiPages) Object.assign(references, { main: wikiPages[amud].mainText, nextMain: wikiPages[nextAmud(amud)]?.mainText });
+        if ((tractate.slug === "kereisos" || (tractate.slug === "arachin" && protectedRetry)) && wikiPages) Object.assign(references, { main: tractate.slug === "kereisos" ? wikiPages[amud]?.mainText || undefined : wikiPages[amud].mainText, nextMain: tractate.slug === "kereisos" ? wikiPages[nextAmud(amud)]?.mainText || undefined : wikiPages[nextAmud(amud)]?.mainText });
         const page = await processPage(definition, index, references, await download(tractate, amud, safeguardPrevious ? work.pages[amud] : null));
         if (safeguardPrevious) verifyOverlapRetrySources(work.pages[amud], page, wikiPages?.[amud], wikiPages?.[nextAmud(amud)]);
         const tosafotEvidence = useWikisource ? { ...applyReviewedGittin76bEvidence(page, horayotSefaria ? classifyHorayotTosafot(amud, page, references.tosafot) : classifyWikisourceTosafot(tractate, amud, page, wikiPages[amud])), runId } : null;
@@ -285,4 +307,5 @@ for (const tractate of selected) {
 }
 const coverage = await writeShasExport();
 console.log(JSON.stringify({ runId, attempted, ...(recheckingAbsences ? { sourceZeroes, unavailableTractates: unavailable } : {}), stoppedForServer: stop, coverage }, null, 2));
+if (stop) process.exitCode = 2;
 if (stop || (recheckingAbsences && unavailable)) process.exitCode = 1;

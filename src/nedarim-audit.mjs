@@ -158,6 +158,52 @@ async function recomputeEntry(amud, entry, { definition, expected, wikiPages, lo
     previousClassification: structuredClone(entry) }, outcome: "recomputed" };
 }
 
+// Fresh measurement for a clean checkout: the same classifier and checks as the audit, without a saved checkpoint.
+export async function measureNedarimSide(amud, { definition, expected, wikiPages, loadPdf, processPage = processNedarimPage, mainPins = reviewedNedarimMainAlignments }) {
+  const review = mainPins[`nedarim-${amud}`];
+  const position = expected.indexOf(amud);
+  const selected = {};
+  let page = null, mainPage = null, reason = null, references = null;
+  try {
+    for (const name of [expected[position - 1], amud, expected[position + 1]].filter(Boolean)) {
+      const wikiPage = wikisourcePage(wikiPages, name);
+      if (wikiPage) selected[name] = wikiPage;
+      else if (name === amud) throw new Skip(`Wikisource lacks current amud ${amud}`);
+    }
+    references = nedarimAmudReferences(selected, nedarimAmudIndex(amud));
+    if (!references.main || (!references.rashi && !references.ran)) throw new Skip("Wikisource references unusable: current amud lacks main or commentary text");
+  } catch (error) {
+    if (error.code === "ERR_ASSERTION") throw error;
+    reason = error instanceof Skip ? error.message : `Wikisource references unusable: ${error.message}`;
+    references = null;
+  }
+  const bytes = await loadPdf(definition, amud, review?.pdfSha256);
+  if (references) {
+    try {
+      page = await processPage(definition, nedarimAmudIndex(amud), references, bytes);
+      if (!page.groups.main.length) throw new Skip("no main rows computed");
+      if (!page.groups.rashi?.length) throw new Skip("no attributed Rashi rows computed");
+      if (page.groups.tosafot?.length || page.frameRows || page.fragmentOwnership || page.commentaryAttribution?.tosafot !== null) throw new Skip("page carries Tosafot or frame-only rows");
+    } catch (error) {
+      if (error.code === "ERR_ASSERTION") throw error;
+      reason = error instanceof Skip ? error.message : `classifier rejected: ${error.message}`;
+      page = null;
+      try {
+        mainPage = await processPage(definition, nedarimAmudIndex(amud), references, bytes, { mainOnly: true });
+        if (!mainPage.groups.main.length || mainPage.groups.rashi.length || mainPage.groups.tosafot.length || mainPage.groups.other.length) mainPage = null;
+      } catch (mainError) {
+        if (mainError.code === "ERR_ASSERTION") throw mainError;
+        mainPage = null;
+      }
+    }
+  }
+  const sources = references ? [references, ...references.adjacent].map(({ title, revision: revid, contentSha256 }) => ({ title, revision: revid, contentSha256 })) : [];
+  if (page) return { classifierVersion, page, unknownCategories: [], inferredAbsent: [], confirmedAbsent: [], excludedCategories: ["tosafot"],
+    nedarimAudit: { version: nedarimAuditVersion, policy, outcome: "recomputed", reason: null, rashi: "measured", tosafot: "excluded", pdfSha256: page.sha256, sources } };
+  return { classifierVersion, ...(mainPage ? { page: mainPage } : { error: reason }), unknownCategories: ["rashi"], inferredAbsent: [], confirmedAbsent: [], excludedCategories: ["tosafot"],
+    nedarimAudit: { version: nedarimAuditVersion, policy, outcome: "fallback", reason, rashi: "unknown", tosafot: "excluded", sources } };
+}
+
 export async function auditNedarimEntry(amud, entry, { recompute = true, retryUnknown = false, ...context } = {}) {
   let retryReason;
   if (entry.nedarimAudit && retryUnknown && recompute && entry.nedarimAudit.outcome === "fallback") {
@@ -376,7 +422,7 @@ export async function auditNedarim({ resultsDirectory = "results", workspaceDire
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     const flags = process.argv.slice(2);
-    assert.ok(flags.every((flag) => ["--apply", "--no-recompute", "--retry-unknown"].includes(flag)), "Usage: node experiments/nedarim-audit.mjs [--apply] [--no-recompute] [--retry-unknown] (run at workspace root; default is a dry run)");
+    assert.ok(flags.every((flag) => ["--apply", "--no-recompute", "--retry-unknown"].includes(flag)), "Usage: node src/nedarim-audit.mjs [--apply] [--no-recompute] [--retry-unknown] (run at workspace root; default is a dry run)");
     assert.ok(!(flags.includes("--retry-unknown") && flags.includes("--no-recompute")), "--retry-unknown requires recomputation");
     const { inputs, files, ...summary } = await auditNedarim({ apply: flags.includes("--apply"), recompute: !flags.includes("--no-recompute"), retryUnknown: flags.includes("--retry-unknown") });
     console.log(serialize({ ...summary, files }));

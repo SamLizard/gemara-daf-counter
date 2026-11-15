@@ -6,9 +6,9 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createCanvas } from "@napi-rs/canvas";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
-import { loadTexts, processPage } from "./measure-corpus.mjs";
-import { amudIndex, tractates } from "./shas-catalog.mjs";
-import { loadWikisourcePages } from "./sotah-wikisource.mjs";
+import { loadTexts, processPage } from "../src/measure-corpus.mjs";
+import { amudIndex, tractates } from "../src/shas-catalog.mjs";
+import { loadWikisourcePages } from "../src/sotah-wikisource.mjs";
 
 const directory = dirname(fileURLToPath(import.meta.url));
 const outputDirectory = resolve(directory, "../results");
