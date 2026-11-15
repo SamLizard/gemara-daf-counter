@@ -241,13 +241,16 @@ function reviewedPage(name, sha256, references) {
   return review;
 }
 
-// Exact glyph string of the Vilna outer-margin "רבינו חננאל" heading (main glyph font, \u000e = נ), set at a commentary size.
-const marginHeadings = { "avodah-zarah": { glyphs: "\u00cf\u2021\u000e\u000e\u00c1\u00c2\u000e\u00c8\u00b7\u00af", label: "\u05e8\u05d1\u05d9\u05e0\u05d5 \u05d7\u05e0\u05e0\u05d0\u05dc" } };
+const marginHeadings = {
+  "avodah-zarah": { glyphs: ["\u00cf\u2021\u000e\u000e\u00c1\u00c2\u000e\u00c8\u00b7\u00af"], label: "\u05e8\u05d1\u05d9\u05e0\u05d5 \u05d7\u05e0\u05e0\u05d0\u05dc" },
+  bechoros: { glyphs: ["\u00cc\u00c2\u02d8\u00af\u201a \u00c2\u0014\u00c8\u00b7\u00af"], label: "\u05e8\u05d1\u05d9\u05e0\u05d5 \u05d2\u05e8\u05e9\u05d5\u05dd" },
+  arachin: { glyphs: ["\u00cc\u00c2\u02d8\u00af\u201a \u00c2\u0011\u00c8\u00b7\u00af"], label: "\u05e8\u05d1\u05d9\u05e0\u05d5 \u05d2\u05e8\u05e9\u05d5\u05dd" },
+};
 
 export function findMarginHeadings(slug, items, commentaryItems) {
   const heading = marginHeadings[slug];
   if (!heading) return [];
-  const candidates = commentaryItems.filter((item) => item.str === heading.glyphs);
+  const candidates = commentaryItems.filter((item) => heading.glyphs.includes(item.str));
   const others = commentaryItems.filter((item) => !candidates.includes(item));
   if (!candidates.length || !others.length) return [];
   const left = Math.min(...others.map((item) => item.transform[4])), right = Math.max(...others.map((item) => item.transform[4] + item.width));
@@ -817,6 +820,27 @@ export function identifyCommentaryRun(items, run, sizes, references, name) {
   }
 }
 
+function identifyShortSourceBackedCommentary(expanded, references, name) {
+  const source = references.commentarySources?.tosafot?.current;
+  const text = source?.text;
+  if (typeof text !== "string" || text.length < 32 || text.length > 120 || source.commentary !== "tosafot"
+    || `${source.tractate}-${source.amud}` !== name || !Number.isInteger(source.revision) || source.revision <= 0
+    || source.source !== `https://he.wikisource.org/?oldid=${source.revision}` || !source.title
+    || !/^[a-f0-9]{64}$/.test(source.contentSha256 || "")
+    || createHash("sha256").update(JSON.stringify([text, source.openingWord])).digest("hex") !== source.sha256
+    || !references.tosafot?.startsWith(text) || [references.rashi, references.other].some((other) => other?.includes(text))) return null;
+  const rows = groupRows(expanded, 2);
+  if (rows.length < 2 || rows.length > 12 || Math.max(...rows.map((row) => row.right)) - Math.min(...rows.map((row) => row.left)) > 240
+    || rows[0].baseline - rows.at(-1).baseline > 120) return null;
+  const printed = rows.map((row) => normalizeHebrew([...row.items].sort((first, second) => second.transform[4] - first.transform[4])
+    .map((item) => decodePdfText(item.str)).join(" "))).join("");
+  if (!printed.startsWith(text) || !/^(?:דף[א-ת]{1,3})?$/.test(printed.slice(text.length))) return null;
+  const scores = Object.fromEntries(["rashi", "tosafot", "other"].map((kind) => [kind, matchScore(expanded, references[kind])]));
+  if (scores.tosafot < 32 || scores.tosafot < 4 * Math.max(scores.rashi, scores.other)) return null;
+  return { kind: "tosafot", scores, basis: "complete-short-wikisource-section-and-pdf-block",
+    source: { amud: source.amud, revision: source.revision, source: source.source, sha256: source.sha256, contentSha256: source.contentSha256 } };
+}
+
 export function classifyHorayotTosafot(amud, page, reference) {
   const match = /^(\d+)([ab])$/.exec(amud);
   if (!match) throw new Error(`Invalid Horayot amud: ${amud}`);
@@ -907,9 +931,12 @@ export async function processPage(definition, index, references, pdfBytes) {
         try {
           result = identifyCommentaryRun(items, run, boldSizes, references, name);
         } catch (error) {
-          const { review, provenance, ...match } = reviewedShortTosafotSection(name, createHash("sha256").update(bytes).digest("hex"), items, run, expanded, streams, commentaryItems, references, error);
-          result = match;
-          reviewedSection = { review, provenance };
+          result = identifyShortSourceBackedCommentary(expanded, references, name);
+          if (!result) {
+            const { review, provenance, ...match } = reviewedShortTosafotSection(name, createHash("sha256").update(bytes).digest("hex"), items, run, expanded, streams, commentaryItems, references, error);
+            result = match;
+            reviewedSection = { review, provenance };
+          }
         }
         matches.push(result);
         const stream = { run, expanded, kind: result.kind, match: result };
@@ -1019,14 +1046,19 @@ export function nedarimReferences(wikiPage) {
   const mainSection = /<קטע\s+התחלה\s*=\s*ג\s*\/\s*>([^]*?)<קטע\s+סוף\s*=\s*ג\s*\/\s*>/.exec(content)?.[1];
   const main = mainSection ? cleanNedarimSection(mainSection, { dropTemplates: true }) : null;
   const headings = [...content.matchAll(/^(={2,6})[ \t]*(.*?)[ \t]*\1[ \t]*$/gm)];
-  const section = (pattern) => {
+  const section = (pattern, kind) => {
     const matching = headings.filter((heading) => heading[1].length === 2 && pattern.test(heading[2].trim()));
     if (matching.length !== 1) return null;
     const end = headings.find((candidate) => candidate.index > matching[0].index && candidate[1].length <= 2)?.index ?? content.length;
-    const text = cleanNedarimSection(content.slice(matching[0].index + matching[0][0].length, end));
+    let raw = content.slice(matching[0].index + matching[0][0].length, end);
+    if (kind === "rashi" && wikiPage.title === "נדרים ב א" && revision.revid === 3006991) {
+      if (createHash("sha256").update(raw).digest("hex") !== "4d8723ce8c44bfca9548de1fd2e2083dfddcd0d81f7e5a916df9bcdb4513807e") return null;
+      raw = raw.replace("([[במדבר ל]])", " ");
+    }
+    const text = cleanNedarimSection(raw);
     return text && text.length >= 16 ? text : null;
   };
-  const texts = { main: main && main.length >= 30 ? main : null, rashi: section(/^מיוחס לרש["״]י$/), ran: section(/^ר["״]ן$/) };
+  const texts = { main: main && main.length >= 30 ? main : null, rashi: section(/^מיוחס לרש["״]י$/, "rashi"), ran: section(/^ר["״]ן$/, "ran") };
   const hash = (text) => text ? createHash("sha256").update(text).digest("hex") : null;
   return { title: wikiPage.title, revision: revision.revid, source: `https://he.wikisource.org/?oldid=${revision.revid}`,
     contentSha256: hash(content), ...texts, sha256: Object.fromEntries(Object.entries(texts).map(([kind, text]) => [kind, hash(text)])) };
@@ -1157,22 +1189,98 @@ export function attachNedarimInlineItems(segments, items, pitch, { gutter, main 
     } };
 }
 
-export function attributeNedarimSegments(segments, references, pitch, name = "nedarim") {
+function uniqueNedarimInsertionMatch(sources, text, start, end) {
+  const matches = new Map();
+  for (const [sourceIndex, source] of sources.entries()) for (const kind of ["main", "rashi", "ran"]) {
+    const value = source[kind];
+    const record = (position, exact, extraInRange) => {
+      const key = `${sourceIndex}/${kind}/${position}`;
+      const hit = matches.get(key) || { sourceIndex, kind, exact: false, extraInRange: false };
+      hit.exact ||= exact;
+      hit.extraInRange ||= extraInRange;
+      matches.set(key, hit);
+    };
+    for (let position = value.indexOf(text); position >= 0; position = value.indexOf(text, position + 1)) record(position, true, false);
+    for (let index = 1; index < text.length; index++) {
+      const prefix = text.slice(0, index), suffix = text.slice(index);
+      for (let position = value.indexOf(prefix); position >= 0; position = value.indexOf(prefix, position + 1)) {
+        if (value.startsWith(suffix, position + index + 1)) record(position, false, index >= start && index < end);
+      }
+    }
+  }
+  const [match] = matches.values();
+  return matches.size === 1 && !match.exact && match.extraInRange ? match : null;
+}
+
+export function attributeNedarimSegments(segments, references, pitch, name = "nedarim", { ignoredSourceItems = new Set() } = {}) {
+  const contiguous = (first, second) => Math.abs(first.baseline - second.baseline) <= pitch * 1.3 && first.baseline !== second.baseline
+    && Math.min(first.right, second.right) - Math.max(first.left, second.left) >= 0.5 * Math.min(first.right - first.left, second.right - second.left);
+  const neighbors = (segment, direction) => segments.filter((candidate) => contiguous(segment, candidate)
+    && Math.sign(candidate.baseline - segment.baseline) === direction);
+  const textOf = (segment) => [...segment.items].filter((item) => !ignoredSourceItems.has(item))
+    .sort((first, second) => second.transform[4] - first.transform[4])
+    .map((item) => normalizeHebrew(decodePdfText(item.str))).join("");
+  const conflicts = [];
   for (const segment of segments) {
     segment.scores = scoreNedarimSegment(segment, references);
     // Commentary font sizes already exclude the main text; quotations of it are not evidence either way.
     const total = (kind) => segment.scores[kind] + segment.scores.adjacent[kind];
     const strong = (kind) => segment.scores[kind] >= 12 || segment.scores.adjacent[kind] >= 24;
     if (strong("rashi") && strong("ran")) {
-      throw new Error(`${name}: Nedarim segment matches both attributed Rashi and Ran at ${segment.baseline.toFixed(1)}`);
+      conflicts.push(segment);
+      segment.kind = segment.basis = null;
+      continue;
     }
     const [best, second] = total("rashi") >= total("ran") ? ["rashi", "ran"] : ["ran", "rashi"];
     segment.kind = total(best) >= 12 && total(best) >= 4 * total(second) ? best : null;
     segment.basis = !segment.kind ? null : segment.scores[best] >= 12 ? "unique-amud-source-text" : "unique-adjacent-amud-source-text";
     if (segment.basis === "unique-adjacent-amud-source-text" && segment.scores.adjacent[best] < 24) segment.kind = segment.basis = null;
   }
-  const contiguous = (first, second) => Math.abs(first.baseline - second.baseline) <= pitch * 1.3 && first.baseline !== second.baseline
-    && Math.min(first.right, second.right) - Math.max(first.left, second.left) >= 0.5 * Math.min(first.right - first.left, second.right - second.left);
+  for (const segment of conflicts) {
+    const sources = [references, ...(references.adjacent || [])];
+    const below = neighbors(segment, -1);
+    const anchor = below.length === 1 ? below[0] : null;
+    const opposite = anchor?.kind === "rashi" ? "ran" : "rashi";
+    const firstPage = name === "nedarim-2a" && references.title === "נדרים ב א" && sources.length === 2 && sources[1].title === "נדרים ב ב";
+    if ((sources.length === 3 || firstPage) && sources.every((source) => source.main && source.rashi && source.ran)
+      && anchor?.basis === "unique-amud-source-text" && neighbors(anchor, 1).length === 1
+      && !anchor.scores[opposite] && !anchor.scores.adjacent[opposite]) {
+      const rowText = textOf(segment), anchorText = textOf(anchor);
+      if (rowText.length >= 20 && anchorText.length >= 20) {
+        const text = rowText + anchorText.slice(0, 20);
+        const match = uniqueNedarimInsertionMatch(sources, text, 0, rowText.length);
+        if (match?.sourceIndex === 0 && match.kind === anchor.kind) {
+          Object.assign(segment, { kind: anchor.kind, basis: "unique-amud-source-one-insertion-continuation" });
+          continue;
+        }
+      }
+    }
+    throw new Error(`${name}: Nedarim segment matches both attributed Rashi and Ran at ${segment.baseline.toFixed(1)}`);
+  }
+  if (references.adjacent?.length === 2 && [references, ...references.adjacent].every((source) => source.main && source.rashi && source.ran)) {
+    for (const segment of segments.filter((candidate) => !candidate.kind)) {
+      const fragments = [...segment.items].sort((first, second) => second.transform[4] - first.transform[4])
+        .map((item) => normalizeHebrew(decodePdfText(item.str)));
+      fragments.push(fragments.join(""));
+      const owners = new Set(), current = new Set();
+      for (const text of fragments) for (let index = 0; index + 24 <= text.length; index++) {
+        const fragment = text.slice(index, index + 24);
+        for (const [sourceIndex, source] of [references, ...references.adjacent].entries()) for (const kind of ["main", "rashi", "ran"]) {
+          if (source[kind].includes(fragment)) {
+            owners.add(kind);
+            if (!sourceIndex) current.add(kind);
+          }
+        }
+      }
+      if (owners.size !== 1) continue;
+      const [kind] = owners;
+      const opposite = kind === "rashi" ? "ran" : "rashi";
+      if (kind === "main" || !current.has(kind) || segment.scores[opposite] || segment.scores.adjacent[opposite]) continue;
+      segment.scores[kind] += 24;
+      segment.kind = kind;
+      segment.basis = "unique-amud-source-fragment";
+    }
+  }
   const nearest = (segment, direction) => {
     const visited = new Set([segment]);
     let current = segment;
@@ -1198,6 +1306,56 @@ export function attributeNedarimSegments(segments, references, pitch, name = "ne
     const opposite = above === "rashi" ? "ran" : "rashi";
     if (above && above === below && !segment.scores[opposite] && !segment.scores.adjacent[opposite]) {
       Object.assign(segment, { kind: above, basis: "contiguous-column-between-same-source-rows" });
+    }
+  }
+  if (references.adjacent?.length === 2 && [references, ...references.adjacent].every((source) => source.main && source.rashi && source.ran)) {
+    const proposals = new Map();
+    const insertionProposals = new Set();
+    for (const segment of segments.filter((candidate) => !candidate.kind)) for (const direction of [-1, 1]) {
+      const path = [segment];
+      while (path.length <= 2) {
+        const current = path.at(-1);
+        if ([-1, 1].some((side) => neighbors(current, side).length > 1)) break;
+        const next = neighbors(current, direction)[0];
+        if (!next || neighbors(next, -direction).length !== 1) break;
+        path.push(next);
+        if (!next.kind) continue;
+        if (next.basis !== "unique-amud-source-text") break;
+        const kind = next.kind, opposite = kind === "rashi" ? "ran" : "rashi";
+        if (path.slice(0, -1).some((row) => row.scores[opposite] || row.scores.adjacent[opposite])) break;
+        const ordered = [...path].sort((first, second) => second.baseline - first.baseline);
+        const parts = ordered.map(textOf);
+        if (parts.some((text) => text.length < 8)) break;
+        const own = references[kind];
+        let text = parts.join("");
+        if (!own.includes(text) && ordered.length === 2 && ordered[0] === next && parts[0].length >= 16 && parts[1].length >= 20
+          && text.length >= 40 && !next.scores[opposite] && !next.scores.adjacent[opposite]) {
+          const match = uniqueNedarimInsertionMatch([references, ...references.adjacent], text, parts[0].length, text.length);
+          if (match?.sourceIndex === 0 && match.kind === kind) {
+            const kinds = proposals.get(segment) || new Set();
+            kinds.add(kind);
+            proposals.set(segment, kinds);
+            insertionProposals.add(segment);
+            break;
+          }
+        }
+        if (!own.includes(text) && ordered.length === 2 && ordered[1] === next) {
+          for (let length = parts[1].length - 1; length >= 24; length--) {
+            const prefix = parts[0] + parts[1].slice(0, length);
+            if (own.includes(prefix)) { text = prefix; break; }
+          }
+        }
+        if (text.length < 24 || own.indexOf(text) < 0 || own.indexOf(text) !== own.lastIndexOf(text)) break;
+        if ([references, ...references.adjacent].some((source, sourceIndex) => ["main", "rashi", "ran"]
+          .some((other) => (sourceIndex || other !== kind) && source[other].includes(text)))) break;
+        const kinds = proposals.get(segment) || new Set();
+        kinds.add(kind);
+        proposals.set(segment, kinds);
+        break;
+      }
+    }
+    for (const [segment, kinds] of proposals) if (kinds.size === 1) {
+      Object.assign(segment, { kind: [...kinds][0], basis: insertionProposals.has(segment) ? "unique-amud-source-one-insertion-continuation" : "unique-ordered-source-continuation" });
     }
   }
   return segments;
@@ -1242,8 +1400,9 @@ export async function processNedarimPage(definition, index, references, pdfBytes
     const pitch = definition.commentaryPitch;
     const segments = groupRows(itemsOfSize(items, [...layout.bodySizes, ...layout.boldSizes]).filter(inWindow), 2)
       .flatMap((row) => splitNedarimRow(row, layout.gutter)).sort((first, second) => second.baseline - first.baseline || first.left - second.left);
-    const inline = attachNedarimInlineItems(segments, itemsOfSize(items, layout.inlineSizes).filter(inWindow), pitch, { gutter: layout.gutter, main });
-    attributeNedarimSegments(segments, references, pitch, name);
+    const inlineItems = itemsOfSize(items, layout.inlineSizes).filter(inWindow);
+    const inline = attachNedarimInlineItems(segments, inlineItems, pitch, { gutter: layout.gutter, main });
+    attributeNedarimSegments(segments, references, pitch, name, { ignoredSourceItems: new Set(inlineItems) });
     const unresolved = segments.filter((segment) => !segment.kind);
     if (unresolved.length) {
       throw new Error(`${name}: unresolved Nedarim commentary segments at ${unresolved.map((segment) => `${segment.baseline.toFixed(1)}/${segment.left.toFixed(0)}-${segment.right.toFixed(0)}`).join(", ")}`);
@@ -1276,7 +1435,7 @@ export async function processNedarimPage(definition, index, references, pdfBytes
       commentaryAttribution: { version: nedarimAttributionVersion, layout: "nedarim-attributed-rashi-ran", tosafot: null,
         source: references.source || null, revision: references.revision || null, sourceSha256: references.sha256 || null,
         adjacentSources: (references.adjacent || []).map(({ title, revision, sha256 }) => ({ title, revision, sha256 })),
-        segments: Object.fromEntries(["unique-amud-source-text", "unique-adjacent-amud-source-text", "contiguous-column-between-same-source-rows"].map((basis) =>
+        segments: Object.fromEntries(["unique-amud-source-text", "unique-adjacent-amud-source-text", "unique-amud-source-fragment", "unique-amud-source-one-insertion-continuation", "contiguous-column-between-same-source-rows", "unique-ordered-source-continuation"].map((basis) =>
           [basis, segments.filter((segment) => segment.basis === basis).length])) } };
     checkOverlap(result);
     return result;

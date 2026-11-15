@@ -749,6 +749,29 @@ test("Kiddushin pinned 36b and 77a cached PDFs reproduce saved rows and count th
   });
 });
 
+test("Chullin 138a recognizes the source-backed short Tosafot block", async () => {
+  const definition = shasDefinition(tractates.find((tractate) => tractate.slug === "chullin"));
+  const checkpoint = JSON.parse(await readFile("results/shas-work/chullin.json", "utf8"));
+  const previous = checkpoint.pages["138a"];
+  const bytes = (await getCachedPdf(definition, "138a", { expectedHash: "869be6614112d17aa240f05c3e32924e38ccf568b7a840cc13d8a2e9cd0c73f7", cacheOnly: true })).bytes;
+  const wiki = await loadWikisourcePages(definition, { selectedAmudim: ["138a", "138b"], cacheDirectory: "results/wikisource-cache", cacheOnly: true });
+  const commentarySources = Object.fromEntries(["rashi", "tosafot"].map((kind) => [kind, { current: wiki["138a"].commentarySources[kind], next: wiki["138b"].commentarySources[kind] }]));
+  const references = { rashi: commentarySources.rashi.current.text, tosafot: wiki["138a"].text, commentarySources };
+  const page = await processPage(definition, amudIndex("138a") - 4, references, bytes);
+  assert.deepEqual([page.groups.main.length, page.groups.rashi.length, page.groups.tosafot.length], [52, 136, 4]);
+  assert.deepEqual(page.groups.main, previous.page.groups.main);
+  assert.equal(page.matches.at(-1).basis, "complete-short-wikisource-section-and-pdf-block");
+  preserveRetryPage(previous, { page });
+  checkOverlap(page);
+  const source = commentarySources.tosafot.current;
+  for (const changedSource of [undefined, { ...source, sha256: "0".repeat(64) }, { ...source, revision: source.revision + 1 },
+    { ...source, text: `${source.text}א` }, { ...source, amud: "138b" }]) {
+    const changed = { ...references, commentarySources: { ...commentarySources, tosafot: { ...commentarySources.tosafot, current: changedSource } } };
+    await assert.rejects(processPage(definition, amudIndex("138a") - 4, changed, bytes), /ambiguous commentary stream/);
+  }
+  await assert.rejects(processPage(definition, amudIndex("138a") - 4, { ...references, rashi: references.rashi + source.text }, bytes), /ambiguous commentary stream/);
+});
+
 test("Nazir 33b and Zevachim 51b/71a pinned pages measure with empty Sefaria Rashi and fail closed", async (context) => {
   const offline = () => { throw new Error("Fixture network access forbidden"); };
   const load = async (slug, amud, nextAmud, sha256) => {
@@ -1674,6 +1697,306 @@ test("Nedarim attribution uses unique source text and contiguous columns, reject
     adjacentReferences, 10.44), /adjacent-amud ran evidence contradicts its column/);
 });
 
+test("Nedarim partial source matches require long unambiguous current evidence", async () => {
+  const { attributeNedarimSegments } = await import("./measure-corpus.mjs");
+  const references = { ...nedarimReferencesFixture(), adjacent: [nedarimReferencesFixture(), nedarimReferencesFixture()] };
+  const text = `${nedarimRanText.slice(0, 40)}טעותבגרסה`;
+  const segment = nedarimSegment(text, 900, 88, 507);
+  attributeNedarimSegments([segment], references, 10.44);
+  assert.deepEqual([segment.kind, segment.basis], ["ran", "unique-amud-source-fragment"]);
+  const rashi = nedarimSegment(`${nedarimRashiText.slice(0, 40)}טעותבגרסה`, 900, 88, 507);
+  attributeNedarimSegments([rashi], references, 10.44);
+  assert.deepEqual([rashi.kind, rashi.basis], ["rashi", "unique-amud-source-fragment"]);
+  for (const changed of [
+    { ...references, adjacent: references.adjacent.slice(0, 1) },
+    { ...references, adjacent: [{ ...references.adjacent[0], rashi: null }, references.adjacent[1]] },
+    { ...references, adjacent: [{ ...references.adjacent[0], rashi: normalizeHebrew(nedarimRanText.slice(0, 40)) }, references.adjacent[1]] },
+    { ...references, main: normalizeHebrew(nedarimRanText.slice(0, 40)) },
+    { ...references, rashi: normalizeHebrew(nedarimRanText.slice(0, 40)) },
+    { ...references, ran: normalizeHebrew(nedarimRanText.slice(0, 23)) },
+    { ...references, ran: normalizeHebrew("טקסט אחר שאינו מופיע בדף הזה") },
+  ]) {
+    const rejected = nedarimSegment(text, 900, 88, 507);
+    attributeNedarimSegments([rejected], changed, 10.44);
+    assert.equal(rejected.kind, null);
+  }
+  const conflicting = nedarimSegment(text, 900, 88, 507);
+  conflicting.items.push(item(nedarimRashiText.slice(0, 10), 90, 900));
+  attributeNedarimSegments([conflicting], references, 10.44);
+  assert.equal(conflicting.kind, null);
+});
+
+test("Nedarim short edge rows require an unambiguous ordered source continuation", async () => {
+  const { attributeNedarimSegments } = await import("./measure-corpus.mjs");
+  const opening = "שנדרו הנאה זה";
+  const middle = "מזה מפרש בגמ";
+  const anchor = "אי בנדרו אי בהדירו מיירי";
+  const source = normalizeHebrew(opening + middle + anchor);
+  const reference = { main: normalizeHebrew(opening), rashi: source, ran: normalizeHebrew(opening),
+    adjacent: [{ main: "אאא", rashi: "בבב", ran: "גגג" }, { main: "דדד", rashi: "ההה", ran: "ווו" }] };
+  const rows = () => [nedarimSegment(opening, 900, 88, 198), nedarimSegment(middle, 889.56, 88, 151), nedarimSegment(anchor, 879.12, 88, 198)];
+  const accepted = rows();
+  attributeNedarimSegments(accepted, reference, 10.44);
+  assert.deepEqual(accepted.map((segment) => segment.kind), ["rashi", "rashi", "rashi"]);
+  const terminal = [nedarimSegment(anchor, 900, 88, 198), nedarimSegment(middle, 889.56, 88, 151)];
+  attributeNedarimSegments(terminal, { ...reference, rashi: normalizeHebrew(anchor + middle) }, 10.44);
+  assert.deepEqual(terminal.map((segment) => segment.kind), ["rashi", "rashi"]);
+  const markerRows = rows();
+  const marker = item("סימן", 88, 889.56, 6);
+  markerRows[1].items.push(marker);
+  attributeNedarimSegments(markerRows, reference, 10.44, "nedarim", { ignoredSourceItems: new Set([marker]) });
+  assert.deepEqual(markerRows.map((segment) => segment.kind), ["rashi", "rashi", "rashi"]);
+  for (const [label, change, sources] of [
+    ["large gap", (segments) => { segments[0].baseline += 12; }, reference],
+    ["ambiguous nearby columns", (segments) => { segments.push(nedarimSegment("אחר", 889.56, 110, 190)); }, reference],
+    ["competing current source", () => {}, { ...reference, ran: source }],
+    ["competing adjacent source", () => {}, { ...reference, adjacent: [{ ...reference.adjacent[0], ran: source }, reference.adjacent[1]] }],
+    ["missing adjacent source", () => {}, { ...reference, adjacent: reference.adjacent.slice(0, 1) }],
+    ["repeated current source", () => {}, { ...reference, rashi: source + source }],
+    ["wrong source order", () => {}, { ...reference, rashi: normalizeHebrew(middle + opening + anchor) }],
+  ]) {
+    const segments = rows();
+    change(segments);
+    attributeNedarimSegments(segments, sources, 10.44);
+    assert.equal(segments[0].kind, null, label);
+  }
+  const sparse = [nedarimSegment(opening, 900, 88, 198), nedarimSegment(middle, 889.56, 88, 151)];
+  attributeNedarimSegments(sparse, reference, 10.44);
+  assert.ok(sparse.every((segment) => segment.kind === null));
+  const sparseTerminal = [nedarimSegment(anchor, 900, 88, 198), nedarimSegment("קצר", 889.56, 88, 110)];
+  attributeNedarimSegments(sparseTerminal, { ...reference, rashi: normalizeHebrew(anchor + "קצר") }, 10.44);
+  assert.equal(sparseTerminal[1].kind, null);
+});
+
+test("Nedarim top quotes require their full text and a long unique anchored continuation", async () => {
+  const { attributeNedarimSegments } = await import("./measure-corpus.mjs");
+  const opening = "אמר רבא היתה לפניו ככר של הפקר ואמר ככר זו הקדש נטלה";
+  const quote = "לאכלה מעל לפי כולה";
+  const printed = "האי דנקיט לה בככר של הפקר ולא נקט לה";
+  const sourceTail = "האי דנקיט לה בככר של הפקר ולא נקט ליה";
+  const source = normalizeHebrew(opening + quote + sourceTail);
+  const reference = { main: normalizeHebrew(opening), rashi: "אבגדהוזחטיכלמנסעפצקרשת", ran: source,
+    adjacent: [{ main: "אאא", rashi: "בבב", ran: "גגג" }, { main: "דדד", rashi: "ההה", ran: "ווו" }] };
+  const rows = () => [nedarimSegment(opening, 900, 88, 198), { baseline: 889.56, left: 88, right: 198,
+    items: [item(quote, 140, 889.56, 58), item(printed, 88, 889.56, 52)] }];
+  const accepted = rows();
+  attributeNedarimSegments(accepted, reference, 10.44);
+  assert.deepEqual(accepted.map((segment) => segment.kind), ["ran", "ran"]);
+  assert.equal(accepted[0].basis, "unique-ordered-source-continuation");
+  for (const [label, change, sources] of [
+    ["unmatched opening", (segments) => { segments[0].items[0].str += "תוספת"; }, reference],
+    ["large gap", (segments) => { segments[0].baseline += 12; }, reference],
+    ["ambiguous column", (segments) => { segments.push(nedarimSegment("אחר", 889.56, 110, 190)); }, reference],
+    ["competing current source", () => {}, { ...reference, rashi: source }],
+    ["competing adjacent source", () => {}, { ...reference, adjacent: [{ ...reference.adjacent[0], ran: source }, reference.adjacent[1]] }],
+    ["missing adjacent source", () => {}, { ...reference, adjacent: reference.adjacent.slice(0, 1) }],
+    ["repeated source", () => {}, { ...reference, ran: source + source }],
+    ["short anchored prefix", () => {}, { ...reference, ran: normalizeHebrew(opening + quote + "שינוי אחר לגמרי") }],
+  ]) {
+    const segments = rows();
+    change(segments);
+    attributeNedarimSegments(segments, sources, 10.44);
+    assert.equal(segments[0].kind, null, label);
+  }
+});
+
+test("Nedarim terminal rows require a unique whole-row continuation with one extra source letter", async () => {
+  const { attributeNedarimSegments } = await import("./measure-corpus.mjs");
+  const anchor = "לחולין אבל אם אמר הרי";
+  const terminal = "הנטיעות האלו קרבן עד שיקצצו";
+  const source = normalizeHebrew(anchor + terminal.replace("עד שיקצצו", "עד ישיקצצו"));
+  const reference = { main: "אבגדהוזחטיכלמנסעפצקרשת", rashi: source, ran: "קרשתצפעסנמלכיטחזוהדגבא",
+    adjacent: [{ main: "אאא", rashi: "בבב", ran: "גגג" }, { main: "דדד", rashi: "ההה", ran: "ווו" }] };
+  const rows = () => [nedarimSegment(anchor, 900, 88, 198), nedarimSegment(terminal, 889.56, 88, 198)];
+  const accepted = rows();
+  attributeNedarimSegments(accepted, reference, 10.44);
+  assert.deepEqual(accepted.map((segment) => segment.kind), ["rashi", "rashi"]);
+  assert.equal(accepted[1].basis, "unique-amud-source-one-insertion-continuation");
+  for (const [label, change, sources] of [
+    ["large gap", (segments) => { segments[1].baseline -= 12; }, reference],
+    ["ambiguous column", (segments) => { segments.push(nedarimSegment("אחר", 900, 110, 190)); }, reference],
+    ["corrupt row", (segments) => { segments[1].items[0].str += "תוספת"; }, reference],
+    ["short anchor", (segments) => { segments[0].items[0].str = "אבל אם אמר"; }, reference],
+    ["missing adjacent source", () => {}, { ...reference, adjacent: reference.adjacent.slice(0, 1) }],
+    ["repeated source", () => {}, { ...reference, rashi: source + source }],
+    ["competing exact source", () => {}, { ...reference, adjacent: [{ ...reference.adjacent[0], ran: normalizeHebrew(anchor + terminal) }, reference.adjacent[1]] }],
+    ["competing approximate source", () => {}, { ...reference, adjacent: [{ ...reference.adjacent[0], ran: source }, reference.adjacent[1]] }],
+    ["two extra letters", () => {}, { ...reference, rashi: source.replace("עדישיקצצו", "עדיישיקצצו") }],
+  ]) {
+    const segments = rows();
+    change(segments);
+    attributeNedarimSegments(segments, sources, 10.44);
+    assert.equal(segments[1].kind, null, label);
+  }
+});
+
+test("Nedarim conflicting fragments require a unique full-row source match with one extra source letter", async () => {
+  const { attributeNedarimSegments } = await import("./measure-corpus.mjs");
+  const heading = "אלא רבי יהודה היא";
+  const explanation = "דאית ליה מכלל לאו הן היינו רישא כלומר";
+  const anchor = "כבר תנינא בפירקין דלעיל לחולין שאוכל לך";
+  const source = normalizeHebrew(heading.replace("יהודה", "יהודיה") + explanation + anchor);
+  const reference = { main: "אבגדהוזחטיכלמנסעפצקרשת", rashi: source, ran: normalizeHebrew(heading + "ענין אחר בפירושו"),
+    adjacent: [{ main: "אאא", rashi: "בבב", ran: "גגג" }, { main: "דדד", rashi: "ההה", ran: "ווו" }] };
+  const rows = () => [{ baseline: 900, left: 88, right: 198,
+    items: [item(heading, 145, 900, 53), item(explanation, 88, 900, 57)] }, nedarimSegment(anchor, 889.56, 88, 198)];
+  const accepted = rows();
+  attributeNedarimSegments(accepted, reference, 10.44);
+  assert.deepEqual(accepted.map((segment) => segment.kind), ["rashi", "rashi"]);
+  assert.equal(accepted[0].basis, "unique-amud-source-one-insertion-continuation");
+  for (const [label, change, sources] of [
+    ["large gap", (segments) => { segments[0].baseline += 12; }, reference],
+    ["ambiguous column", (segments) => { segments.push(nedarimSegment("אחר", 889.56, 110, 190)); }, reference],
+    ["corrupt row", (segments) => { segments[0].items[1].str += "תוספת"; }, reference],
+    ["short anchor", (segments) => { segments[1].items[0].str = "כבר תנינא בפירקין"; }, reference],
+    ["missing adjacent source", () => {}, { ...reference, adjacent: reference.adjacent.slice(0, 1) }],
+    ["repeated source", () => {}, { ...reference, rashi: source + source }],
+    ["competing exact source", () => {}, { ...reference, adjacent: [{ ...reference.adjacent[0], ran: normalizeHebrew(heading + explanation + anchor) }, reference.adjacent[1]] }],
+    ["competing approximate source", () => {}, { ...reference, adjacent: [{ ...reference.adjacent[0], ran: source }, reference.adjacent[1]] }],
+    ["two extra letters", () => {}, { ...reference, rashi: source.replace("יהודיה", "יהודייה") }],
+  ]) {
+    const segments = rows();
+    change(segments);
+    try { attributeNedarimSegments(segments, sources, 10.44); } catch (error) {
+      assert.match(error.message, /matches both attributed Rashi and Ran/, label);
+      continue;
+    }
+    assert.notEqual(segments[0].kind, "rashi", label);
+  }
+});
+
+test("Nedarim pinned conflicting headings resolve only through unique source continuation", async (context) => {
+  const { processNedarimPage, nedarimAmudReferences } = await import("./measure-corpus.mjs");
+  const definition = shasDefinition({ slug: "nedarim" });
+  const fixtures = [
+    { amud: "2a", index: 0, revision: 3006991, pdf: "4f1ce54d185d0fee77ff6d6f3c4dbad7fd9ea5a65ae598a4da4f4d37c2c66ece",
+      rashi: "f00749ef7eda2160f9c3e60ddd7ca674a055b9f68f83804a5c99301da184b400", baseline: 1129.6, left: 303 },
+    { amud: "14a", index: 24, revision: 2967925, pdf: "ed699008f0554cbadab030e9f0e66a5a9533ee85b8d4820fe477babbdc715758",
+      rashi: "ff5ad0b7c58a0a0be742d3f79117ec9eb12c03aaa453db0f76ee68d9ccb781d1", baseline: 1129.6, left: 303 },
+    { amud: "78a", index: 152, revision: 2968053, pdf: "02423e079840e9cdad4d27e6a08983af8b00e15a19efbb717e8a42b9edfc3dd9",
+      rashi: "6cd3c666dac672705f58d403ed1c3ee797982b6b90e2742e513de73a7bd5326e", baseline: 1066.8, left: 397 },
+  ];
+  let wikiPages, checkpoint;
+  try {
+    wikiPages = JSON.parse(await readFile(new URL("../results/wikisource-cache/nedarim.json", import.meta.url), "utf8"));
+    checkpoint = JSON.parse(await readFile(new URL("../results/shas-work/nedarim.json", import.meta.url), "utf8"));
+    for (const fixture of fixtures) fixture.bytes = (await getCachedPdf(definition, fixture.amud, { expectedHash: fixture.pdf, cacheOnly: true,
+      fetcher: () => { throw new Error("Fixture network access forbidden"); } })).bytes;
+  } catch (error) {
+    if (error.message.includes("not available in the local cache") || error.code === "ENOENT") { context.skip("Pinned Nedarim fixtures unavailable"); return; }
+    throw error;
+  }
+  for (const fixture of fixtures) {
+    const references = nedarimAmudReferences(wikiPages, fixture.index);
+    assert.deepEqual([references.revision, references.sha256.rashi], [fixture.revision, fixture.rashi]);
+    const page = await processNedarimPage(definition, fixture.index, references, fixture.bytes);
+    assert.deepEqual(page.groups.main, checkpoint.pages[fixture.amud].page.groups.main);
+    assert.ok(page.groups.rashi.some((row) => Math.abs(row.baseline - fixture.baseline) < 0.1 && Math.abs(row.left - fixture.left) < 1 && Math.abs(row.right - 507) < 1));
+    assert.ok(page.commentaryAttribution.segments["unique-amud-source-one-insertion-continuation"] > 0);
+    assert.ok(page.groups.other.length);
+    assert.deepEqual(page.groups.tosafot, []);
+    assert.equal(page.commentaryAttribution.tosafot, null);
+    checkOverlap(page);
+    if (fixture.amud === "2a") {
+      const altered = structuredClone(wikiPages["2a"]);
+      altered.revisions[0].slots.main.content = altered.revisions[0].slots.main.content.replace("([[במדבר ל]])", "");
+      const { nedarimReferences } = await import("./measure-corpus.mjs");
+      assert.equal(nedarimReferences(altered).rashi, null);
+      await assert.rejects(processNedarimPage(definition, fixture.index, { ...references, adjacent: [] }, fixture.bytes), /matches both attributed Rashi and Ran/);
+      await assert.rejects(processNedarimPage(definition, fixture.index, { ...references, adjacent: [{ ...references.adjacent[0], title: "wrong" }] }, fixture.bytes), /matches both attributed Rashi and Ran/);
+    }
+  }
+});
+
+test("Nedarim pinned 76b rejects a source match in the wrong commentary column", async (context) => {
+  const { processNedarimPage, nedarimAmudReferences } = await import("./measure-corpus.mjs");
+  const definition = shasDefinition({ slug: "nedarim" });
+  let wikiPages, bytes;
+  try {
+    wikiPages = JSON.parse(await readFile(new URL("../results/wikisource-cache/nedarim.json", import.meta.url), "utf8"));
+    bytes = (await getCachedPdf(definition, "76b", { expectedHash: "bcd524355091e23abc7a0351e97c929051cfb1939992f92758c672facc1b4fca", cacheOnly: true,
+      fetcher: () => { throw new Error("Fixture network access forbidden"); } })).bytes;
+  } catch (error) {
+    if (error.message.includes("not available in the local cache") || error.code === "ENOENT") { context.skip("Pinned Nedarim fixtures unavailable"); return; }
+    throw error;
+  }
+  const references = nedarimAmudReferences(wikiPages, 149);
+  assert.deepEqual([references.revision, references.sha256.rashi, references.sha256.ran], [2968049,
+    "80a66c53565fc2a037d7d8540cffc63898e41ed6fc425e0c1af0a51ad4854976", "a5e367d2fd1fff9d6b492049aa4548ed13d0d70e601c88885f8b5c9b7926e5b5"]);
+  await assert.rejects(processNedarimPage(definition, 149, references, bytes), /ran beside main text is not in the expected column/);
+});
+
+test("Nedarim cached Ran fragments retain main and exclude marginal material on both sides", async (context) => {
+  const { processNedarimPage, nedarimAmudReferences } = await import("./measure-corpus.mjs");
+  const definition = shasDefinition({ slug: "nedarim" });
+  const fixtures = [
+    { amud: "7b", index: 11, baseline: 1108.6, revision: 2967908, pdfSha256: "7854edd542ef8a69a24fc49e3a5d446642b96ad83d3b0a53ca3542593363eb06", ranSha256: "2355f67ec4927d279e8d76fd51262d2887602c0fd1661748d1eb52cda2fe5719" },
+    { amud: "71a", index: 138, baseline: 658.8, revision: 2968038, pdfSha256: "d565b2cb0a2b65de0b5fe93ede48425fc257761d693030d64812929063f65e69", ranSha256: "86dc9f4236202771ac317585614ce3209ca666284dd206a3804577855c4b7e40" },
+  ];
+  let wikiPages, checkpoint;
+  try {
+    wikiPages = JSON.parse(await readFile(new URL("../results/wikisource-cache/nedarim.json", import.meta.url), "utf8"));
+    checkpoint = JSON.parse(await readFile(new URL("../results/shas-work/nedarim.json", import.meta.url), "utf8"));
+    for (const fixture of fixtures) fixture.bytes = (await getCachedPdf(definition, fixture.amud, { expectedHash: fixture.pdfSha256, cacheOnly: true,
+      fetcher: () => { throw new Error("Fixture network access forbidden"); } })).bytes;
+  } catch (error) {
+    if (error.message.includes("not available in the local cache") || error.code === "ENOENT") { context.skip("Pinned Nedarim fixtures unavailable"); return; }
+    throw error;
+  }
+  for (const fixture of fixtures) {
+    const references = nedarimAmudReferences(wikiPages, fixture.index);
+    assert.deepEqual([references.revision, references.sha256.ran], [fixture.revision, fixture.ranSha256]);
+    const page = await processNedarimPage(definition, fixture.index, references, fixture.bytes);
+    assert.deepEqual(page.groups.main, checkpoint.pages[fixture.amud].page.groups.main);
+    assert.ok(page.groups.other.some((row) => Math.abs(row.baseline - fixture.baseline) < 0.1 && row.left < 90 && row.right > 505));
+    assert.ok(page.commentaryAttribution.segments["unique-amud-source-fragment"] > 0);
+    assert.ok(page.groups.rashi.length);
+    assert.equal(page.groups.tosafot.length, 0);
+    assert.equal(page.commentaryAttribution.tosafot, null);
+    checkOverlap(page);
+  }
+});
+
+test("Nedarim cached source continuations recover top and short terminal rows", async (context) => {
+  const { processNedarimPage, nedarimAmudReferences } = await import("./measure-corpus.mjs");
+  const definition = shasDefinition({ slug: "nedarim" });
+  const fixtures = [
+    { amud: "28a", index: 52, revision: 3023456, pdf: "977ad9ca9258cb68020b7bcf713519d6ad201272901c8ecc20e635d0d57992ea",
+      source: ["rashi", "565820a06f8163256f926f76b3b7004d9b2b477c196eb903276b77e42d581d4e"], basis: "unique-amud-source-one-insertion-continuation", rows: [["rashi", 617.0, 397, 507]] },
+    { amud: "34a", index: 64, revision: 2967961, pdf: "63590b99a2f722d6a869f7a20744f2f13516c517fe7a7a0fd7a181accd4bd779",
+      source: ["ran", "6b393c75e55b168dca4f92d84107d932d3de591f0e992ca71d1af7399c95762b"], rows: [["other", 1129.6, 88, 292]] },
+    { amud: "34b", index: 65, revision: 2967962, pdf: "701ad98b9772cf155d30c6246e2a436da727e7bfc13aeeabc10275277be5a75a",
+      source: ["ran", "a641a8bd8cd1d34bc668230ff025a99459dcd69cf6a95a485877fe84e6bb27fc"], rows: [["other", 1129.6, 303, 507]] },
+    { amud: "60a", index: 116, revision: 2968016, pdf: "5930b5824e2d2d742ad4d261b2cc25e221ec2ab5147078e4b407e1e9ed299682",
+      source: ["rashi", "3bede7faccdbf15e92d8db2e56d949fed147e3df08fc09d9355f0ac5402e7c00"], rows: [["rashi", 1014.5, 431, 473], ["rashi", 983.1, 397, 507]] },
+    { amud: "66b", index: 129, revision: 2968029, pdf: "7a9029cca4fd9df47b518398d9c7fab3ade9bece215e72c4e1730308654e13a9",
+      source: ["rashi", "54e5a9ac098294c2c16d63af19d6a4b2bb708255f5f1296265ab59a8156ab504"], rows: [["rashi", 658.8, 117, 169], ["rashi", 628.2, 88, 198]] },
+  ];
+  let wikiPages, checkpoint;
+  try {
+    wikiPages = JSON.parse(await readFile(new URL("../results/wikisource-cache/nedarim.json", import.meta.url), "utf8"));
+    checkpoint = JSON.parse(await readFile(new URL("../results/shas-work/nedarim.json", import.meta.url), "utf8"));
+    for (const fixture of fixtures) fixture.bytes = (await getCachedPdf(definition, fixture.amud, { expectedHash: fixture.pdf, cacheOnly: true,
+      fetcher: () => { throw new Error("Fixture network access forbidden"); } })).bytes;
+  } catch (error) {
+    if (error.message.includes("not available in the local cache") || error.code === "ENOENT") { context.skip("Pinned Nedarim fixtures unavailable"); return; }
+    throw error;
+  }
+  for (const fixture of fixtures) {
+    const references = nedarimAmudReferences(wikiPages, fixture.index);
+    assert.deepEqual([references.revision, references.sha256[fixture.source[0]]], [fixture.revision, fixture.source[1]]);
+    const page = await processNedarimPage(definition, fixture.index, references, fixture.bytes);
+    assert.deepEqual(page.groups.main, checkpoint.pages[fixture.amud].page.groups.main);
+    assert.ok(page.commentaryAttribution.segments[fixture.basis || "unique-ordered-source-continuation"] > 0);
+    for (const [kind, baseline, left, right] of fixture.rows) {
+      assert.ok(page.groups[kind].some((row) => Math.abs(row.baseline - baseline) < 0.1 && Math.abs(row.left - left) < 1 && Math.abs(row.right - right) < 1), fixture.amud);
+    }
+    assert.deepEqual(page.groups.tosafot, []);
+    assert.equal(page.commentaryAttribution.tosafot, null);
+    checkOverlap(page);
+  }
+});
+
 test("Nedarim inline items attach only to one touching commentary line", async () => {
   const { attachNedarimInlineItems } = await import("./measure-corpus.mjs");
   const gutter = { left: 293, right: 302 };
@@ -1805,16 +2128,17 @@ test("Nedarim pinned main alignment accepts only unique, ordered, amud-specific 
   assert.match(alignNedarimMainGlyphs(swapped, reference, adjacent).rejected, /out of source order/);
 });
 
-test("Nedarim pinned 40b/86b recover main and commentary, 45b only main, and the alignment needs every exact pin", async (context) => {
+test("Nedarim pinned 40b/45b/86b recover main and commentary, and alignment needs every exact pin", async (context) => {
   const { processNedarimPage, nedarimAmudReferences, reviewedNedarimMainAlignments } = await import("./measure-corpus.mjs");
   const definition = shasDefinition({ slug: "nedarim" });
   const pins = Object.fromEntries(["40b", "45b", "86b"].map((amud) => [amud, reviewedNedarimMainAlignments[`nedarim-${amud}`]]));
   const indexOf = (amud) => (Number.parseInt(amud, 10) - 2) * 2 + (amud.endsWith("b") ? 1 : 0);
-  let bytes = {}, wikiPages;
+  let bytes = {}, wikiPages, checkpoint;
   try {
     for (const [amud, pin] of Object.entries(pins)) bytes[amud] = (await getCachedPdf(definition, amud, { expectedHash: pin.pdfSha256, cacheOnly: true,
       fetcher: () => { throw new Error("Fixture network access forbidden"); } })).bytes;
     wikiPages = JSON.parse(await readFile(new URL("../results/wikisource-cache/nedarim.json", import.meta.url), "utf8"));
+    checkpoint = JSON.parse(await readFile(new URL("../results/shas-work/nedarim.json", import.meta.url), "utf8"));
   } catch (error) {
     if (error.message.includes("not available in the local cache") || error.code === "ENOENT") { context.skip("Pinned Nedarim fixtures unavailable"); return; }
     throw error;
@@ -1830,7 +2154,17 @@ test("Nedarim pinned 40b/86b recover main and commentary, 45b only main, and the
     assert.equal(page.groups.tosafot.length, 0);
     checkOverlap(page);
   }
-  await assert.rejects(processNedarimPage(definition, indexOf("45b"), references["45b"], bytes["45b"]), /unresolved Nedarim commentary segments/);
+  assert.equal(references["45b"].sha256.rashi, "7e54f490e3ab0cc40af811e1037a3c1f7d42bb3462861696d16e8c939f8ee88f");
+  const recovered = await processNedarimPage(definition, indexOf("45b"), references["45b"], bytes["45b"]);
+  assert.deepEqual(recovered.groups.main, checkpoint.pages["45b"].page.groups.main);
+  assert.deepEqual(Object.fromEntries(Object.entries(recovered.groups).map(([kind, rows]) => [kind, rows.length])), { main: 3, rashi: 7, tosafot: 0, other: 61 });
+  assert.equal(recovered.commentaryAttribution.segments["unique-ordered-source-continuation"], 2);
+  for (const [baseline, right] of [[1077.7, 198], [1067.3, 151]]) {
+    assert.ok(recovered.groups.rashi.some((row) => Math.abs(row.baseline - baseline) < 0.1 && row.left < 89 && Math.abs(row.right - right) < 1));
+  }
+  assert.ok(recovered.groups.other.some((row) => Math.abs(row.baseline - 501.9) < 0.1 && row.left < 89 && row.right > 505));
+  assert.equal(recovered.commentaryAttribution.tosafot, null);
+  checkOverlap(recovered);
   const mainOnly = await processNedarimPage(definition, indexOf("45b"), references["45b"], bytes["45b"], { mainOnly: true });
   assert.equal(mainOnly.mainMatch.basis, "reviewed-pinned-ambiguous-nun-alignment");
   assert.ok(mainOnly.groups.main.length > 0);
@@ -1855,6 +2189,88 @@ test("Avodah Zarah margin heading exclusion needs the exact glyphs outside the p
   assert.deepEqual(findMarginHeadings("avodah-zarah", [inside, ...body], [inside, ...body]), []);
   assert.deepEqual(findMarginHeadings("avodah-zarah", [item(`${glyphs}x`, 43.7, 900, 35.9), ...body], [item(`${glyphs}x`, 43.7, 900, 35.9), ...body]), []);
   assert.deepEqual(findMarginHeadings("sanhedrin", all, all), []);
+});
+
+test("Bekhorot and Arakhin margin headings require their exact glyphs outside the commentary span", async () => {
+  const { findMarginHeadings } = await import("./measure-corpus.mjs");
+  for (const [slug, glyphs] of [
+    ["bechoros", "\u00cc\u00c2\u02d8\u00af\u201a \u00c2\u0014\u00c8\u00b7\u00af"],
+    ["arachin", "\u00cc\u00c2\u02d8\u00af\u201a \u00c2\u0011\u00c8\u00b7\u00af"],
+  ]) {
+    const body = [item("a", 96, 900, 50), item("b", 400, 900, 116)];
+    const heading = item(glyphs, 534, 1147, 37);
+    const all = [heading, ...body];
+    assert.equal(findMarginHeadings(slug, all, all)[0].item, heading);
+    assert.equal(findMarginHeadings(slug, all, all)[0].provenance.label, "\u05e8\u05d1\u05d9\u05e0\u05d5 \u05d2\u05e8\u05e9\u05d5\u05dd");
+    const inside = item(glyphs, 470, 1147, 37);
+    assert.deepEqual(findMarginHeadings(slug, [inside, ...body], [inside, ...body]), []);
+    const changed = item(`${glyphs}x`, 534, 1147, 37);
+    assert.deepEqual(findMarginHeadings(slug, [changed, ...body], [changed, ...body]), []);
+    assert.deepEqual(findMarginHeadings("temurah", all, all), []);
+  }
+});
+
+test("cached Bekhorot and Arakhin margin headings retain source and overlap safeguards", async (context) => {
+  const offline = () => { throw new Error("Fixture network access forbidden"); };
+  for (const [slug, amud, nextAmud, sha256, revision, nextRevision, itemIndex, contentSha256, nextContentSha256] of [
+    ["bechoros", "8b", "9a", "08c44f374c9d3947a91b528def41bb1e18b9d1fdc62f828011b06cb80a773612", 1061762, 2834229, 624,
+      "f4ae3fa544bbe9242cd62ced0a1b09e6ba17523f0be86067a828e82dc9d92bde", "9100a314bc879ba55c851c3f21beb3557fef7ed59f01cd114babb9ebb035e74d"],
+    ["arachin", "8a", "8b", "b5af3c8e485a4bfe212d449223afea06f2c3343be0297f65caf26b98658301af", 1066043, 1066044, 443,
+      "30a8cbf2557436eeb50854861abcbcec79f44970ba14229c34a0c09772f0b819", "ab3826f3d3eddb76fed0d6b803c1fd945883a218cbe8538e7cfdc0479b775ca6"],
+  ]) await context.test(`${slug} ${amud}`, async (check) => {
+    const definition = shasDefinition(tractates.find((tractate) => tractate.slug === slug));
+    let bytes, wiki, checkpoint;
+    try {
+      bytes = (await getCachedPdf(definition, amud, { expectedHash: sha256, cacheOnly: true, fetcher: offline })).bytes;
+      wiki = await loadWikisourcePages(definition, { selectedAmudim: [amud, nextAmud], cacheDirectory: "results/wikisource-cache", cacheOnly: true, fetcher: offline });
+      checkpoint = JSON.parse(await readFile(`results/shas-work/${slug}.json`, "utf8"));
+    } catch (error) {
+      if (error.code === "ENOENT" || /not available in the local cache|revisions unavailable in local cache/.test(error.message)) return check.skip("Matching local fixtures unavailable; no network fetch permitted");
+      throw error;
+    }
+    assert.equal(wiki[amud].revision, revision);
+    assert.equal(wiki[nextAmud].revision, nextRevision);
+    const commentarySources = Object.fromEntries(["rashi", "tosafot"].map((kind) => [kind, { current: wiki[amud].commentarySources[kind], next: wiki[nextAmud].commentarySources[kind] }]));
+    for (const kind of ["rashi", "tosafot"]) {
+      assert.equal(commentarySources[kind].current.contentSha256, contentSha256);
+      assert.equal(commentarySources[kind].next.contentSha256, nextContentSha256);
+    }
+    const references = { rashi: commentarySources.rashi.current.text, tosafot: wiki[amud].text, commentarySources,
+      ...(slug === "arachin" ? { main: wiki[amud].mainText, nextMain: wiki[nextAmud].mainText } : {}) };
+    const page = await processPage(definition, amudIndex(amud) - 4, references, bytes);
+    assert.deepEqual(page.excludedMarginHeadings.map((heading) => [heading.itemIndex, heading.label]), [[itemIndex, "\u05e8\u05d1\u05d9\u05e0\u05d5 \u05d2\u05e8\u05e9\u05d5\u05dd"]]);
+    assert.ok(page.excludedMarginHeadings[0].left > page.excludedMarginHeadings[0].commentarySpan.right);
+    await assert.rejects(processPage(definition, amudIndex(amud) - 4, { ...references, rashi: "" }, bytes), /requires non-empty Rashi and Tosafot/);
+    await assert.rejects(processPage(definition, amudIndex(amud) - 4, { ...references, tosafot: "" }, bytes), /requires non-empty Rashi and Tosafot/);
+    await assert.rejects(processPage(definition, amudIndex(amud) - 4, { ...references, rashi: `${references.rashi}${references.tosafot}` }, bytes), /lacks independent evidence|ambiguous commentary stream/);
+    if (slug === "arachin") {
+      assert.throws(() => checkOverlap(page), /overlap between main and rashi/);
+      return;
+    }
+    assert.equal(createHash("sha256").update(references.rashi).digest("hex"), "923e0ed5e1e26013659297e7006118daaa2d8f297b1b1486367457a3c5c2ac0f");
+    assert.deepEqual([page.groups.main.length, page.groups.rashi.length, page.groups.tosafot.length], [45, 70, 8]);
+    checkOverlap(page);
+    const previous = checkpoint.pages[amud];
+    assert.equal(previous.page.sha256, sha256);
+    assert.deepEqual(page.groups.main, previous.page.groups.main);
+    verifyOverlapRetrySources(previous, page, wiki[amud], wiki[nextAmud]);
+    const evidence = classifyWikisourceTosafot(definition, amud, page, wiki[amud]);
+    assert.equal(evidence.decision, "present");
+    const categories = classifyMissingCategories(page, references, { useWikisource: true, tosafotEvidence: evidence });
+    assert.deepEqual(categories.unknownCategories, []);
+    preserveRetryTosafot(previous, page, evidence, categories.unknownCategories, [], "fixture");
+    preserveRetryPage(previous, { page, ...categories, confirmedAbsent: [] });
+    const before = Object.values(checkpoint.pages).filter((entry) => entry.page).map((entry) => structuredClone(entry.page));
+    const after = before.map((saved) => structuredClone(saved.name === page.name ? page : saved));
+    const frame = calculateFrame(before, { horizontal: 2, vertical: 2 });
+    assert.deepEqual(calculateFrame(after, { horizontal: 2, vertical: 2 }), frame);
+    calculateAreas(before, frame);
+    calculateAreas(after, frame);
+    for (let index = 0; index < before.length; index++) {
+      if (before[index].name === page.name) assert.deepEqual(after[index].areas.main, before[index].areas.main);
+      else assert.deepEqual(after[index].areas, before[index].areas);
+    }
+  });
 });
 
 test("Avodah Zarah cached pages drop only the margin heading and keep saved main rows", async (context) => {
