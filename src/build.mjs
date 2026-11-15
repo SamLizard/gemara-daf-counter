@@ -8,8 +8,8 @@ const runId = runIdArg?.slice("--run-id=".length) || "build";
 const script = fileURLToPath(new URL("./measure-shas.mjs", import.meta.url));
 const steps = [
   ["Measure all tractates", ["--wikisource", `--run-id=${runId}`]],
-  ["Recheck Tosafot absences on Wikisource", ["--wikisource", "--recheck-absences"]],
-  ["Recheck Rashi absences on Wikisource", ["--wikisource", "--recheck-rashi-absences"]],
+  ["Recheck Tosafot absences on Wikisource", ["--recheck-absences"]],
+  ["Recheck Rashi absences on Wikisource", ["--recheck-rashi-absences"]],
   ["Record the Shekalim Yerushalmi absence", ["--confirm-yerushalmi-absence", "shekalim"]],
 ];
 for (const [label, args] of steps) {
