@@ -96,6 +96,10 @@ Tosafot or Rashi that continues mid-sentence on the next side ends with a catchw
 
 All 119 Bekhorot sides are classified. Besides Rashi at 10.92 and Tosafot at 10.68 (10.44 pitch), the PDFs set commentary in 9.36 and 8.88 points, including the "רש"י כת"י" manuscript Rashi block on 57b–61a, which is counted as Rashi. These smaller sizes are justified vertically, so their row pitch is measured per page as the median gap between consecutive baselines (fewer than five gaps is an error). Rows use the baseline of their body-size fragments, so raised gloss markers such as `ז(` do not lift them. Catchwords may be acronyms (`ת"ש`) or end with an apostrophe (`מתני'`), and raised gloss markers in the preceding row are ignored. 59b's Tosafot zero relies on Wikisource having no Tosafot section; its two commentary sizes are both Rashi.
 
+### Arakhin Classification
+
+All 65 Arakhin sides are classified. On 9a and 24b a long Tosafot is set in 8.88 points and justified vertically, so 8.88 counts as commentary with a measured pitch only on rows that are wide and mostly in that size; elsewhere 8.88 is gloss markers. Gloss markers inside the main column are owned by main-column geometry, so they no longer pull Rashi rows into the main text.
+
 ### Keritot Classification
 
 All 54 sides have classified main text and commentary. The full profile uses 12-point main text, 9.84-point commentary, and a separately identified 8.04-point bottom Tosafot block. Each block requires a unique label, consistent geometry, and matching cached Tosafot text. The six Tosafot zeroes on 26a-28b rely on Wikisource section evidence, not a complete independent visual absence audit. Main rows and prior classifications were preserved; the new shared frame slightly changes the fractions.

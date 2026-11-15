@@ -30,7 +30,9 @@ export function shasDefinition(tractate, { mainOnly = false } = {}) {
     ? { mainSize: 13.44, mainPitch: 11.88, commentaryPitch: 10.44, commentarySizes: [10.92, 10.68, 9.36, 8.88], boldSizes: [8.4, 9.12, 9.96, 11.88, 13.92, 14.4, 16.32], adjacentBoldSizes: [13.92, 14.4],
       runPitches: [[10.92, 10.44], [10.68, 10.44], [9.36, "measured"], [8.88, "measured"]], bodyBaselineRows: true }
     : ["arachin", "temurah"].includes(tractate.slug)
-    ? { mainSize: 13.44, mainPitch: tractate.slug === "arachin" ? 11.7 : 11.88, commentaryPitch: tractate.slug === "arachin" ? 10.2 : 10.44, commentarySizes: [10.92, 10.68], boldSizes: [8.4, 8.88, 11.88, 13.92, 14.4, 16.32], adjacentBoldSizes: [13.92, 14.4] }
+    ? { mainSize: 13.44, mainPitch: tractate.slug === "arachin" ? 11.7 : 11.88, commentaryPitch: tractate.slug === "arachin" ? 10.2 : 10.44, commentarySizes: [10.92, 10.68], boldSizes: [8.4, 8.88, 11.88, 13.92, 14.4, 16.32], adjacentBoldSizes: [13.92, 14.4], mainColumnFragments: true,
+      // Arakhin 9a and 24b set a long Tosafot in 8.88 points, justified vertically; elsewhere 8.88 is gloss markers.
+      ...(tractate.slug === "arachin" ? { bodySizeVariant: { size: 8.88, minLetters: 1000 } } : {}) }
     : tractate.slug === "horayos"
     ? { mainSize: 12.24, mainPitch: 10.66825, commentaryPitch: 8.69562, tosafotPitch: 6.72 }
     : tractate.slug === "nedarim"

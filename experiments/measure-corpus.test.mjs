@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { promisify } from "node:util";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
-import { applyReviewedGittin76bEvidence, calculateAreas, calculateFrame, checkOverlap, classifyHorayotTosafot, classifyMissingCategories, decodeMainGlyphText, decodePdfText, groupRows, identifyCommentaryRun, identifyRun, includeStreamFragments, isAmbiguousRetryCandidate, isCommentaryRetryCandidate, isLegacyCommentaryAuditCandidate, isOverlapRetryCandidate, loadTexts, matchMainGlyphs, matchScore, measuredRunPitch, normalizeHebrew, preserveRetryPage, preserveRetryTosafot, processPage, redistributeLeadingFragments, resolveCommentaryCatchwords, resolveMainStreamFragments, runPitch, splitCommentaryRuns, splitRuns, verifyOverlapRetrySources } from "./measure-corpus.mjs";
+import { applyReviewedGittin76bEvidence, calculateAreas, calculateFrame, checkOverlap, classifyHorayotTosafot, classifyMissingCategories, decodeMainGlyphText, decodePdfText, groupRows, identifyCommentaryRun, identifyRun, includeStreamFragments, isAmbiguousRetryCandidate, isCommentaryRetryCandidate, isLegacyCommentaryAuditCandidate, isOverlapRetryCandidate, loadTexts, matchMainGlyphs, matchScore, measuredRunPitch, normalizeHebrew, preserveRetryPage, preserveRetryTosafot, processPage, redistributeLeadingFragments, resolveCommentaryCatchwords, resolveMainStreamFragments, runPitch, sizedRowPitch, splitCommentaryRuns, splitRuns, verifyOverlapRetrySources } from "./measure-corpus.mjs";
 
 test("measured run pitch takes the median line gap per column and refuses short runs", () => {
   const item = (x, y, height = 8.88) => ({ height, transform: [1, 0, 0, 1, x, y] });
@@ -16,6 +16,16 @@ test("measured run pitch takes the median line gap per column and refuses short 
   assert.equal(measuredRunPitch(run, 8.88), 9);
   assert.equal(runPitch(run, { runPitches: [[9.36, 10.44], [8.88, "measured"]] }), 9);
   assert.throws(() => measuredRunPitch(run.slice(0, 4), 8.88), /too few consecutive lines/);
+});
+
+test("sized row pitch applies a size's measured pitch only to wide rows mostly in that size", () => {
+  const item = (x, y, width, height = 8.88, str = "אבגדהוזחטי") => ({ str, width, height, transform: [1, 0, 0, 1, x, y] });
+  const run = [700, 691, 682, 673, 664, 655].map((y) => item(50, y, 200));
+  const pitch = sizedRowPitch({ run, pitch: 10.2 }, [[8.88, "measured"]]);
+  assert.equal(pitch([item(50, 700, 200)]), 9);
+  assert.equal(pitch([item(50, 700, 10, 8.88, "א[")]), 10.2);
+  assert.equal(pitch([item(50, 700, 100, 10.68), item(150, 700, 100, 10.68), item(250, 700, 10, 8.88, "א[")]), 10.2);
+  assert.equal(sizedRowPitch({ run: run.slice(0, 3), pitch: 10.2 }, [[8.88, "measured"]])([item(50, 700, 200)]), 10.2);
 });
 import { getCachedPdf } from "./pdf-cache.mjs";
 import { shasDefinition } from "./shas-profiles.mjs";
@@ -2372,7 +2382,9 @@ test("cached Bekhorot and Arakhin margin headings retain source and overlap safe
     await assert.rejects(processPage(definition, amudIndex(amud) - 4, { ...references, tosafot: "" }, bytes), /requires non-empty Rashi and Tosafot/);
     await assert.rejects(processPage(definition, amudIndex(amud) - 4, { ...references, rashi: `${references.rashi}${references.tosafot}` }, bytes), /lacks independent evidence|ambiguous commentary stream/);
     if (slug === "arachin") {
-      assert.throws(() => checkOverlap(page), /overlap between main and rashi/);
+      // The gloss markers that used to pull Rashi into the main column are now owned by main-column geometry.
+      checkOverlap(page);
+      assert.ok(page.fragmentOwnership.some((entry) => entry.kind === "main" && entry.basis === "main-column-geometry"));
       return;
     }
     assert.equal(createHash("sha256").update(references.rashi).digest("hex"), "923e0ed5e1e26013659297e7006118daaa2d8f297b1b1486367457a3c5c2ac0f");

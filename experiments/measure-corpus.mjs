@@ -531,7 +531,7 @@ export function matchMainGlyphs(items, reference) {
   return { fragments: matches.size, letters: [...matches].reduce((sum, fragment) => sum + fragment.length, 0) };
 }
 
-export function resolveMainStreamFragments(items, streams, mainItems, mainRows, pitch, references, commentaryPitch = pitch) {
+export function resolveMainStreamFragments(items, streams, mainItems, mainRows, pitch, references, commentaryPitch = pitch, deferFragment = null) {
   if (!references.main) return [];
   const rows = groupRows(mainItems);
   const distance = (item, row) => Math.max(0, row.left - item.transform[4] - item.width, item.transform[4] - row.right);
@@ -555,14 +555,25 @@ export function resolveMainStreamFragments(items, streams, mainItems, mainRows, 
     for (const item of detached) {
       const nearby = rows.filter((row) => Math.abs(row.baseline - item.transform[5]) < 2 && distance(item, row) < 20);
       if (nearby.length !== 1 || nearCommentary(item)) continue;
+      // A gloss marker across the column gutter from the main text, touching commentary glyphs, belongs to the commentary beside it.
+      if (distance(item, nearby[0]) >= 5 && /^[()[\]]?[\u05d0-\u05ea]{1,3}[()[\]]?$/.test(decodePdfText(item.str).trim())
+        && items.some((glyph) => glyph !== item && !mainItems.includes(glyph) && Math.abs(glyph.transform[5] - item.transform[5]) < 2
+          && Math.max(0, item.transform[4] - glyph.transform[4] - glyph.width, glyph.transform[4] - item.transform[4] - item.width) < 5)) continue;
       const markerParts = detached.filter((part) => Math.abs(part.transform[5] - item.transform[5]) < 0.02
         && Math.max(0, item.transform[4] - part.transform[4] - part.width, part.transform[4] - item.transform[4] - item.width) < 2);
       const marker = markerParts.every((part) => part.height < pitch && part.width < pitch)
         && distance(item, nearby[0]) < 5 && /^[\u05d0-\u05ea]\[$/.test([...markerParts].sort((first, second) => second.transform[4] - first.transform[4]).map((part) => decodePdfText(part.str)).join(""));
       const directMatch = fragmentMatches(item, references.main);
-      if ((!directMatch && !marker) || conflictingCommentary(item)) throw new Error("ambiguous detached fragment near main text: direct ownership not established");
+      // Fragments the caller can attribute by main-column geometry are left for it instead of failing here.
+      if ((!directMatch && !marker) || conflictingCommentary(item)) {
+        if (deferFragment?.(item)) continue;
+        throw new Error(`ambiguous detached fragment near main text: direct ownership not established (${decodePdfText(item.str)} at ${item.transform[4].toFixed(1)},${item.transform[5].toFixed(1)})`);
+      }
       const evidence = contextMatch(nearby[0]);
-      if (evidence.fragments < 2 || evidence.letters < 30) throw new Error("ambiguous detached fragment near main text");
+      if (evidence.fragments < 2 || evidence.letters < 30) {
+        if (deferFragment?.(item)) continue;
+        throw new Error("ambiguous detached fragment near main text");
+      }
       const target = mainRows.find((row) => row.baseline === nearby[0].baseline);
       target.left = Math.min(target.left, item.transform[4]);
       target.right = Math.max(target.right, item.transform[4] + item.width);
@@ -649,8 +660,9 @@ export function resolveCommentaryCatchwords(items, streams, defaultPitch, refere
   return ownership;
 }
 
-function lines(items, pitch, kind, tolerance, { bodyBaseline = false } = {}) {
+function lines(items, rowPitch, kind, tolerance, { bodyBaseline = false } = {}) {
   return groupRows(items, tolerance).map(({ baseline: rowBaseline, left, right, items: fragments }) => {
+    const pitch = typeof rowPitch === "function" ? rowPitch(fragments) : rowPitch;
     // Raised, smaller gloss markers can be the row's highest item; profiles may opt into the body text baseline instead.
     const tallest = Math.max(...fragments.map((fragment) => fragment.height));
     const baseline = bodyBaseline ? Math.max(...fragments.filter((fragment) => fragment.height > tallest - 0.05).map((fragment) => fragment.transform[5])) : rowBaseline;
@@ -896,6 +908,26 @@ export function measuredRunPitch(run, size) {
   return gaps[Math.floor(gaps.length / 2)];
 }
 
+// A row whose text is mostly in a listed size takes that size's pitch (measured over the stream's run when "measured").
+export function sizedRowPitch(stream, sizes) {
+  const pitches = new Map();
+  return (fragments) => {
+    const letters = (size) => fragments.filter((item) => Math.abs(item.height - size) < 0.02).reduce((sum, item) => sum + item.str.length, 0);
+    const total = fragments.reduce((sum, item) => sum + item.str.length, 0);
+    const entry = sizes.find(([size]) => letters(size) * 2 > total);
+    if (!entry) return stream.pitch;
+    const [size, pitch] = entry;
+    if (pitch !== "measured") return pitch;
+    // Gloss markers alone do not make a body line in that size.
+    if (Math.max(...fragments.map((item) => item.transform[4] + item.width)) - Math.min(...fragments.map((item) => item.transform[4])) < stream.pitch * 4) return stream.pitch;
+    if (!pitches.has(size)) {
+      // Isolated lines in that size (references, short notes) follow the stream's regular pitch.
+      try { pitches.set(size, measuredRunPitch(stream.run, size)); } catch { pitches.set(size, stream.pitch); }
+    }
+    return pitches.get(size);
+  };
+}
+
 export function findBottomTosafotBlock(items, spec, references, name) {
   const sized = (item, sizes) => sizes.some((size) => Math.abs(item.height - size) < 0.02);
   const labels = items.filter((item) => sized(item, [spec.labelSize]) && item.str === spec.label);
@@ -1015,10 +1047,31 @@ export async function processPage(definition, index, references, pdfBytes) {
       }
     } else {
       labelledVariant = definition.labelledVariant ? findLabelledVariant(items, definition.labelledVariant, name) : null;
-      const layout = labelledVariant ? { ...definition, ...definition.labelledVariant } : definition;
+      let layout = labelledVariant ? { ...definition, ...definition.labelledVariant } : definition;
+      const variant = layout.bodySizeVariant;
+      if (variant && itemsOfSize(items, [variant.size]).reduce((sum, item) => sum + decodePdfText(item.str).replace(/[^\u05d0-\u05ea]/g, "").length, 0) >= variant.minLetters) {
+        // A page setting a whole commentary in a size used elsewhere only for markers measures it as commentary with its own pitch.
+        layout = { ...layout, commentarySizes: [...layout.commentarySizes, variant.size], boldSizes: layout.boldSizes.filter((size) => size !== variant.size), rowPitchSizes: [[variant.size, "measured"]] };
+      }
       bottomTosafot = definition.bottomTosafot ? findBottomTosafotBlock(items, definition.bottomTosafot, references, name) : null;
       const bottomItems = new Set(bottomTosafot?.items || []);
-      const commentaryItems = itemsOfSize(items, layout.commentarySizes || [11.16, 11.4]).filter((item) => !bottomItems.has(item));
+      const mainFonts = new Set(itemsOfSize(items, [definition.mainSize]).map((item) => item.fontName));
+      const insideMain = (item, band) => main.some((row) => {
+        // Short or indented rows take their column edges from neighbouring rows with the same edges.
+        const column = main.filter((other) => Math.abs(other.baseline - row.baseline) < definition.mainPitch * 3);
+        return Math.abs(row.baseline - item.transform[5]) < band
+          && item.transform[4] >= Math.min(...column.filter((other) => Math.abs(other.left - row.left) < 15).map((other) => other.left)) - 1
+          && item.transform[4] < Math.max(...column.filter((other) => Math.abs(other.right - row.right) < 20).map((other) => other.right));
+      });
+      // Main-font words and short gloss markers set inside the main column belong to the main text, not commentary.
+      const mainColumnFragment = (item) => Boolean(layout.mainColumnFragments)
+        && ((mainFonts.has(item.fontName) && insideMain(item, definition.mainPitch * 1.5))
+          || (/^[()[\]]?[\u05d0-\u05ea]{0,3}[()[\]]?$/.test(decodePdfText(item.str).trim()) && insideMain(item, definition.mainPitch / 2)));
+      const columnOwnership = (item) => ({ itemIndex: items.indexOf(item), kind: "main", basis: "main-column-geometry", text: decodePdfText(item.str),
+        left: item.transform[4], right: item.transform[4] + item.width, baseline: item.transform[5], height: item.height });
+      const sizedItems = itemsOfSize(items, layout.commentarySizes || [11.16, 11.4]).filter((item) => !bottomItems.has(item));
+      const columnFragments = sizedItems.filter(mainColumnFragment);
+      const commentaryItems = sizedItems.filter((item) => !columnFragments.includes(item));
       excludedHeadings = findMarginHeadings(definition.slug, items, commentaryItems);
       if (excludedHeadings.length && (typeof references.rashi !== "string" || !references.rashi || typeof references.tosafot !== "string" || !references.tosafot)) {
         throw new Error(`${name}: margin heading exclusion requires non-empty Rashi and Tosafot references`);
@@ -1057,7 +1110,14 @@ export async function processPage(definition, index, references, pdfBytes) {
         start = items.indexOf(run.at(-1)) + 1;
       }
       if (excludedHeadings.length) for (const stream of streams) requireIndependentStreamEvidence(name, stream, references);
-      fragmentOwnership = resolveMainStreamFragments(items, streams, itemsOfSize(items, [definition.mainSize]), main, definition.mainPitch, references, definition.commentaryPitch);
+      fragmentOwnership = resolveMainStreamFragments(items, streams, itemsOfSize(items, [definition.mainSize]), main, definition.mainPitch, references, definition.commentaryPitch, mainColumnFragment);
+      // Detached fragments without source evidence that sit inside the main column are main text by geometry.
+      for (const stream of streams) {
+        const leftover = stream.expanded.filter((item) => !stream.run.includes(item) && mainColumnFragment(item));
+        stream.expanded = stream.expanded.filter((item) => !leftover.includes(item));
+        columnFragments.push(...leftover);
+      }
+      fragmentOwnership.push(...columnFragments.map(columnOwnership));
       const catchwords = resolveCommentaryCatchwords(items, streams, definition.commentaryPitch, references);
       for (const fragment of catchwords.filter((candidate) => reviewedMegillahCatchword({ name, sha256: createHash("sha256").update(bytes).digest("hex") }, candidate))) {
         let legacyStart = 0;
@@ -1074,7 +1134,7 @@ export async function processPage(definition, index, references, pdfBytes) {
       fragmentOwnership.push(...catchwords);
       frameRows.push(...catchwords.map((entry) => entry.frameRow));
       for (const stream of streams) {
-        const rows = lines(stream.expanded, stream.pitch, stream.kind, 2, { bodyBaseline: Boolean(layout.bodyBaselineRows) });
+        const rows = lines(stream.expanded, layout.rowPitchSizes ? sizedRowPitch(stream, layout.rowPitchSizes) : stream.pitch, stream.kind, 2, { bodyBaseline: Boolean(layout.bodyBaselineRows) });
         stream.match.rows = rows.map(({ baseline, left, right }) => ({ baseline, left, right }));
         groups[stream.kind].push(...rows);
       }
