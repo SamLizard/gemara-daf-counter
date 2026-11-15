@@ -747,21 +747,24 @@ function mainOnlyFrameGeometry(items, definition, side) {
   };
 }
 
-export async function rebuildShekalimFrame(page, pdfBytes) {
-  const match = /^shekalim-\d+([ab])$/.exec(page.name);
-  if (!match || createHash("sha256").update(pdfBytes).digest("hex") !== page.sha256) throw new Error("Shekalim frame rebuild requires the saved PDF fingerprint");
+async function rebuildMainOnlyFrame(page, pdfBytes, slug, label) {
+  const match = new RegExp(`^${slug}-\\d+([ab])$`).exec(page.name);
+  if (!match || createHash("sha256").update(pdfBytes).digest("hex") !== page.sha256) throw new Error(`${label} frame rebuild requires the saved PDF fingerprint`);
   const task = getDocument({ data: new Uint8Array(pdfBytes) });
   try {
     const document = await task.promise;
-    if (document.numPages !== 1) throw new Error("Shekalim frame rebuild requires one PDF page");
+    if (document.numPages !== 1) throw new Error(`${label} frame rebuild requires one PDF page`);
     const pdfPage = await document.getPage(1);
-    if (JSON.stringify(pdfPage.view) !== JSON.stringify(page.view)) throw new Error("Shekalim frame rebuild PDF view differs from the checkpoint");
+    if (JSON.stringify(pdfPage.view) !== JSON.stringify(page.view)) throw new Error(`${label} frame rebuild PDF view differs from the checkpoint`);
     const items = (await pdfPage.getTextContent()).items.filter((item) => item.str?.trim() && item.width > 0 && item.height > 0);
-    return { ...structuredClone(page), ...mainOnlyFrameGeometry(items, shasDefinition({ slug: "shekalim" }, { mainOnly: true }), match[1]) };
+    return { ...structuredClone(page), ...mainOnlyFrameGeometry(items, shasDefinition({ slug }, { mainOnly: true }), match[1]) };
   } finally {
     await task.destroy();
   }
 }
+
+export const rebuildShekalimFrame = (page, pdfBytes) => rebuildMainOnlyFrame(page, pdfBytes, "shekalim", "Shekalim");
+export const rebuildMiddotFrame = (page, pdfBytes) => rebuildMainOnlyFrame(page, pdfBytes, "middos", "Middot");
 
 export async function processMainPage(definition, index, reference, pdfBytes) {
   const daf = Math.floor(index / 2) + 2;
@@ -841,6 +844,53 @@ function identifyShortSourceBackedCommentary(expanded, references, name) {
     source: { amud: source.amud, revision: source.revision, source: source.source, sha256: source.sha256, contentSha256: source.contentSha256 } };
 }
 
+export function findBottomTosafotBlock(items, spec, references, name) {
+  const sized = (item, sizes) => sizes.some((size) => Math.abs(item.height - size) < 0.02);
+  const labels = items.filter((item) => sized(item, [spec.labelSize]) && item.str === spec.label);
+  if (!labels.length) return null;
+  if (labels.length !== 1) throw new Error(`${name}: multiple bottom Tosafot labels`);
+  const [label] = labels;
+  const start = items.indexOf(label);
+  let end = start;
+  while (end + 1 < items.length && sized(items[end + 1], spec.sizes)) end++;
+  const block = items.slice(start, end + 1);
+  const body = block.filter((item) => sized(item, [spec.bodySize]));
+  if (!body.length) throw new Error(`${name}: bottom Tosafot label without body text`);
+  if (block.some((item) => item.transform[4] < spec.window.left || item.transform[4] + item.width > spec.window.right
+    || item.transform[5] > label.transform[5] + 0.5)) throw new Error(`${name}: bottom Tosafot block leaves its band`);
+  const rows = groupRows(body, 2).sort((first, second) => second.baseline - first.baseline);
+  if (rows.some((row, index) => index && Math.abs(rows[index - 1].baseline - row.baseline - spec.pitch) > 0.4)) throw new Error(`${name}: bottom Tosafot block has an irregular pitch`);
+  for (const item of block.filter((candidate) => !body.includes(candidate))) {
+    const row = rows.find((candidate) => Math.abs(candidate.baseline - item.transform[5]) <= 2);
+    if (!row) throw new Error(`${name}: bottom Tosafot item outside the body rows`);
+    row.items.push(item);
+  }
+  const blockItems = new Set(block);
+  if (items.some((item) => !blockItems.has(item) && item.transform[4] + item.width > spec.window.left && item.transform[4] < spec.window.right
+    && item.transform[5] < rows[0].baseline + spec.pitch / 2 && item.transform[5] > rows.at(-1).baseline - spec.pitch / 2)) throw new Error(`${name}: foreign text inside the bottom Tosafot block`);
+  const tosafot = references.tosafot;
+  if (typeof tosafot !== "string" || !tosafot) throw new Error(`${name}: bottom Tosafot block requires a Tosafot reference`);
+  const others = [references.rashi, references.other].filter((text) => typeof text === "string" && text);
+  const texts = block.map((item) => normalizeHebrew(decodePdfText(item.str))).filter((text) => text.length >= 8)
+    .flatMap((text) => Array.from({ length: Math.floor(text.length / 8) }, (_, index) => text.slice(index * 8, index * 8 + 8)));
+  const letters = texts.reduce((sum, text) => sum + text.length, 0);
+  const matched = texts.filter((text) => tosafot.includes(text));
+  const unique = matched.filter((text) => !others.some((other) => other.includes(text)));
+  const matchedLetters = matched.reduce((sum, text) => sum + text.length, 0);
+  const uniqueLetters = unique.reduce((sum, text) => sum + text.length, 0);
+  if (!letters || matchedLetters < 0.9 * letters || uniqueLetters < 32) {
+    throw new Error(`${name}: bottom Tosafot block text is not Wikisource Tosafot ${JSON.stringify({ letters, matchedLetters, uniqueLetters })}`);
+  }
+  const match = identifyRun(block, references, name);
+  if (match.kind !== "tosafot") throw new Error(`${name}: bottom Tosafot block matched ${match.kind}`);
+  const basis = "labelled-bottom-tosafot-block-and-wikisource-text";
+  const tosafotRows = rows.map((row) => ({ ...lines(row.items, spec.pitch, "tosafot", Infinity)[0], baseline: row.baseline,
+    bottom: Math.min(row.baseline - spec.pitch / 2, ...row.items.map((item) => item.transform[5] - item.height / 4)) }));
+  return { items: block, rows: tosafotRows,
+    match: { ...match, basis, rows: tosafotRows.map(({ baseline, left, right }) => ({ baseline, left, right })) },
+    provenance: { commentary: "tosafot", basis, itemIndices: [start, end], rows: tosafotRows.length, letters, matchedLetters, uniqueLetters } };
+}
+
 export function classifyHorayotTosafot(amud, page, reference) {
   const match = /^(\d+)([ab])$/.exec(amud);
   if (!match) throw new Error(`Invalid Horayot amud: ${amud}`);
@@ -886,6 +936,7 @@ export async function processPage(definition, index, references, pdfBytes) {
     let reviewedBlock = null;
     let reviewedSection = null;
     let excludedHeadings = [];
+    let bottomTosafot = null;
     if (definition.slug === "horayos") {
       const rashiRuns = splitRuns(itemsOfSize(items, [9.84]));
       if (rashiRuns.length !== 2) throw new Error(`${name}: expected two Rashi runs, found ${rashiRuns.length}`);
@@ -910,7 +961,9 @@ export async function processPage(definition, index, references, pdfBytes) {
         }
       }
     } else {
-      const commentaryItems = itemsOfSize(items, definition.commentarySizes || [11.16, 11.4]);
+      bottomTosafot = definition.bottomTosafot ? findBottomTosafotBlock(items, definition.bottomTosafot, references, name) : null;
+      const bottomItems = new Set(bottomTosafot?.items || []);
+      const commentaryItems = itemsOfSize(items, definition.commentarySizes || [11.16, 11.4]).filter((item) => !bottomItems.has(item));
       excludedHeadings = findMarginHeadings(definition.slug, items, commentaryItems);
       if (excludedHeadings.length && (typeof references.rashi !== "string" || !references.rashi || typeof references.tosafot !== "string" || !references.tosafot)) {
         throw new Error(`${name}: margin heading exclusion requires non-empty Rashi and Tosafot references`);
@@ -918,12 +971,16 @@ export async function processPage(definition, index, references, pdfBytes) {
       const headingItems = new Set(excludedHeadings.map((heading) => heading.item));
       const runs = splitCommentaryRuns(commentaryItems.filter((item) => !headingItems.has(item)), references, name);
       if (!runs.length) throw new Error(`${name}: commentary type not found`);
+      if (bottomTosafot && runs.some((run) => items.indexOf(run[0]) < bottomTosafot.provenance.itemIndices[1] && items.indexOf(run.at(-1)) > bottomTosafot.provenance.itemIndices[0])) {
+        throw new Error(`${name}: commentary stream spans the bottom Tosafot block`);
+      }
       let start = 0;
       const streams = [];
       for (const run of runs) {
         const boldSizes = definition.boldSizes || [8.88, 8.94, 11.88, 11.94, 13.92, 16.32, 16.38];
         const rows = groupRows(run);
         const expanded = includeStreamFragments(items, run, boldSizes, start).filter((item) => {
+          if (bottomItems.has(item)) return false;
           if (!(definition.adjacentBoldSizes || [13.92]).some((size) => Math.abs(item.height - size) < 0.02)) return true;
           return rows.some((row) => Math.abs(row.baseline - item.transform[5]) < 2 && Math.max(0, row.left - item.transform[4] - item.width, item.transform[4] - row.right) < 20);
         });
@@ -965,6 +1022,10 @@ export async function processPage(definition, index, references, pdfBytes) {
         const rows = lines(stream.expanded, definition.commentaryPitch, stream.kind, 2);
         stream.match.rows = rows.map(({ baseline, left, right }) => ({ baseline, left, right }));
         groups[stream.kind].push(...rows);
+      }
+      if (bottomTosafot) {
+        groups.tosafot.push(...bottomTosafot.rows);
+        matches.push(bottomTosafot.match);
       }
       reviewedBlock = reviewedSmallTosafotBlock(name, createHash("sha256").update(bytes).digest("hex"), items, streams, itemsOfSize(items, [definition.mainSize]), references, groups);
       if (reviewedBlock) {
@@ -1014,6 +1075,7 @@ export async function processPage(definition, index, references, pdfBytes) {
       ...(reviewedBlock ? { reviewedCommentaryBlocks: [reviewedBlock.provenance] } : {}), ...(reviewedPageProvenance ? { reviewedPage: reviewedPageProvenance } : {}),
       ...(reviewedSection ? { reviewedCommentarySections: [reviewedSection.provenance] } : {}),
       ...(gittinProvenance ? { reviewedGittin76b: gittinProvenance } : {}),
+      ...(bottomTosafot ? { bottomTosafotBlocks: [bottomTosafot.provenance] } : {}),
       ...(excludedHeadings.length ? { excludedMarginHeadings: excludedHeadings.map((heading) => heading.provenance) } : {}) };
   } finally {
     await task.destroy();

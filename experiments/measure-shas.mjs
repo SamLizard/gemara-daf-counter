@@ -42,6 +42,7 @@ const runId = allWikisource ? (runIdArg?.slice("--run-id=".length) || new Date()
 const specialMainReferences = ["shekalim", "kinim", "tamid", "middos"];
 const requested = args.filter((argument) => !argument.startsWith("--"));
 if (requested.includes("nedarim")) throw new Error("Nedarim requires the offline Nedarim audit; the generic runner does not respect its marginal Tosafot exclusion");
+if (requested.includes("kereisos")) throw new Error("Keritot requires the offline Keritot staging runner; the generic runner uses a main-only profile");
 if (sotahWikisource && (requested.length !== 1 || requested[0] !== "sotah" || recoverMain)) throw new Error("--sotah-wikisource requires sotah and cannot be combined with --recover-main");
 if (allWikisource && (sotahWikisource || recoverMain)) throw new Error("--wikisource cannot be combined with --sotah-wikisource or --recover-main");
 if ((recheckingAbsences && (useWikisource || recoverMain)) || (recheckAbsences && recheckRashiAbsences)) throw new Error("Absence rechecks cannot be combined with measurement modes or each other");
@@ -52,8 +53,8 @@ if (selectedAmudim && (!(retryCommentary || retryOverlaps) || requested.length !
   || !selectedAmudim.length || selectedAmudim.some((amud) => !amudim(tractates.find((tractate) => tractate.slug === requested[0]) || {}).includes(amud)))) throw new Error("--amudim requires a protected retry and valid pages in one tractate");
 if (retryAmbiguous && (!allWikisource || !cachedPdfsOnly || retryOverlaps || retryCommentary || retry || recheckAbsences || requested.length !== 1 || requested[0] !== "eruvin" || !Number.isInteger(limit) || !Number.isFinite(limit) || !runIdArg?.slice("--run-id=".length).trim())) throw new Error("--retry-ambiguous requires --wikisource --cached-pdfs-only eruvin, a finite integer --limit, and an explicit --run-id; it cannot be combined with other retry modes");
 for (const slug of requested) if (!tractates.some((tractate) => tractate.slug === slug)) throw new Error(`Unknown tractate: ${slug}`);
-const selected = tractates.filter((tractate) => tractate.slug !== "nedarim" && (!requested.length || requested.includes(tractate.slug)));
-if (!requested.length) console.log("Nedarim skipped: use the offline Nedarim audit");
+const selected = tractates.filter((tractate) => !["nedarim", "kereisos"].includes(tractate.slug) && (!requested.length || requested.includes(tractate.slug)));
+if (!requested.length) console.log("Nedarim and Keritot skipped: use their offline staging runners");
 const workDirectory = join("results", "shas-work");
 const wikiOptions = { cacheDirectory: join("results", "wikisource-cache"), refresh: refreshWikisource, requestDelay: 5000, cacheOnly: args.includes("--cached-wikisource-only") };
 await mkdir(workDirectory, { recursive: true });

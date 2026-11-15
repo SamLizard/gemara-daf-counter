@@ -9,9 +9,12 @@ export function shasDefinition(tractate, { mainOnly = false } = {}) {
     : mainOnly && tractate.slug === "tamid"
     ? { mainSize: 13.44, mainPitch: 11.88, frameSizes: [10.68, 10.92], framePitch: 10.44 }
     : mainOnly && tractate.slug === "middos"
-    ? { mainSize: 13.68, mainPitch: 11.88, frameSizes: [10.2, 9.96], framePitch: 9.48 }
+    ? { mainSize: 13.68, mainPitch: 11.88, frameSizes: [10.2, 9.96], framePitch: 9.48, frameWindow: { left: 85, right: 520 }, frameSideOffset: 0 }
     : mainOnly && tractate.slug === "kereisos"
     ? { mainSize: 12, mainPitch: 10.44, frameSizes: [9.84, 8.04], framePitch: 9.36 }
+    : tractate.slug === "kereisos"
+    ? { mainSize: 12, mainPitch: 10.44, commentaryPitch: 9.36, commentarySizes: [9.84], boldSizes: [13.44, 8.88, 8.04, 7.56], adjacentBoldSizes: [13.44],
+      bottomTosafot: { label: "\u02d9\u00c2\u00d9\u00d2\u00c2\u02d9", labelSize: 9.84, sizes: [9.84, 8.88, 8.04, 7.56], bodySize: 8.04, pitch: 6.96, window: { left: 140, right: 530 } } }
     : tractate.slug === "megillah"
     ? { mainSize: 12.96, mainPitch: 11.26, commentaryPitch: 9.94, commentarySizes: [10.14, 10.62], boldSizes: [10.86, 11.34], adjacentBoldSizes: [11.34] }
     : tractate.slug === "avodah-zarah"

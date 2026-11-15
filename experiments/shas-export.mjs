@@ -5,15 +5,18 @@ import { calculateAreas, calculateFrame, classifierVersion } from "./measure-cor
 import { amudim, tractates } from "./shas-catalog.mjs";
 
 const kinds = ["main", "rashi", "tosafot"];
+const excludedCommentary = new Set(["kinim", "tamid", "middos"]);
 
 export function buildShasExport(catalog, data) {
   const books = catalog.map((tractate) => {
     const expected = amudim(tractate);
     const entries = data[tractate.slug] || {};
+    const policyExclusions = excludedCommentary.has(tractate.slug) ? ["rashi", "tosafot"] : [];
+    const exclusionsFor = (entry) => [...new Set([...(entry?.excludedCategories || []), ...policyExclusions])];
     const measured = expected.map((amud) => entries[amud]).filter((entry) => entry?.page);
     const pages = measured.map((entry) => {
       const page = structuredClone(entry.page);
-      for (const kind of entry.excludedCategories || []) if (kind in page.groups) page.groups[kind] = [];
+      for (const kind of exclusionsFor(entry)) if (kind in page.groups) page.groups[kind] = [];
       return page;
     });
     const frame = pages.length ? calculateFrame(pages, { horizontal: 2, vertical: 2 }) : null;
@@ -22,7 +25,7 @@ export function buildShasExport(catalog, data) {
     const output = expected.map((amud) => {
       const entry = entries[amud];
       const confirmedAbsent = entry?.confirmedAbsent || [];
-      const excludedCategories = entry?.excludedCategories || [];
+      const excludedCategories = exclusionsFor(entry);
       if (!entry?.page) return { amud, status: entry?.error || entry?.tosafotEvidence?.state === "error" ? "unresolved" : "pending", reason: entry?.lastClassificationError || entry?.error || null, mainRecoveryError: entry?.mainRecoveryError || null, ...(confirmedAbsent.length ? { confirmedAbsent } : {}), ...(excludedCategories.length ? { excludedCategories, unknownCategories: [...new Set([...(entry?.unknownCategories || []), ...kinds])].filter((kind) => !confirmedAbsent.includes(kind) && !excludedCategories.includes(kind)) } : {}), ...(entry?.rashiEvidence ? { rashiEvidence: entry.rashiEvidence } : {}), ...(entry?.tosafotEvidence ? { confirmedAbsent, tosafotEvidence: entry.tosafotEvidence, lastClassificationError: entry.lastClassificationError || null } : {}), fractions: kinds.some((kind) => confirmedAbsent.includes(kind) || excludedCategories.includes(kind)) ? Object.fromEntries(kinds.map((kind) => [kind, confirmedAbsent.includes(kind) || excludedCategories.includes(kind) ? 0 : null])) : null };
       const page = byName.get(entry.page.name);
       const suspectTosafot = entry.commentaryRetry?.state === "error" && entry.inferredAbsent?.includes("rashi") && !entry.confirmedAbsent?.includes("tosafot") && entry.page.groups.tosafot?.length;
@@ -36,7 +39,7 @@ export function buildShasExport(catalog, data) {
         reason: entry.recovery?.reason || null,
         mainMatch: entry.recovery ? { referenceScope: "page", source: mainSource, ...entry.recovery.mainMatch } : null,
         unknownCategories,
-        inferredAbsent: entry.inferredAbsent || [],
+        inferredAbsent: (entry.inferredAbsent || []).filter((kind) => !excludedCategories.includes(kind)),
         ...(entry.commentaryRetry?.state === "error" ? { commentaryRetryError: entry.commentaryRetry.error } : {}),
         ...(page.matches?.some((match) => match.kind === "other" && match.source) ? { otherCommentary: { sources: [...new Set(page.matches.filter((match) => match.kind === "other" && match.source).map((match) => match.source))], rows: page.groups.other?.length || 0,
           ...(tractate.slug === "nedarim" && entry.nedarimAudit?.outcome === "recomputed" ? { fraction: page.areas.other.fraction } : {}) } } : {}),
@@ -57,7 +60,7 @@ export function buildShasExport(catalog, data) {
       ...(excludedCategories.length ? { excludedCategories } : {}),
       status: complete ? "complete" : measured.length ? "partial" : output.some((page) => page.status === "unresolved") ? "unresolved" : "pending",
       coverage: { expected: expected.length, measured: measured.length, unresolved: output.filter((page) => page.status === "unresolved").length, pending: output.filter((page) => page.status === "pending").length, pagesWithUnknownCategories: output.filter((page) => page.status === "partial").length, pagesWithInferredAbsence: output.filter((page) => page.inferredAbsent?.length).length, knownByCategory: Object.fromEntries(kinds.map((kind) => [kind, output.filter((page) => page.fractions && page.fractions[kind] !== null).length])) },
-      frame: frame ? { ...frame, area: frameArea, provisional: !complete || (tractate.slug === "shekalim" && measured.some((entry) => entry.recovery || entry.page.frameRows?.length)), referenceBasis: pages.some((page) => page.frameRows?.length) ? "main-and-unclassified-text" : measured.every((entry) => entry.recovery) ? "main-text-only" : "classified-text" } : null,
+      frame: frame ? { ...frame, area: frameArea, provisional: !complete || ((tractate.slug === "shekalim" || policyExclusions.length > 0) && measured.some((entry) => entry.recovery || entry.page.frameRows?.length)), referenceBasis: pages.some((page) => page.frameRows?.length) ? "main-and-unclassified-text" : measured.every((entry) => entry.recovery) ? "main-text-only" : "classified-text" } : null,
       totals: allPagesMeasured || excludedCategories.length ? { sides: sums, dafim: Object.fromEntries(kinds.map((kind) => [kind, sums[kind] === null ? null : sums[kind] / 2])) } : null,
       pages: output,
     };

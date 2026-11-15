@@ -104,6 +104,24 @@ test("excluded Tosafot is zero without asserting absence or fitting excluded row
   assert.deepEqual(entries, before);
 });
 
+test("Kinnim, Tamid and Middot exclude both commentary categories without asserting absence", () => {
+  const row = { left: 0, right: 10, baseline: 5, pitch: 10 };
+  for (const slug of ["kinim", "tamid", "middos"]) {
+    const catalog = [{ slug, title: slug, order: "Kodashim", first: "2a", last: "2a" }];
+    const entry = { page: { name: `${slug}-2a`, groups: { main: [row], rashi: [], tosafot: [] }, frameRows: [row] },
+      unknownCategories: ["rashi", "tosafot"], inferredAbsent: ["rashi"] };
+    const before = structuredClone(entry);
+    const book = buildShasExport(catalog, { [slug]: { "2a": entry } }).tractates[0];
+    assert.equal(book.status, "complete");
+    assert.deepEqual(book.pages[0].excludedCategories, ["rashi", "tosafot"]);
+    assert.deepEqual(book.pages[0].unknownCategories, []);
+    assert.deepEqual([book.pages[0].fractions.rashi, book.pages[0].fractions.tosafot], [0, 0]);
+    assert.equal(book.pages[0].confirmedAbsent, undefined);
+    assert.equal(book.frame.provisional, true);
+    assert.deepEqual(entry, before);
+  }
+});
+
 test("exports complete tractate totals in sides and dafim", () => {
   const catalog = [{ slug: "example", title: "Example", order: "Moed", first: "2a", last: "2a" }];
   const page = { name: "example-2a", groups: { main: [{ left: 0, right: 10, baseline: 5, pitch: 10 }], rashi: [], tosafot: [] } };

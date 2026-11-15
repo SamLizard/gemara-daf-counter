@@ -28,9 +28,10 @@ export function buildProblemIndex(data, entries, { includeMeasured = false } = {
     fractions: Object.fromEntries(kinds.map((kind) => [kind, page.fractions?.[kind] ?? null])),
     otherCommentary: page.otherCommentary || null,
     method: page.method || null,
-    sourceOnlyZero: (page.tosafotEvidence?.basis?.startsWith("wikisource-") && page.fractions?.tosafot === 0)
-      || (page.rashiEvidence?.basis?.startsWith("wikisource-") && page.fractions?.rashi === 0),
-    userAttestedZero: ["rashi", "tosafot"].some((kind) => page[`${kind}Evidence`]?.sourceType === "user-attestation" && page.fractions?.[kind] === 0),
+    sourceOnlyZero: ["rashi", "tosafot"].some((kind) => !page.excludedCategories?.includes(kind)
+      && page[`${kind}Evidence`]?.basis?.startsWith("wikisource-") && page.fractions?.[kind] === 0),
+    userAttestedZero: ["rashi", "tosafot"].some((kind) => !page.excludedCategories?.includes(kind)
+      && page[`${kind}Evidence`]?.sourceType === "user-attestation" && page.fractions?.[kind] === 0),
     error: entries[book.id]?.[page.amud]?.commentaryRetry?.error || entries[book.id]?.[page.amud]?.overlapRetry?.error || page.lastClassificationError || (page.status !== "measured" ? page.reason : null) || null,
   })));
 }

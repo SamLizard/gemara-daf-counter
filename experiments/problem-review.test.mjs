@@ -114,6 +114,11 @@ test("review indexes excluded zeroes separately from absences and preserves unre
   assert.deepEqual(pages[1].unknownCategories, ["main", "rashi"]);
   assert.equal(pages[1].fractions.tosafot, 0);
   assert.ok(pages.every((page) => !page.sourceOnlyZero && !page.userAttestedZero));
+  const excluded = buildProblemIndex({ tractates: [{ id: "kinim", title: "Kinnim", pages: [{ amud: "22b", status: "measured",
+    excludedCategories: ["rashi", "tosafot"], fractions: { main: 0.4, rashi: 0, tosafot: 0 },
+    rashiEvidence: { sourceType: "user-attestation" }, tosafotEvidence: { basis: "wikisource-empty" } }] }] }, {}, { includeMeasured: true });
+  assert.equal(excluded[0].sourceOnlyZero, false);
+  assert.equal(excluded[0].userAttestedZero, false);
 });
 
 test("identifies overlaps between any two text categories", () => {

@@ -29,6 +29,37 @@ test("Shekalim filters marginal frame items before grouping without filtering wi
   assert.deepEqual(fragments, before);
 });
 
+test("Middot filters right marginal frame items on both sides", async () => {
+  const { selectFrameItems } = await import("./measure-corpus.mjs");
+  const definition = shasDefinition({ slug: "middos" }, { mainOnly: true });
+  const fragments = [item("body", 90, 900, 420), item("right margin", 530, 900, 50)];
+  assert.deepEqual(selectFrameItems(fragments, definition, "a"), fragments.slice(0, 1));
+  assert.deepEqual(selectFrameItems(fragments, definition, "b"), fragments.slice(0, 1));
+});
+
+test("Middot cached sides preserve main rows and fit the reviewed right edge", async (context) => {
+  const { rebuildMiddotFrame } = await import("./measure-corpus.mjs");
+  let work;
+  try { work = JSON.parse(await readFile("results/shas-work/middos.json", "utf8")); }
+  catch (error) { if (error.code === "ENOENT") { context.skip("Middot checkpoint unavailable"); return; } throw error; }
+  const definition = tractates.find((tractate) => tractate.slug === "middos");
+  const pages = [];
+  for (const [amud, expectedRows] of [["34a", 100], ["34b", 117], ["35a", 101], ["35b", 109], ["36a", 76], ["36b", 93], ["37a", 50], ["37b", 44]]) {
+    const saved = work.pages[amud].page;
+    let bytes;
+    try { bytes = (await getCachedPdf(definition, amud, { expectedHash: saved.sha256, cacheOnly: true })).bytes; }
+    catch (error) { if (error.message.includes("not available in the local cache")) { context.skip(`Pinned PDF fixture unavailable: ${amud}`); return; } throw error; }
+    const rebuilt = await rebuildMiddotFrame(saved, bytes);
+    assert.deepEqual(rebuilt.groups, saved.groups);
+    assert.equal(rebuilt.frameRows.length, expectedRows);
+    await assert.rejects(rebuildMiddotFrame({ ...saved, sha256: "0".repeat(64) }, bytes), /saved PDF fingerprint/);
+    pages.push(rebuilt);
+  }
+  const frame = calculateFrame(pages, { horizontal: 2, vertical: 2 });
+  assert.ok(Math.abs(frame.right - 515.2148289105725) < 0.001);
+  assert.ok(Math.abs(frame.top - 1140.355547312) < 0.001);
+});
+
 test("Shekalim common frame translates sides without changing numerators or denominators", async () => {
   const { frameForPage } = await import("./measure-corpus.mjs");
   const row = { left: 106.19, right: 531.38, baseline: 900, pitch: 9.72 };
@@ -1025,11 +1056,11 @@ test("bounded commentary retries preserve old data and skip attempts in the same
     const modules = {
       "measure-corpus.mjs": `export { applyReviewedGittin76bEvidence, checkOverlap, classifierVersion, classifyMissingCategories, isAmbiguousRetryCandidate, isCommentaryRetryCandidate, isLegacyCommentaryAuditCandidate, isOverlapRetryCandidate, preserveRetryPage, preserveRetryTosafot, verifyOverlapRetrySources } from ${JSON.stringify(corpusModule)};
     export const classifyHorayotTosafot = () => ({}), loadMainTexts = async () => ({ texts: [], scope: "tractate", source: "fixture" });
-    export async function processMainPage(_definition, _index, _reference, bytes) { const amud = bytes.toString(); return { name: "kereisos-" + amud, sha256: "sha" + amud, groups: { main: [{ left: 0, right: amud === "2a" ? 5 : 10, baseline: 5, pitch: 10 }], rashi: [], tosafot: [] }, matches: [] }; }
+    export async function processMainPage(_definition, _index, _reference, bytes) { const amud = bytes.toString(); return { name: "tamid-" + amud, sha256: "sha" + amud, groups: { main: [{ left: 0, right: amud === "2a" ? 5 : 10, baseline: 5, pitch: 10 }], rashi: [], tosafot: [] }, matches: [] }; }
 export async function loadTexts(_tractate, options) { if (process.env.FIXTURE_404) throw Error("HTTP 404"); if (!options.works.includes("Rashbam")) throw Error("missing Rashbam"); return { rashi: [], rashbam: ["rashbam"] }; }
 export async function processPage(_definition, _index, _references, bytes) { const amud = bytes.toString(); if (amud === "2a") throw Error("ambiguous commentary stream"); return { name: "bava-basra-" + amud, sha256: "sha" + amud, groups: { main: [{ left: 0, right: 10, baseline: 5, pitch: 10 }], rashi: [], tosafot: amud === "3b" ? [{ left: 20, right: 30, baseline: 5, pitch: 10 }] : [], other: [] }, matches: [] }; }`,
       "pdf-cache.mjs": `export async function getCachedPdf(_tractate, amud) { return { bytes: Buffer.from(amud) }; }`,
-      "shas-catalog.mjs": `export const tractates = [{ slug: "bava-basra", title: "Bava Batra", order: "Nezikin" }, { slug: "kereisos", title: "Keritot", order: "Kodashim" }]; export const amudim = () => ["2a", "2b", "3a", "3b", "4a"]; export function amudIndex(amud) { return Number(amud.slice(0, -1)) * 2 + (amud.endsWith("b") ? 1 : 0); }`,
+      "shas-catalog.mjs": `export const tractates = [{ slug: "bava-basra", title: "Bava Batra", order: "Nezikin" }, { slug: "tamid", title: "Tamid", order: "Kodashim" }]; export const amudim = () => ["2a", "2b", "3a", "3b", "4a"]; export function amudIndex(amud) { return Number(amud.slice(0, -1)) * 2 + (amud.endsWith("b") ? 1 : 0); }`,
       "shas-export.mjs": `export async function readShasData() { return {}; } export async function writeShasExport() {}`,
       "shas-profiles.mjs": `export function shasDefinition(tractate) { return tractate; }`,
       "sotah-wikisource.mjs": `export function applyWikisourceAbsence() {} export function applyWikisourceRashiAbsence() {} export function needsWikisourceAbsence() {} export function needsWikisourceRashiAbsence() {} export function classifyWikisourceTosafot(_tractate, _amud, page, reference) { return { revision: reference.revision, decision: page.groups.tosafot.length ? "present" : "unknown" }; } export async function loadWikisourcePages(_tractate, options) { if (options.selectedAmudim?.length > 4) throw Error("limit exceeded"); const selected = options.selectedAmudim || ["2a", "2b", "3a", "3b", "4a"]; return Object.fromEntries(selected.map(amud => [amud, { revision: amud === "2b" ? 99 : 42, text: "", status: "unknown" }])); }`,
@@ -1098,15 +1129,15 @@ export async function processPage(_definition, _index, _references, bytes) { con
     assert.equal(updated.pages["3b"].checkpoint, "user");
     assert.match(updated.pages["3b"].commentaryRetry.error, /could not be reproduced/);
     const commentary = [{ left: 20, right: 30, baseline: 5, pitch: 10 }];
-    const mainWork = { slug: "kereisos", pages: Object.fromEntries(["2a", "2b", "3a", "3b"].map((amud) => [amud, {
+    const mainWork = { slug: "tamid", pages: Object.fromEntries(["2a", "2b", "3a", "3b"].map((amud) => [amud, {
       checkpoint: "user", lastClassificationError: "overlap between main and rashi",
       page: { ...oldPage(amud, amud === "3a" ? commentary : []), groups: { ...oldPage(amud, amud === "3a" ? commentary : []).groups, rashi: amud === "2b" ? commentary : [] } },
       ...(amud === "3b" ? { confirmedAbsent: ["rashi", "tosafot"] } : {}),
       tosafotEvidence: { revision: amud === "2b" ? 99 : 42, decision: amud === "3a" ? "present" : "unknown" },
     }])) };
-    const mainWorkFile = join(directory, "results", "shas-work", "kereisos.json");
+    const mainWorkFile = join(directory, "results", "shas-work", "tamid.json");
     await writeFile(mainWorkFile, JSON.stringify(mainWork));
-    const mainArgs = ["measure-shas.mjs", "kereisos", "--wikisource", "--retry-overlaps", "--cached-pdfs-only", "--limit=2", "--run-id=main-only"];
+    const mainArgs = ["measure-shas.mjs", "tamid", "--wikisource", "--retry-overlaps", "--cached-pdfs-only", "--limit=2", "--run-id=main-only"];
     await run(process.execPath, mainArgs, { cwd: directory });
     await run(process.execPath, mainArgs, { cwd: directory });
     const mainUpdated = JSON.parse(await readFile(mainWorkFile, "utf8"));
@@ -1121,12 +1152,12 @@ export async function processPage(_definition, _index, _references, bytes) { con
     assert.match((await run(process.execPath, mainArgs, { cwd: directory })).stdout, /"attempted": 0/);
     assert.deepEqual(JSON.parse(await readFile(mainWorkFile, "utf8")), mainUpdated);
     await writeFile(mainWorkFile, JSON.stringify(mainWork));
-    await run(process.execPath, ["measure-shas.mjs", "kereisos", "--wikisource", "--retry-commentary", "--amudim=2a", "--limit=2", "--run-id=selected"], { cwd: directory });
+    await run(process.execPath, ["measure-shas.mjs", "tamid", "--wikisource", "--retry-commentary", "--amudim=2a", "--limit=2", "--run-id=selected"], { cwd: directory });
     const selected = JSON.parse(await readFile(mainWorkFile, "utf8"));
     assert.equal(selected.pages["2a"].commentaryRetry.runId, "selected");
     assert.deepEqual(selected.pages["2a"].page, mainWork.pages["2a"].page);
     assert.equal(selected.pages["2b"].commentaryRetry, undefined);
-    await assert.rejects(run(process.execPath, ["measure-shas.mjs", "kereisos", "--wikisource", "--retry-commentary", "--include-classified", "--limit=2", "--run-id=selected"], { cwd: directory }), /--include-classified requires/);
+    await assert.rejects(run(process.execPath, ["measure-shas.mjs", "tamid", "--wikisource", "--retry-commentary", "--include-classified", "--limit=2", "--run-id=selected"], { cwd: directory }), /--include-classified requires/);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
