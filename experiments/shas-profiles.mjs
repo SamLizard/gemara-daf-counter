@@ -20,7 +20,10 @@ export function shasDefinition(tractate, { mainOnly = false } = {}) {
     : tractate.slug === "avodah-zarah"
     ? { mainSize: 13.2, mainPitch: 11.88, commentaryPitch: 10.44 }
     : tractate.slug === "menachos"
-    ? { mainSize: 11.65, mainPitch: 10.67, commentaryPitch: 9.42, commentarySizes: [9.64, 9.84], boldSizes: [8.05, 9.41, 10.74], adjacentBoldSizes: [9.41, 10.74] }
+    ? { mainSize: 11.65, mainPitch: 10.67, commentaryPitch: 9.42, commentarySizes: [9.64, 9.84], boldSizes: [8.05, 9.41, 10.74], adjacentBoldSizes: [9.41, 10.74],
+      // Pages printed with the Rashi manuscript block (headed "רש"י כת"י") set all Rashi in 8.05/8.28 at a 7.17 pitch.
+      labelledVariant: { label: ["\u00c8", "\"", "\u02d9\u00ce \u00c8", "\"", "\u02d8\u00af"], labelSize: 12.53, name: "rashi-manuscript",
+        commentarySizes: [8.05, 9.64], boldSizes: [8.28, 9.41, 10.74], adjacentBoldSizes: [9.41, 10.74], runPitches: [[8.05, 7.17], [9.64, 9.42]] } }
     : ["bechoros", "arachin", "temurah"].includes(tractate.slug)
     ? { mainSize: 13.44, mainPitch: tractate.slug === "arachin" ? 11.7 : 11.88, commentaryPitch: tractate.slug === "arachin" ? 10.2 : 10.44, commentarySizes: [10.92, 10.68], boldSizes: [8.4, 8.88, 11.88, 13.92, 14.4, 16.32], adjacentBoldSizes: [13.92, 14.4] }
     : tractate.slug === "horayos"

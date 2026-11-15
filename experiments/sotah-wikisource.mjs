@@ -46,6 +46,8 @@ export function wikisourceTitle(tractate, amud) {
   return `${hebrewTitles[tractate.slug]} ${numeral} ${match[2] === "a" ? "א" : "ב"}`;
 }
 
+const extendedMarkupTractates = ["menachos", "bechoros", "arachin", "temurah", "meilah"];
+
 export async function loadWikisourcePages(tractate, { fetcher = fetch, selectedAmudim = amudim(tractate), cacheDirectory = null, refresh = false, requestDelay = 0, cacheOnly = false } = {}) {
   const pages = {};
   const titles = selectedAmudim.map((amud) => ({ amud, title: wikisourceTitle(tractate, amud) }));
@@ -77,12 +79,15 @@ export async function loadWikisourcePages(tractate, { fetcher = fetch, selectedA
         const end = headings.find((candidate) => candidate.index > heading.index && candidate[1].length <= heading[1].length)?.index ?? content.length;
         const rawSection = content.slice(heading.index + heading[0].length, end);
         if ((kind === "rashi" ? /<קטע\s+התחלה\s*=\s*ת\s*\/\s*>/ : /<קטע\s+התחלה\s*=\s*ר\s*\/\s*>/).test(rawSection)) continue;
-        const section = cleanRegularTosafotSection(rawSection)
-          .replace(/\[\[([^\[\]{}|]+)\]\]/g, "$1")
-          .replace(/\{\{הפניה-גמ\|[^{}]+\}\}/g, "|");
+        // Piped links, source templates and a parenthesised opening are accepted only for the Kodashim audit tractates,
+        // so previously pinned sources elsewhere keep their exact fingerprints.
+        const extendedMarkup = extendedMarkupTractates.includes(tractate.slug);
+        let section = cleanRegularTosafotSection(rawSection).replace(/\[\[([^\[\]{}|]+)\]\]/g, "$1");
+        if (extendedMarkup) section = section.replace(/\[\[[^\[\]{}|]+\|([^\[\]{}|]+)\]\]/g, "$1");
+        section = section.replace(extendedMarkup ? /\{\{(?:הפניה-גמ1?|מקור)\|[^{}]+\}\}/g : /\{\{הפניה-גמ\|[^{}]+\}\}/g, "|");
         if (/\{\{|\[\[|^=/m.test(section)) continue;
         const text = normalizeHebrew(section);
-        const openingWord = normalizeHebrew(/^[' \t\r\n]*([\u05d0-\u05ea]+)(?=[^\u05d0-\u05ea]|$)/.exec(section)?.[1] || "");
+        const openingWord = normalizeHebrew((extendedMarkup ? /^[(' \t\r\n]*([\u05d0-\u05ea]+)(?=[^\u05d0-\u05ea]|$)/ : /^[' \t\r\n]*([\u05d0-\u05ea]+)(?=[^\u05d0-\u05ea]|$)/).exec(section)?.[1] || "");
         if (text.length < 16 || !openingWord || !text.startsWith(openingWord)) continue;
         commentarySources[kind] = { amud, tractate: tractate.slug, commentary: kind, title: page.title, revision: revision.revid, text, openingWord,
           source: `https://he.wikisource.org/?oldid=${revision.revid}`,

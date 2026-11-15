@@ -245,6 +245,7 @@ const marginHeadings = {
   "avodah-zarah": { glyphs: ["\u00cf\u2021\u000e\u000e\u00c1\u00c2\u000e\u00c8\u00b7\u00af"], label: "\u05e8\u05d1\u05d9\u05e0\u05d5 \u05d7\u05e0\u05e0\u05d0\u05dc" },
   bechoros: { glyphs: ["\u00cc\u00c2\u02d8\u00af\u201a \u00c2\u0014\u00c8\u00b7\u00af"], label: "\u05e8\u05d1\u05d9\u05e0\u05d5 \u05d2\u05e8\u05e9\u05d5\u05dd" },
   arachin: { glyphs: ["\u00cc\u00c2\u02d8\u00af\u201a \u00c2\u0011\u00c8\u00b7\u00af"], label: "\u05e8\u05d1\u05d9\u05e0\u05d5 \u05d2\u05e8\u05e9\u05d5\u05dd" },
+  menachos: { glyphs: ["\u00cc\u00c2\u02d8\u00af\u201a \u00c2\u0002\u00c8\u00b7\u00af"], label: "\u05e8\u05d1\u05d9\u05e0\u05d5 \u05d2\u05e8\u05e9\u05d5\u05dd" },
 };
 
 export function findMarginHeadings(slug, items, commentaryItems) {
@@ -593,7 +594,7 @@ export function resolveMainStreamFragments(items, streams, mainItems, mainRows, 
   return ownership;
 }
 
-export function resolveCommentaryCatchwords(items, streams, pitch, references) {
+export function resolveCommentaryCatchwords(items, streams, defaultPitch, references) {
   const ownership = [];
   const fingerprint = (source) => source?.text && /^[a-f0-9]{64}$/.test(source.sha256 || "")
     && createHash("sha256").update(JSON.stringify([source.text, source.openingWord])).digest("hex") === source.sha256
@@ -603,6 +604,7 @@ export function resolveCommentaryCatchwords(items, streams, pitch, references) {
   const pageIndex = (amud) => /^(\d+)([ab])$/.test(amud || "") ? Number(amud.slice(0, -1)) * 2 + (amud.endsWith("b") ? 1 : 0) : NaN;
   for (const stream of streams) {
     const sources = references.commentarySources?.[stream.kind];
+    const pitch = stream.pitch ?? defaultPitch;
     if (!["rashi", "tosafot"].includes(stream.kind) || !fingerprint(sources?.current) || !fingerprint(sources?.next)
       || sources.current.tractate !== sources.next.tractate || sources.current.commentary !== stream.kind || sources.next.commentary !== stream.kind
       || pageIndex(sources.next.amud) !== pageIndex(sources.current.amud) + 1) continue;
@@ -610,15 +612,18 @@ export function resolveCommentaryCatchwords(items, streams, pitch, references) {
     const terminal = rows.at(-1), preceding = rows.at(-2);
     if (!terminal || !preceding || terminal.items.length !== 1) continue;
     const catchword = terminal.items[0], decoded = decodePdfText(catchword.str).trim(), text = normalizeHebrew(decoded);
+    // A short last line can end at the catchword's x; measure the indent from the column edge of the rows above.
+    const edge = Math.min(preceding.left, ...rows.slice(-4, -2).filter((row) => row.left <= terminal.left && row.right >= terminal.right).map((row) => row.left));
     if (stream.run.at(-1) !== catchword || streams.filter((candidate) => candidate.expanded.includes(catchword)).length !== 1
       || !/^[\u05d0-\u05ea]{2,8}$/.test(decoded) || text !== sources.next.openingWord || !sources.next.text.startsWith(text)
       || terminal.right - terminal.left > pitch * 4 || catchword.height > pitch * 1.2 || !(catchword.height > 0)
       || preceding.baseline - terminal.baseline < pitch * 0.8 || preceding.baseline - terminal.baseline > pitch * 1.2
-      || terminal.left - preceding.left < pitch * 0.8 || terminal.left - preceding.left > pitch * 2
+      || terminal.left - edge < pitch * 0.8 || terminal.left - edge > pitch * 2
       || terminal.right > preceding.right + 0.02) continue;
     const precedingText = [...preceding.items].sort((first, second) => second.transform[4] - first.transform[4]).map((item) => decodePdfText(item.str)).join(" ");
     const ending = normalizeHebrew(precedingText);
-    if (!/[.:]\s*$/.test(precedingText) || ending.length < 8 || !sources.current.text.endsWith(ending)) continue;
+    // The commentary may continue mid-sentence on the next amud; the exact source ending and next opening are the evidence.
+    if (ending.length < 8 || !sources.current.text.endsWith(ending)) continue;
     if (references[stream.kind]?.includes(ending + text)) continue;
     const body = stream.expanded.filter((item) => item !== catchword);
     const unique = new Set(groupRows(body, 2).map((row) => normalizeHebrew([...row.items].sort((first, second) => second.transform[4] - first.transform[4])
@@ -844,6 +849,25 @@ function identifyShortSourceBackedCommentary(expanded, references, name) {
     source: { amud: source.amud, revision: source.revision, source: source.source, sha256: source.sha256, contentSha256: source.contentSha256 } };
 }
 
+export function findLabelledVariant(items, spec, name) {
+  const found = [];
+  for (let index = 0; index + spec.label.length <= items.length; index++) {
+    const run = items.slice(index, index + spec.label.length);
+    if (run.every((item, offset) => item.str === spec.label[offset] && Math.abs(item.height - spec.labelSize) < 0.03
+      && Math.abs(item.transform[5] - run[0].transform[5]) < 0.5)) found.push({ name: spec.name, itemIndex: index, baseline: run[0].transform[5] });
+  }
+  if (found.length > 1) throw new Error(`${name}: multiple ${spec.name} labels`);
+  return found[0] || null;
+}
+
+export function runPitch(run, layout) {
+  if (!layout.runPitches) return layout.commentaryPitch;
+  const counts = layout.runPitches.map(([size]) => run.filter((item) => Math.abs(item.height - size) < 0.02).length);
+  const best = Math.max(...counts);
+  if (counts.filter((count) => count === best).length > 1) throw new Error("Commentary run has no dominant body size");
+  return layout.runPitches[counts.indexOf(best)][1];
+}
+
 export function findBottomTosafotBlock(items, spec, references, name) {
   const sized = (item, sizes) => sizes.some((size) => Math.abs(item.height - size) < 0.02);
   const labels = items.filter((item) => sized(item, [spec.labelSize]) && item.str === spec.label);
@@ -937,6 +961,7 @@ export async function processPage(definition, index, references, pdfBytes) {
     let reviewedSection = null;
     let excludedHeadings = [];
     let bottomTosafot = null;
+    let labelledVariant = null;
     if (definition.slug === "horayos") {
       const rashiRuns = splitRuns(itemsOfSize(items, [9.84]));
       if (rashiRuns.length !== 2) throw new Error(`${name}: expected two Rashi runs, found ${rashiRuns.length}`);
@@ -961,9 +986,11 @@ export async function processPage(definition, index, references, pdfBytes) {
         }
       }
     } else {
+      labelledVariant = definition.labelledVariant ? findLabelledVariant(items, definition.labelledVariant, name) : null;
+      const layout = labelledVariant ? { ...definition, ...definition.labelledVariant } : definition;
       bottomTosafot = definition.bottomTosafot ? findBottomTosafotBlock(items, definition.bottomTosafot, references, name) : null;
       const bottomItems = new Set(bottomTosafot?.items || []);
-      const commentaryItems = itemsOfSize(items, definition.commentarySizes || [11.16, 11.4]).filter((item) => !bottomItems.has(item));
+      const commentaryItems = itemsOfSize(items, layout.commentarySizes || [11.16, 11.4]).filter((item) => !bottomItems.has(item));
       excludedHeadings = findMarginHeadings(definition.slug, items, commentaryItems);
       if (excludedHeadings.length && (typeof references.rashi !== "string" || !references.rashi || typeof references.tosafot !== "string" || !references.tosafot)) {
         throw new Error(`${name}: margin heading exclusion requires non-empty Rashi and Tosafot references`);
@@ -977,11 +1004,11 @@ export async function processPage(definition, index, references, pdfBytes) {
       let start = 0;
       const streams = [];
       for (const run of runs) {
-        const boldSizes = definition.boldSizes || [8.88, 8.94, 11.88, 11.94, 13.92, 16.32, 16.38];
+        const boldSizes = layout.boldSizes || [8.88, 8.94, 11.88, 11.94, 13.92, 16.32, 16.38];
         const rows = groupRows(run);
         const expanded = includeStreamFragments(items, run, boldSizes, start).filter((item) => {
           if (bottomItems.has(item)) return false;
-          if (!(definition.adjacentBoldSizes || [13.92]).some((size) => Math.abs(item.height - size) < 0.02)) return true;
+          if (!(layout.adjacentBoldSizes || [13.92]).some((size) => Math.abs(item.height - size) < 0.02)) return true;
           return rows.some((row) => Math.abs(row.baseline - item.transform[5]) < 2 && Math.max(0, row.left - item.transform[4] - item.width, item.transform[4] - row.right) < 20);
         });
         let result;
@@ -996,7 +1023,7 @@ export async function processPage(definition, index, references, pdfBytes) {
           }
         }
         matches.push(result);
-        const stream = { run, expanded, kind: result.kind, match: result };
+        const stream = { run, expanded, kind: result.kind, match: result, pitch: runPitch(run, layout) };
         if (streams.length) redistributeLeadingFragments(items, streams.at(-1), stream, { references, mainRows: main });
         streams.push(stream);
         start = items.indexOf(run.at(-1)) + 1;
@@ -1019,7 +1046,7 @@ export async function processPage(definition, index, references, pdfBytes) {
       fragmentOwnership.push(...catchwords);
       frameRows.push(...catchwords.map((entry) => entry.frameRow));
       for (const stream of streams) {
-        const rows = lines(stream.expanded, definition.commentaryPitch, stream.kind, 2);
+        const rows = lines(stream.expanded, stream.pitch, stream.kind, 2);
         stream.match.rows = rows.map(({ baseline, left, right }) => ({ baseline, left, right }));
         groups[stream.kind].push(...rows);
       }
@@ -1076,6 +1103,7 @@ export async function processPage(definition, index, references, pdfBytes) {
       ...(reviewedSection ? { reviewedCommentarySections: [reviewedSection.provenance] } : {}),
       ...(gittinProvenance ? { reviewedGittin76b: gittinProvenance } : {}),
       ...(bottomTosafot ? { bottomTosafotBlocks: [bottomTosafot.provenance] } : {}),
+      ...(labelledVariant ? { labelledVariant } : {}),
       ...(excludedHeadings.length ? { excludedMarginHeadings: excludedHeadings.map((heading) => heading.provenance) } : {}) };
   } finally {
     await task.destroy();

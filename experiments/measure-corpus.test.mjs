@@ -189,6 +189,41 @@ test("commentary catchwords require standalone terminal geometry and fingerprint
   assert.deepEqual(resolveCommentaryCatchwords(items, [], 10, references), []);
 });
 
+test("mid-sentence catchwords under a short last line use the column edge and exact source ending", () => {
+  const body = [item("פירושראשוןארוךמאד", 100, 120, 100), item("פירוששניארוךמאד", 100, 110, 100), item("ומיהובריש", 114, 100, 86)];
+  const tail = { ...item("פירקין", 114, 90, 14), height: 10 };
+  const snapshot = (text, amud, revision, openingWord = "") => ({ text, amud, revision, openingWord, title: `מנחות ${amud}`, tractate: "menachos", commentary: "tosafot",
+    source: `https://he.wikisource.org/?oldid=${revision}`, contentSha256: "1".repeat(64), sha256: createHash("sha256").update(JSON.stringify([text, openingWord])).digest("hex") });
+  const current = snapshot(normalizeHebrew(body.map((fragment) => fragment.str).join(" ")), "60a", 42);
+  const commentarySources = { tosafot: { current, next: snapshot("פירקיןהמשך", "60b", 43, "פירקין") } };
+  const items = [...body, tail];
+  const streams = [{ run: items, expanded: [...items], kind: "tosafot" }];
+  const result = resolveCommentaryCatchwords(items, streams, 10, { tosafot: current.text, commentarySources });
+  assert.equal(result.length, 1);
+  assert.deepEqual(streams[0].expanded, body);
+  const flush = [item(body[0].str, 114, 120, 86), item(body[1].str, 114, 110, 86), body[2], tail];
+  assert.deepEqual(resolveCommentaryCatchwords(flush, [{ run: flush, expanded: [...flush], kind: "tosafot" }], 10, { tosafot: current.text, commentarySources }), []);
+  const joined = [{ run: items, expanded: [...items], kind: "tosafot" }];
+  assert.deepEqual(resolveCommentaryCatchwords(items, joined, 10, { tosafot: `${current.text}פירקין`, commentarySources }), []);
+});
+
+test("Menachot manuscript-Rashi label switches commentary sizes and run pitch only on an exact single label", async () => {
+  const { findLabelledVariant, runPitch } = await import("./measure-corpus.mjs");
+  const spec = shasDefinition(tractates.find((tractate) => tractate.slug === "menachos")).labelledVariant;
+  const label = spec.label.map((text, index) => ({ ...item(text, 300 - index * 5, 742, 4), height: 12.53 }));
+  assert.deepEqual(findLabelledVariant([item("x", 0, 0), ...label], spec, "menachos-x"), { name: "rashi-manuscript", itemIndex: 1, baseline: 742 });
+  assert.equal(findLabelledVariant(label.map((part, index) => index === 2 ? { ...part, str: "x" } : part), spec, "menachos-x"), null);
+  assert.equal(findLabelledVariant(label.map((part) => ({ ...part, height: 9.64 })), spec, "menachos-x"), null);
+  assert.equal(findLabelledVariant(label.map((part, index) => index === 4 ? { ...part, transform: [0, 0, 0, 0, 280, 700] } : part), spec, "menachos-x"), null);
+  assert.throws(() => findLabelledVariant([...label, ...label], spec, "menachos-x"), /multiple rashi-manuscript labels/);
+  const sized = (height, count) => Array.from({ length: count }, (_, index) => ({ ...item("a", index, 0), height }));
+  const layout = { commentaryPitch: 9.42, ...spec };
+  assert.equal(runPitch([...sized(8.05, 3), ...sized(9.64, 1)], layout), 7.17);
+  assert.equal(runPitch([...sized(8.05, 1), ...sized(9.64, 3)], layout), 9.42);
+  assert.throws(() => runPitch([...sized(8.05, 2), ...sized(9.64, 2)], layout), /no dominant body size/);
+  assert.equal(runPitch(sized(8.05, 3), { commentaryPitch: 9.42 }), 9.42);
+});
+
 test("synthetic Sefaria current Rashi continuation overrides a true same-commentary Wikisource next opening", () => {
   const body = [item("ביאוררשימובהקראשוןארוך", 100, 120, 100), item("ביאוררשימובהקשניארוך:", 100, 110, 100)];
   const tail = { ...item("עובד", 114, 100, 14), height: 10 };
@@ -2274,11 +2309,12 @@ test("Avodah Zarah margin heading exclusion needs the exact glyphs outside the p
   assert.deepEqual(findMarginHeadings("sanhedrin", all, all), []);
 });
 
-test("Bekhorot and Arakhin margin headings require their exact glyphs outside the commentary span", async () => {
+test("Bekhorot, Arakhin and Menachot margin headings require their exact glyphs outside the commentary span", async () => {
   const { findMarginHeadings } = await import("./measure-corpus.mjs");
   for (const [slug, glyphs] of [
     ["bechoros", "\u00cc\u00c2\u02d8\u00af\u201a \u00c2\u0014\u00c8\u00b7\u00af"],
     ["arachin", "\u00cc\u00c2\u02d8\u00af\u201a \u00c2\u0011\u00c8\u00b7\u00af"],
+    ["menachos", "\u00cc\u00c2\u02d8\u00af\u201a \u00c2\u0002\u00c8\u00b7\u00af"],
   ]) {
     const body = [item("a", 96, 900, 50), item("b", 400, 900, 116)];
     const heading = item(glyphs, 534, 1147, 37);
