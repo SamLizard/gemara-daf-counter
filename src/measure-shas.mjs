@@ -95,8 +95,16 @@ for (const tractate of selected) {
     const definition = shasDefinition(tractate);
     const loadPdf = async (_definition, amud, expectedHash) => (await getCachedPdf(tractate, amud, { expectedHash, cacheOnly: cachedPdfsOnly })).bytes;
     for (const [position, amud] of todo.entries()) {
+      let entry;
+      try {
+        entry = await measureNedarimSide(amud, { definition, expected: amudim(tractate), wikiPages, loadPdf });
+      } catch (error) {
+        if (!/PDF HTTP (403|429|5\d\d)|PDF network error/.test(error.message)) throw error;
+        console.error(`nedarim ${amud}: download stopped: ${error.message}`);
+        stop = true;
+        break;
+      }
       attempted++;
-      const entry = await measureNedarimSide(amud, { definition, expected: amudim(tractate), wikiPages, loadPdf });
       entry.nedarimAudit.runId = runId;
       work.pages[amud] = entry;
       if ((position + 1) % 20 === 0 || position + 1 === todo.length) {
@@ -106,7 +114,7 @@ for (const tractate of selected) {
     }
     await save(work);
     await writeShasExport();
-    if (attempted >= limit) break;
+    if (attempted >= limit || stop) break;
     continue;
   }
   if (recheckingAbsences) {
@@ -264,7 +272,7 @@ for (const tractate of selected) {
         if (safeguardPrevious) preserveRetryPage(work.pages[amud], next);
         work.pages[amud] = next;
       } catch (error) {
-        const serverFailure = /PDF HTTP (403|429|5\d\d)/.test(error.message);
+        const serverFailure = /PDF HTTP (403|429|5\d\d)|PDF network error/.test(error.message);
         if (serverFailure) {
           stop = true;
         }
@@ -277,6 +285,8 @@ for (const tractate of selected) {
           }
           else if (protectedRetry) return;
           else if (safeguardPrevious) work.pages[amud].lastClassificationError = error.message;
+          // Left pending so that rerunning the same run ID resumes it.
+          else if (serverFailure) return;
           else {
             work.pages[amud].tosafotEvidence.state = "error";
             work.pages[amud].lastClassificationError = error.message;
@@ -285,7 +295,7 @@ for (const tractate of selected) {
               applyWikisourceRashiAbsence(work.pages[amud], wikiPages[amud]);
             }
           }
-        } else if (/PDF HTTP (403|429|5\d\d)/.test(error.message)) {
+        } else if (serverFailure) {
           return;
         } else if (recoverMain) {
           work.pages[amud].mainRecoveryError = error.message;
