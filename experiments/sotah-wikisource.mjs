@@ -87,7 +87,7 @@ export async function loadWikisourcePages(tractate, { fetcher = fetch, selectedA
         section = section.replace(extendedMarkup ? /\{\{(?:הפניה-גמ1?|מקור)\|[^{}]+\}\}/g : /\{\{הפניה-גמ\|[^{}]+\}\}/g, "|");
         if (/\{\{|\[\[|^=/m.test(section)) continue;
         const text = normalizeHebrew(section);
-        const openingWord = normalizeHebrew((extendedMarkup ? /^[(' \t\r\n]*([\u05d0-\u05ea]+)(?=[^\u05d0-\u05ea]|$)/ : /^[' \t\r\n]*([\u05d0-\u05ea]+)(?=[^\u05d0-\u05ea]|$)/).exec(section)?.[1] || "");
+        const openingWord = normalizeHebrew((extendedMarkup ? /^[(' \t\r\n]*([\u05d0-\u05ea]+(?:["\u05f4][\u05d0-\u05ea]+)*)(?=[^\u05d0-\u05ea]|$)/ : /^[' \t\r\n]*([\u05d0-\u05ea]+)(?=[^\u05d0-\u05ea]|$)/).exec(section)?.[1] || "");
         if (text.length < 16 || !openingWord || !text.startsWith(openingWord)) continue;
         commentarySources[kind] = { amud, tractate: tractate.slug, commentary: kind, title: page.title, revision: revision.revid, text, openingWord,
           source: `https://he.wikisource.org/?oldid=${revision.revid}`,

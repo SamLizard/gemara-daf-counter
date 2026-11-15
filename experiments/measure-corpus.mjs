@@ -614,13 +614,20 @@ export function resolveCommentaryCatchwords(items, streams, defaultPitch, refere
     const catchword = terminal.items[0], decoded = decodePdfText(catchword.str).trim(), text = normalizeHebrew(decoded);
     // A short last line can end at the catchword's x; measure the indent from the column edge of the rows above.
     const edge = Math.min(preceding.left, ...rows.slice(-4, -2).filter((row) => row.left <= terminal.left && row.right >= terminal.right).map((row) => row.left));
+    // Raised, smaller bracketed gloss markers (e.g. "יב[", ")י(") sit inside the preceding row but are not part of the commentary text.
+    const tallest = Math.max(...preceding.items.map((item) => item.height));
+    const textual = preceding.items.filter((item) => {
+      const marker = decodePdfText(item.str).trim();
+      return !(item.height < tallest - 0.05 && /^[()[\]\u05d0-\u05ea]{1,4}$/.test(marker) && /[()[\]]/.test(marker));
+    });
+    const gap = Math.max(...textual.map((item) => item.transform[5])) - terminal.baseline;
     if (stream.run.at(-1) !== catchword || streams.filter((candidate) => candidate.expanded.includes(catchword)).length !== 1
-      || !/^[\u05d0-\u05ea]{2,8}$/.test(decoded) || text !== sources.next.openingWord || !sources.next.text.startsWith(text)
+      || !/^[\u05d0-\u05ea]+(?:["'\u05f3\u05f4][\u05d0-\u05ea]+)*['\u05f3]?$/.test(decoded) || text.length < 2 || text.length > 8 || text !== sources.next.openingWord || !sources.next.text.startsWith(text)
       || terminal.right - terminal.left > pitch * 4 || catchword.height > pitch * 1.2 || !(catchword.height > 0)
-      || preceding.baseline - terminal.baseline < pitch * 0.8 || preceding.baseline - terminal.baseline > pitch * 1.2
+      || gap < pitch * 0.8 || gap > pitch * 1.5
       || terminal.left - edge < pitch * 0.8 || terminal.left - edge > pitch * 2
       || terminal.right > preceding.right + 0.02) continue;
-    const precedingText = [...preceding.items].sort((first, second) => second.transform[4] - first.transform[4]).map((item) => decodePdfText(item.str)).join(" ");
+    const precedingText = [...textual].sort((first, second) => second.transform[4] - first.transform[4]).map((item) => decodePdfText(item.str)).join(" ");
     const ending = normalizeHebrew(precedingText);
     // The commentary may continue mid-sentence on the next amud; the exact source ending and next opening are the evidence.
     if (ending.length < 8 || !sources.current.text.endsWith(ending)) continue;
@@ -642,16 +649,20 @@ export function resolveCommentaryCatchwords(items, streams, defaultPitch, refere
   return ownership;
 }
 
-function lines(items, pitch, kind, tolerance) {
-  return groupRows(items, tolerance).map(({ baseline, left, right, items: fragments }) => ({
-    baseline, left, right, pitch, kind,
+function lines(items, pitch, kind, tolerance, { bodyBaseline = false } = {}) {
+  return groupRows(items, tolerance).map(({ baseline: rowBaseline, left, right, items: fragments }) => {
+    // Raised, smaller gloss markers can be the row's highest item; profiles may opt into the body text baseline instead.
+    const tallest = Math.max(...fragments.map((fragment) => fragment.height));
+    const baseline = bodyBaseline ? Math.max(...fragments.filter((fragment) => fragment.height > tallest - 0.05).map((fragment) => fragment.transform[5])) : rowBaseline;
+    return { baseline, left, right, pitch, kind,
     top: Math.max(baseline + pitch / 2, ...fragments.map((fragment) => fragment.transform[5] + fragment.height)),
     bottom: Math.min(baseline - pitch / 2, ...fragments.map((fragment) => fragment.transform[5] - fragment.height / 4)),
     tallFragments: fragments.filter((fragment) => fragment.height > pitch * 1.4).map((fragment) => ({
       left: fragment.transform[4], right: fragment.transform[4] + fragment.width,
       top: fragment.transform[5] + fragment.height * 0.65, bottom: fragment.transform[5] - fragment.height / 4,
     })),
-  }));
+    };
+  });
 }
 
 function itemsOfSize(items, sizes) {
@@ -865,7 +876,24 @@ export function runPitch(run, layout) {
   const counts = layout.runPitches.map(([size]) => run.filter((item) => Math.abs(item.height - size) < 0.02).length);
   const best = Math.max(...counts);
   if (counts.filter((count) => count === best).length > 1) throw new Error("Commentary run has no dominant body size");
-  return layout.runPitches[counts.indexOf(best)][1];
+  const [size, pitch] = layout.runPitches[counts.indexOf(best)];
+  return pitch === "measured" ? measuredRunPitch(run, size) : pitch;
+}
+
+// Some layouts justify a small commentary font vertically, so its line pitch differs per page (e.g. Bekhorot 8.88 at 7.9–9.4).
+export function measuredRunPitch(run, size) {
+  const sized = run.filter((item) => Math.abs(item.height - size) < 0.02);
+  const gaps = [];
+  for (const column of [sized.filter((item) => item.transform[4] < 300), sized.filter((item) => item.transform[4] >= 300)]) {
+    const baselines = [...new Set(column.map((item) => item.transform[5]))].sort((first, second) => second - first);
+    for (let index = 1; index < baselines.length; index++) {
+      const gap = baselines[index - 1] - baselines[index];
+      if (gap >= size * 0.8 && gap <= size * 1.15) gaps.push(gap);
+    }
+  }
+  if (gaps.length < 5) throw new Error(`Commentary run at ${size} has too few consecutive lines to measure its pitch`);
+  gaps.sort((first, second) => first - second);
+  return gaps[Math.floor(gaps.length / 2)];
 }
 
 export function findBottomTosafotBlock(items, spec, references, name) {
@@ -1046,7 +1074,7 @@ export async function processPage(definition, index, references, pdfBytes) {
       fragmentOwnership.push(...catchwords);
       frameRows.push(...catchwords.map((entry) => entry.frameRow));
       for (const stream of streams) {
-        const rows = lines(stream.expanded, stream.pitch, stream.kind, 2);
+        const rows = lines(stream.expanded, stream.pitch, stream.kind, 2, { bodyBaseline: Boolean(layout.bodyBaselineRows) });
         stream.match.rows = rows.map(({ baseline, left, right }) => ({ baseline, left, right }));
         groups[stream.kind].push(...rows);
       }

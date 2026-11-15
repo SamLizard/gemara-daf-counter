@@ -7,7 +7,16 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { promisify } from "node:util";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
-import { applyReviewedGittin76bEvidence, calculateAreas, calculateFrame, checkOverlap, classifyHorayotTosafot, classifyMissingCategories, decodeMainGlyphText, decodePdfText, groupRows, identifyCommentaryRun, identifyRun, includeStreamFragments, isAmbiguousRetryCandidate, isCommentaryRetryCandidate, isLegacyCommentaryAuditCandidate, isOverlapRetryCandidate, loadTexts, matchMainGlyphs, matchScore, normalizeHebrew, preserveRetryPage, preserveRetryTosafot, processPage, redistributeLeadingFragments, resolveCommentaryCatchwords, resolveMainStreamFragments, splitCommentaryRuns, splitRuns, verifyOverlapRetrySources } from "./measure-corpus.mjs";
+import { applyReviewedGittin76bEvidence, calculateAreas, calculateFrame, checkOverlap, classifyHorayotTosafot, classifyMissingCategories, decodeMainGlyphText, decodePdfText, groupRows, identifyCommentaryRun, identifyRun, includeStreamFragments, isAmbiguousRetryCandidate, isCommentaryRetryCandidate, isLegacyCommentaryAuditCandidate, isOverlapRetryCandidate, loadTexts, matchMainGlyphs, matchScore, measuredRunPitch, normalizeHebrew, preserveRetryPage, preserveRetryTosafot, processPage, redistributeLeadingFragments, resolveCommentaryCatchwords, resolveMainStreamFragments, runPitch, splitCommentaryRuns, splitRuns, verifyOverlapRetrySources } from "./measure-corpus.mjs";
+
+test("measured run pitch takes the median line gap per column and refuses short runs", () => {
+  const item = (x, y, height = 8.88) => ({ height, transform: [1, 0, 0, 1, x, y] });
+  const run = [...[700, 691, 682.2, 673, 664, 655].map((y) => item(50, y)), ...[600, 591.4, 582.4].map((y) => item(400, y)),
+    item(50, 640, 9.36), item(400, 560)];
+  assert.equal(measuredRunPitch(run, 8.88), 9);
+  assert.equal(runPitch(run, { runPitches: [[9.36, 10.44], [8.88, "measured"]] }), 9);
+  assert.throws(() => measuredRunPitch(run.slice(0, 4), 8.88), /too few consecutive lines/);
+});
 import { getCachedPdf } from "./pdf-cache.mjs";
 import { shasDefinition } from "./shas-profiles.mjs";
 import { amudIndex, tractates } from "./shas-catalog.mjs";
@@ -2367,7 +2376,9 @@ test("cached Bekhorot and Arakhin margin headings retain source and overlap safe
       return;
     }
     assert.equal(createHash("sha256").update(references.rashi).digest("hex"), "923e0ed5e1e26013659297e7006118daaa2d8f297b1b1486367457a3c5c2ac0f");
-    assert.deepEqual([page.groups.main.length, page.groups.rashi.length, page.groups.tosafot.length], [45, 70, 8]);
+    // Both terminal rows are catchwords ("לבי" opens 9a Rashi, "בי" 9a Tosafot) once raised gloss markers are ignored.
+    assert.deepEqual([page.groups.main.length, page.groups.rashi.length, page.groups.tosafot.length], [45, 69, 7]);
+    assert.deepEqual(page.fragmentOwnership.filter((entry) => entry.kind === "catchword").map((entry) => [entry.commentary, entry.text]), [["rashi", "\u05dc\u05d1\u05d9"], ["tosafot", "\u05d1\u05d9"]]);
     checkOverlap(page);
     const previous = checkpoint.pages[amud];
     assert.equal(previous.page.sha256, sha256);
