@@ -4,7 +4,7 @@ This research estimates the printed area occupied by Mishnah and Gemara, Rashi, 
 
 ## Full Shas JSON
 
-The generated [results/shas-metrics.json](results/shas-metrics.json) is a frontend-oriented export for 40 separately named sections. All 5,405 sides have a numeric main-text measurement, including a confirmed zero on Nazir 33b. Thirty-seven sections have numeric values for all three categories on every side, while three are partial; 74 sides have at least one unknown category. These counts describe coverage, not verified accuracy. There are 300 Wikisource-only Rashi zeroes and 414 numeric Tosafot zeroes, including 151 whose recorded basis is the Wikisource-only section check, 180 deliberately excluded on Nedarim, and 31 deliberately excluded on Kinnim, Tamid, and Middot. Forty Shekalim sides have user-attested Rashi and Tosafot zeroes.
+The generated [results/shas-metrics.json](results/shas-metrics.json) is a frontend-oriented export for 40 separately named sections. All 5,405 sides have a numeric main-text measurement, including a confirmed zero on Nazir 33b. All 40 sections have numeric values for all three categories on every side; no side has an unknown category. These counts describe coverage, not verified accuracy. There are 300 Wikisource-only Rashi zeroes and 414 numeric Tosafot zeroes, including 151 whose recorded basis is the Wikisource-only section check, 180 deliberately excluded on Nedarim, and 31 deliberately excluded on Kinnim, Tamid, and Middot. Forty Shekalim sides have user-attested Rashi and Tosafot zeroes.
 
 Shekalim, Kinnim, Tamid, and Middot have main-text-only measurements. Their fitted frames also use unclassified printed text, not identified Rashi or Tosafot; they are provisional. Shekalim is checked against the Jerusalem Talmud, Kinnim and Middot against Mishnah, and Tamid against Bavli Tamid. For these four sections, matches are against the entire work because its reference pagination differs from the PDF; this is weaker than a page-specific match. The source lists the Jerusalem Talmud Shekalim version's license as unknown.
 
@@ -99,6 +99,10 @@ All 119 Bekhorot sides are classified. Besides Rashi at 10.92 and Tosafot at 10.
 ### Arakhin Classification
 
 All 65 Arakhin sides are classified. On 9a and 24b a long Tosafot is set in 8.88 points and justified vertically, so 8.88 counts as commentary with a measured pitch only on rows that are wide and mostly in that size; elsewhere 8.88 is gloss markers. Gloss markers inside the main column are owned by main-column geometry, so they no longer pull Rashi rows into the main text.
+
+### Temurah and Meilah Classification
+
+Temurah 6b–34a set Tosafot in 9.36 points (pitch 9), a size used elsewhere only for gloss markers, so a page with at least 150 letters in 9.36 measures it as commentary with a measured pitch. Meilah's gloss marker `$` inside the main column is owned by main-column geometry, which removed its false main/Tosafot overlaps and ambiguous one-glyph streams.
 
 ### Keritot Classification
 

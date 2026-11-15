@@ -1066,7 +1066,7 @@ export async function processPage(definition, index, references, pdfBytes) {
       // Main-font words and short gloss markers set inside the main column belong to the main text, not commentary.
       const mainColumnFragment = (item) => Boolean(layout.mainColumnFragments)
         && ((mainFonts.has(item.fontName) && insideMain(item, definition.mainPitch * 1.5))
-          || (/^[()[\]]?[\u05d0-\u05ea]{0,3}[()[\]]?$/.test(decodePdfText(item.str).trim()) && insideMain(item, definition.mainPitch / 2)));
+          || (/^(?:[()[\]]?[\u05d0-\u05ea]{0,3}[()[\]]?|[$*])$/.test(decodePdfText(item.str).trim()) && insideMain(item, definition.mainPitch / 2)));
       const columnOwnership = (item) => ({ itemIndex: items.indexOf(item), kind: "main", basis: "main-column-geometry", text: decodePdfText(item.str),
         left: item.transform[4], right: item.transform[4] + item.width, baseline: item.transform[5], height: item.height });
       const sizedItems = itemsOfSize(items, layout.commentarySizes || [11.16, 11.4]).filter((item) => !bottomItems.has(item));
