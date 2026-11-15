@@ -4,6 +4,70 @@ import { test } from "node:test";
 import { chromium } from "playwright-core";
 import { buildProblemIndex, intersections } from "./problem-review.mjs";
 
+test("review downloads missing PDFs without changing checkpoints and reuses the verified cache", async (context) => {
+  const { mkdir, mkdtemp, rm, writeFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { getCachedPdf } = await import("./pdf-cache.mjs");
+  const { classifierVersion } = await import("./measure-corpus.mjs");
+  const { startProblemReview } = await import("./problem-review.mjs");
+  const sha256 = "82ef64ca9f7fd05bf9af160f1c91094cfc103b591ff179008ac6184d2c412973";
+  let bytes;
+  try {
+    bytes = (await getCachedPdf({ slug: "shekalim" }, "2a", { expectedHash: sha256, cacheOnly: true })).bytes;
+  } catch (error) {
+    if (error.message.includes("not available in the local cache")) { context.skip("Pinned PDF fixture unavailable"); return; }
+    throw error;
+  }
+  const directory = await mkdtemp(join(tmpdir(), "pdf-download-review-"));
+  let server;
+  try {
+    await mkdir(join(directory, "shas-work"));
+    const groups = { main: [{ left: 100, right: 200, baseline: 918, pitch: 10 }], rashi: [], tosafot: [] };
+    const checkpoint = JSON.stringify({ slug: "nedarim", pages: {
+      "2a": { classifierVersion, page: { sha256, groups }, unknownCategories: [] },
+      "2b": { classifierVersion, page: { sha256: "0".repeat(64), groups }, unknownCategories: [] },
+    } });
+    const metrics = JSON.stringify({ tractates: [{ id: "nedarim", title: "Nedarim", pages: [
+      { amud: "2a", status: "measured", fractions: { main: 0.4, rashi: 0.2, tosafot: 0 } },
+      { amud: "2b", status: "measured", fractions: { main: 0.4, rashi: 0.2, tosafot: 0 } },
+    ] }] });
+    await writeFile(join(directory, "shas-work", "nedarim.json"), checkpoint);
+    await writeFile(join(directory, "shas-metrics.json"), metrics);
+    let requests = 0;
+    const pdfFetcher = async () => { requests++; return new Response(bytes); };
+    let review = await startProblemReview({ resultsDirectory: directory, writeReport: false, cacheOnly: true, pdfFetcher });
+    server = review.server;
+    assert.equal((await fetch(`${review.url}api/page?tractate=nedarim&amud=2a`)).status, 502);
+    assert.equal(requests, 0);
+    await new Promise((resolveClose) => server.close(resolveClose));
+    review = await startProblemReview({ resultsDirectory: directory, writeReport: false, cacheOnly: true, downloadMissingPdfs: true, pdfFetcher });
+    server = review.server;
+    const response = await fetch(`${review.url}api/page?tractate=nedarim&amud=2a`);
+    assert.equal(response.status, 200);
+    const page = await response.json();
+    assert.match(page.note, /downloaded and cached.*matches the saved fingerprint/);
+    assert.equal(page.regions.main.rows.length, 1);
+    assert.deepEqual(await readFile(join(directory, "pdf-cache", `nedarim-2a-${sha256}.pdf`)), bytes);
+    const mismatch = await fetch(`${review.url}api/page?tractate=nedarim&amud=2b`);
+    assert.equal(mismatch.status, 502);
+    assert.match((await mismatch.json()).error, /differs from the previously measured file/);
+    assert.equal(requests, 2);
+    await new Promise((resolveClose) => server.close(resolveClose));
+    review = await startProblemReview({ resultsDirectory: directory, writeReport: false, cacheOnly: true, pdfFetcher });
+    server = review.server;
+    const cached = await fetch(`${review.url}api/page?tractate=nedarim&amud=2a`);
+    assert.equal(cached.status, 200);
+    assert.match((await cached.json()).note, /loaded from disk cache/);
+    assert.equal(requests, 2);
+    assert.equal(await readFile(join(directory, "shas-work", "nedarim.json"), "utf8"), checkpoint);
+    assert.equal(await readFile(join(directory, "shas-metrics.json"), "utf8"), metrics);
+  } finally {
+    if (server) await new Promise((resolveClose) => server.close(resolveClose));
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test("Shekalim cache-only review preview translates its frame and never writes reports or checkpoints", async (context) => {
   const { mkdir, mkdtemp, rm, writeFile } = await import("node:fs/promises");
   const { tmpdir } = await import("node:os");

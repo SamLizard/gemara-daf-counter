@@ -49,7 +49,7 @@ export function intersections(groups) {
   return found;
 }
 
-export async function startProblemReview({ port = 0, resultsDirectory = results, writeReport = true, cacheOnly = false, shekalimFramePreview = false } = {}) {
+export async function startProblemReview({ port = 0, resultsDirectory = results, writeReport = true, cacheOnly = false, downloadMissingPdfs = !cacheOnly, pdfFetcher = fetch, shekalimFramePreview = false } = {}) {
   const template = await readFile(join(directory, "problem-review.html"), "utf8");
   const textsByBook = new Map();
   const scans = new Map();
@@ -86,7 +86,7 @@ export async function startProblemReview({ port = 0, resultsDirectory = results,
     const entry = entries[item.tractate]?.[item.amud];
     const book = data.tractates.find((candidate) => candidate.id === item.tractate);
     const expectedHash = entry?.page?.sha256 || entry?.tosafotEvidence?.pdfSha256 || entry?.rashiEvidence?.pdfSha256;
-    const { bytes, source } = await getCachedPdf(tractate, item.amud, { expectedHash, cacheOnly: cacheOnly || shekalimFramePreview || item.tractate === "nedarim",
+    const { bytes, source } = await getCachedPdf(tractate, item.amud, { expectedHash, cacheOnly: !downloadMissingPdfs || shekalimFramePreview, fetcher: pdfFetcher,
       cacheDirectory: join(resultsDirectory, "pdf-cache"), corpusDirectory: join(resultsDirectory, "pdfs") });
     const hash = createHash("sha256").update(bytes).digest("hex");
     const verified = Boolean(expectedHash && hash === expectedHash);
