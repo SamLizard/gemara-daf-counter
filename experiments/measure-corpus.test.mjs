@@ -1688,6 +1688,45 @@ test("Nedarim references read only main text, attributed Rashi and Ran from one 
   assert.ok(adjacent.adjacent.every((source) => !Object.hasOwn(source, "tosafot")));
 });
 
+test("Nedarim references follow a contradicting gmara container only when its own heading is absent", async () => {
+  const { nedarimReferences } = await import("./measure-corpus.mjs");
+  const mislabelled = (withRan) => ({ title: "נדרים יא א", revisions: [{ revid: 78, slots: { main: { content: [
+    `<קטע התחלה=ג/>${nedarimMainText}<קטע סוף=ג/>`,
+    `<div class='gmara_ran'>\n==מיוחס לרש"י==\n${nedarimRanText}`,
+    ...(withRan ? [`<div class='gmara_ran'>\n==ר"ן==\n${nedarimRanText}`] : []),
+    `<div class='gmara_tosfot'>\n==תוספות==\n${nedarimTosafotText}`,
+  ].join("\n") } } }] });
+  const references = nedarimReferences(mislabelled(false));
+  assert.equal(references.rashi, null);
+  assert.equal(references.ran, normalizeHebrew(nedarimRanText));
+  assert.deepEqual([nedarimReferences(mislabelled(true)).rashi, nedarimReferences(mislabelled(true)).ran], [null, normalizeHebrew(nedarimRanText)]);
+});
+
+test("Nedarim column layout fills textless column rows and overrides only short quotations", async () => {
+  const { assignNedarimColumnLayout } = await import("./measure-corpus.mjs");
+  const gutter = { left: 293, right: 302 };
+  const scores = (rashi = 0, ran = 0) => ({ main: 0, rashi, ran, adjacent: { main: 0, rashi: 0, ran: 0 } });
+  const segment = (baseline, left, right, kind, rashi, ran) => ({ baseline, left, right, kind, basis: kind ? "unique-amud-source-text" : undefined, scores: scores(rashi, ran) });
+  const main = [{ baseline: 900 }, { baseline: 890 }, { baseline: 880 }, { baseline: 870 }];
+  // b-side: inner Rashi is the left column.
+  const column = () => [segment(900, 88, 198, "rashi", 60, 0), segment(890, 88, 198, "ran", 0, 19), segment(880, 88, 198, "rashi", 50, 0),
+    segment(870, 88, 198, null, 0, 0), segment(900, 383, 507, "ran", 0, 60), segment(890, 383, 507, null, 0, 0), segment(880, 383, 507, "ran", 0, 40)];
+  const options = { innerRashi: "left", gutter, pitch: 10.44, main, mainPitch: 11.88 };
+  const segments = column();
+  assignNedarimColumnLayout(segments, options);
+  assert.deepEqual(segments.map((candidate) => [candidate.kind, candidate.basis]), [
+    ["rashi", "unique-amud-source-text"], ["rashi", "nedarim-column-layout-over-short-quotation"], ["rashi", "unique-amud-source-text"],
+    ["rashi", "nedarim-column-layout"], ["ran", "unique-amud-source-text"], ["ran", "nedarim-column-layout"], ["ran", "unique-amud-source-text"]]);
+  const strong = column();
+  strong[1].scores.ran = 40;
+  assignNedarimColumnLayout(strong, options);
+  assert.equal(strong[1].kind, "ran", "strong text evidence is never overridden");
+  const contested = column();
+  contested[5].scores.rashi = 30;
+  assignNedarimColumnLayout(contested, options);
+  assert.equal(contested[5].kind, null, "opposite text evidence leaves a row unresolved");
+});
+
 test("Nedarim rows split only across the commentary gutter", async () => {
   const { splitNedarimRow } = await import("./measure-corpus.mjs");
   const gutter = { left: 293, right: 302 };
@@ -1939,7 +1978,7 @@ test("Nedarim pinned conflicting headings resolve only through unique source con
   }
 });
 
-test("Nedarim pinned 76b rejects a source match in the wrong commentary column", async (context) => {
+test("Nedarim pinned 76b re-attributes a short shared quotation in the inner column to Rashi", async (context) => {
   const { processNedarimPage, nedarimAmudReferences } = await import("./measure-corpus.mjs");
   const definition = shasDefinition({ slug: "nedarim" });
   let wikiPages, bytes;
@@ -1954,7 +1993,12 @@ test("Nedarim pinned 76b rejects a source match in the wrong commentary column",
   const references = nedarimAmudReferences(wikiPages, 149);
   assert.deepEqual([references.revision, references.sha256.rashi, references.sha256.ran], [2968049,
     "80a66c53565fc2a037d7d8540cffc63898e41ed6fc425e0c1af0a51ad4854976", "a5e367d2fd1fff9d6b492049aa4548ed13d0d70e601c88885f8b5c9b7926e5b5"]);
-  await assert.rejects(processNedarimPage(definition, 149, references, bytes), /ran beside main text is not in the expected column/);
+  // "מחד בשבא לחד בשבא - דהכי משמע" opens both a Rashi and a Ran comment; only Ran's wording is on Wikisource.
+  const page = await processNedarimPage(definition, 149, references, bytes);
+  const row = page.groups.rashi.find((candidate) => Math.abs(candidate.baseline - 889.0) < 0.5);
+  assert.ok(row && row.right < 213, "inner b-side row stays Rashi");
+  assert.equal(page.commentaryAttribution.segments["nedarim-column-layout-over-short-quotation"], 1);
+  assert.equal(page.groups.other.some((candidate) => Math.abs(candidate.baseline - 889.0) < 0.5 && candidate.right < 213), false);
 });
 
 test("Nedarim cached Ran fragments retain main and exclude marginal material on both sides", async (context) => {
@@ -2055,7 +2099,8 @@ test("Nedarim classifier refuses Tosafot references, incomplete sources and othe
   const references = nedarimReferencesFixture();
   await assert.rejects(processNedarimPage(definition, 5, { ...references, tosafot: "" }, Buffer.alloc(0)), /does not accept Tosafot/);
   await assert.rejects(processNedarimPage(definition, 5, { ...references, adjacent: [{ ...references, tosafot: null }] }, Buffer.alloc(0)), /does not accept Tosafot/);
-  await assert.rejects(processNedarimPage(definition, 5, { ...references, ran: null }, Buffer.alloc(0)), /main, attributed Rashi and Ran/);
+  await assert.rejects(processNedarimPage(definition, 5, { ...references, rashi: null, ran: null }, Buffer.alloc(0)), /main and attributed Rashi or Ran/);
+  await assert.rejects(processNedarimPage(definition, 5, { ...references, main: null }, Buffer.alloc(0)), /main and attributed Rashi or Ran/);
   await assert.rejects(processNedarimPage(shasDefinition({ slug: "sotah" }), 5, references, Buffer.alloc(0)), /Nedarim profile/);
   for (const slug of ["sotah", "nazir", "tamid", "rosh-hashanah"]) assert.equal(Object.hasOwn(shasDefinition({ slug }), "nedarimLayout"), false);
   const { nedarimLayout, ...shared } = definition;
@@ -2112,7 +2157,7 @@ test("Nedarim 4b pinned cache separates main, inner attributed Rashi and outer R
   assert.throws(() => preserveRetryPage({ ...previous([]), confirmedAbsent: ["rashi"] }, next()), /conflicts with a previously recorded zero/);
 });
 
-test("Nedarim pinned a-side keeps Rashi inner and unsupported displaced Ran is rejected", async (context) => {
+test("Nedarim pinned a-side keeps Rashi inner and textless inner rows follow the column layout", async (context) => {
   const { processNedarimPage, nedarimAmudReferences } = await import("./measure-corpus.mjs");
   const definition = shasDefinition({ slug: "nedarim" });
   const load = async (amud, sha256) => (await getCachedPdf(definition, amud, { expectedHash: sha256, cacheOnly: true,
@@ -2133,7 +2178,14 @@ test("Nedarim pinned a-side keeps Rashi inner and unsupported displaced Ran is r
   assert.ok(page.groups.rashi.filter(beside).length && page.groups.rashi.filter(beside).every((row) => row.left > 383), "a-side inner Rashi on the right");
   assert.ok(page.groups.other.filter(beside).length && page.groups.other.filter(beside).every((row) => row.right < 213), "a-side outer Ran on the left");
   assert.equal(page.groups.tosafot.length, 0);
-  await assert.rejects(processNedarimPage(definition, 19, nedarimAmudReferences(wikiPages, 19), rejected), /unresolved Nedarim commentary segments/);
+  // 11b: Wikisource's attributed Rashi differs from the printed wording, so the inner column has no text evidence.
+  const layoutPage = await processNedarimPage(definition, 19, nedarimAmudReferences(wikiPages, 19), rejected);
+  const layoutTop = Math.max(...layoutPage.groups.main.map((row) => row.baseline));
+  const layoutBottom = Math.min(...layoutPage.groups.main.map((row) => row.baseline));
+  const besideLayout = (row) => row.baseline <= layoutTop && row.baseline >= layoutBottom;
+  assert.ok(layoutPage.groups.rashi.filter(besideLayout).length > 20 && layoutPage.groups.rashi.filter(besideLayout).every((row) => row.right < 213));
+  assert.ok(layoutPage.groups.other.filter(besideLayout).every((row) => row.left > 383));
+  assert.ok(layoutPage.commentaryAttribution.segments["nedarim-column-layout"] >= 25);
 });
 
 test("Nedarim pinned main alignment accepts only unique, ordered, amud-specific main items", async () => {

@@ -1082,7 +1082,7 @@ export async function processPage(definition, index, references, pdfBytes) {
   }
 }
 
-export const nedarimAttributionVersion = 1;
+export const nedarimAttributionVersion = 2;
 
 function cleanNedarimSection(section, { dropTemplates = false } = {}) {
   let text = section.replace(/<!--[^]*?-->/g, " ")
@@ -1108,8 +1108,20 @@ export function nedarimReferences(wikiPage) {
   const mainSection = /<קטע\s+התחלה\s*=\s*ג\s*\/\s*>([^]*?)<קטע\s+סוף\s*=\s*ג\s*\/\s*>/.exec(content)?.[1];
   const main = mainSection ? cleanNedarimSection(mainSection, { dropTemplates: true }) : null;
   const headings = [...content.matchAll(/^(={2,6})[ \t]*(.*?)[ \t]*\1[ \t]*$/gm)];
-  const section = (pattern, kind) => {
-    const matching = headings.filter((heading) => heading[1].length === 2 && pattern.test(heading[2].trim()));
+  // Wikisource wraps each commentary in a gmara_<kind> container. On the pinned 11a revision the Ran text sits in
+  // gmara_ran under a "מיוחס לרש"י" heading (Sefaria's Vilna Ran confirms it is Ran), so a container that
+  // contradicts its heading wins only when no heading of that kind exists; the heading's own kind is then dropped.
+  const containerKind = (heading) => {
+    const container = /<div\s+class\s*=\s*['"]gmara_(rashi|ran|tosfot)['"]\s*>\s*$/.exec(content.slice(0, heading.index))?.[1];
+    return container === "rashi" || container === "ran" ? container : null;
+  };
+  const headingKinds = { rashi: /^מיוחס לרש["״]י$/, ran: /^ר["״]ן$/ };
+  const section = (kind) => {
+    const labelled = headings.filter((heading) => heading[1].length === 2 && headingKinds[kind].test(heading[2].trim()));
+    const own = labelled.filter((heading) => [null, kind].includes(containerKind(heading)));
+    const relabelled = headings.filter((heading) => heading[1].length === 2 && containerKind(heading) === kind
+      && Object.entries(headingKinds).some(([other, pattern]) => other !== kind && pattern.test(heading[2].trim())));
+    const matching = labelled.length ? own : relabelled;
     if (matching.length !== 1) return null;
     const end = headings.find((candidate) => candidate.index > matching[0].index && candidate[1].length <= 2)?.index ?? content.length;
     let raw = content.slice(matching[0].index + matching[0][0].length, end);
@@ -1120,7 +1132,7 @@ export function nedarimReferences(wikiPage) {
     const text = cleanNedarimSection(raw);
     return text && text.length >= 16 ? text : null;
   };
-  const texts = { main: main && main.length >= 30 ? main : null, rashi: section(/^מיוחס לרש["״]י$/, "rashi"), ran: section(/^ר["״]ן$/, "ran") };
+  const texts = { main: main && main.length >= 30 ? main : null, rashi: section("rashi"), ran: section("ran") };
   const hash = (text) => text ? createHash("sha256").update(text).digest("hex") : null;
   return { title: wikiPage.title, revision: revision.revid, source: `https://he.wikisource.org/?oldid=${revision.revid}`,
     contentSha256: hash(content), ...texts, sha256: Object.fromEntries(Object.entries(texts).map(([kind, text]) => [kind, hash(text)])) };
@@ -1423,10 +1435,61 @@ export function attributeNedarimSegments(segments, references, pitch, name = "ne
   return segments;
 }
 
+// Rashi and Ran share one body font in these PDFs, so size cannot separate them. Their layout can: on every accepted side,
+// column rows follow inner Rashi / outer Ran (12207 rows, 2 below-main exceptions, both fixed by text). Segments the text
+// leaves unresolved take their column's kind unless they carry strong opposite evidence or their column chain disagrees;
+// full-width rows only take a kind when every attributed full-width neighbour in the chain agrees. Beside the main text,
+// where the layout is enforced, a short fragment (< 24 matched letters) quoted by the other commentary is re-attributed to
+// its column when the rows directly above and below it in that column agree.
+export function assignNedarimColumnLayout(segments, { innerRashi, gutter, pitch, main = [], mainPitch = pitch }) {
+  const column = (segment) => segment.right <= gutter.left + 1 ? "left" : segment.left >= gutter.right - 1 ? "right" : null;
+  const contiguous = (first, second) => Math.abs(first.baseline - second.baseline) <= pitch * 1.3 && first.baseline !== second.baseline
+    && Math.min(first.right, second.right) - Math.max(first.left, second.left) >= 0.5 * Math.min(first.right - first.left, second.right - second.left);
+  const chainKinds = (segment) => {
+    const kinds = new Set();
+    for (const direction of [-1, 1]) {
+      const visited = new Set([segment]);
+      for (let current = segment; ;) {
+        const candidates = segments.filter((candidate) => !visited.has(candidate) && contiguous(current, candidate)
+          && Math.sign(candidate.baseline - current.baseline) === direction && column(candidate) === column(segment));
+        if (candidates.length !== 1) break;
+        [current] = candidates;
+        visited.add(current);
+        if (current.kind && current.basis !== "nedarim-column-layout") { kinds.add(current.kind); break; }
+      }
+    }
+    return kinds;
+  };
+  const weakAgainst = (segment, kind) => {
+    const opposite = kind === "rashi" ? "ran" : "rashi";
+    return segment.scores[opposite] < 12 && segment.scores.adjacent[opposite] < 24;
+  };
+  const proposals = new Map();
+  for (const segment of segments.filter((candidate) => candidate.kind && column(candidate))) {
+    const kind = column(segment) === innerRashi ? "rashi" : "ran";
+    if (segment.kind === kind || segment.scores[segment.kind] + segment.scores.adjacent[segment.kind] >= 24
+      || !main.some((row) => Math.abs(row.baseline - segment.baseline) <= mainPitch)) continue;
+    const around = [-1, 1].map((direction) => segments.filter((candidate) => contiguous(segment, candidate)
+      && Math.sign(candidate.baseline - segment.baseline) === direction && column(candidate) === column(segment)));
+    if (around.every((rows) => rows.length === 1 && rows[0].kind === kind)) proposals.set(segment, kind);
+  }
+  for (const segment of segments.filter((candidate) => !candidate.kind)) {
+    const position = column(segment);
+    const kinds = chainKinds(segment);
+    const kind = position ? (position === innerRashi ? "rashi" : "ran") : kinds.size === 1 ? [...kinds][0] : null;
+    if (kind && weakAgainst(segment, kind) && [...kinds].every((value) => value === kind)) proposals.set(segment, kind);
+  }
+  for (const [segment, kind] of proposals) {
+    Object.assign(segment, { kind, basis: segment.kind ? "nedarim-column-layout-over-short-quotation" : "nedarim-column-layout" });
+  }
+  return segments;
+}
+
 export async function processNedarimPage(definition, index, references, pdfBytes, { mainOnly = false } = {}) {
   const layout = definition.nedarimLayout;
   if (definition.slug !== "nedarim" || !layout) throw new Error("Nedarim attribution requires the Nedarim profile");
-  if (!references?.main || !references.rashi || !references.ran) throw new Error("Nedarim attribution requires main, attributed Rashi and Ran sources");
+  // A missing commentary section only removes text evidence; its rows then come from the column layout alone.
+  if (!references?.main || (!references.rashi && !references.ran)) throw new Error("Nedarim attribution requires main and attributed Rashi or Ran sources");
   if (Object.hasOwn(references, "tosafot") || (references.adjacent || []).some((source) => Object.hasOwn(source, "tosafot"))) {
     throw new Error("Nedarim attribution does not accept Tosafot references");
   }
@@ -1465,12 +1528,13 @@ export async function processNedarimPage(definition, index, references, pdfBytes
     const inlineItems = itemsOfSize(items, layout.inlineSizes).filter(inWindow);
     const inline = attachNedarimInlineItems(segments, inlineItems, pitch, { gutter: layout.gutter, main });
     attributeNedarimSegments(segments, references, pitch, name, { ignoredSourceItems: new Set(inlineItems) });
+    const innerRashi = side === "b" ? "left" : "right";
+    assignNedarimColumnLayout(segments, { innerRashi, gutter: layout.gutter, pitch, main, mainPitch: definition.mainPitch });
     const unresolved = segments.filter((segment) => !segment.kind);
     if (unresolved.length) {
       throw new Error(`${name}: unresolved Nedarim commentary segments at ${unresolved.map((segment) => `${segment.baseline.toFixed(1)}/${segment.left.toFixed(0)}-${segment.right.toFixed(0)}`).join(", ")}`);
     }
     inline.resolve(name);
-    const innerRashi = side === "b" ? "left" : "right";
     for (const segment of segments) {
       const beside = main.filter((row) => Math.abs(row.baseline - segment.baseline) <= definition.mainPitch);
       if (!beside.length) continue;
@@ -1497,7 +1561,7 @@ export async function processNedarimPage(definition, index, references, pdfBytes
       commentaryAttribution: { version: nedarimAttributionVersion, layout: "nedarim-attributed-rashi-ran", tosafot: null,
         source: references.source || null, revision: references.revision || null, sourceSha256: references.sha256 || null,
         adjacentSources: (references.adjacent || []).map(({ title, revision, sha256 }) => ({ title, revision, sha256 })),
-        segments: Object.fromEntries(["unique-amud-source-text", "unique-adjacent-amud-source-text", "unique-amud-source-fragment", "unique-amud-source-one-insertion-continuation", "contiguous-column-between-same-source-rows", "unique-ordered-source-continuation"].map((basis) =>
+        segments: Object.fromEntries(["unique-amud-source-text", "unique-adjacent-amud-source-text", "unique-amud-source-fragment", "unique-amud-source-one-insertion-continuation", "contiguous-column-between-same-source-rows", "unique-ordered-source-continuation", "nedarim-column-layout", "nedarim-column-layout-over-short-quotation"].map((basis) =>
           [basis, segments.filter((segment) => segment.basis === basis).length])) } };
     checkOverlap(result);
     return result;

@@ -118,7 +118,7 @@ async function recomputeEntry(amud, entry, { definition, expected, wikiPages, lo
   } catch (error) {
     throw new Skip(`Wikisource references unusable: ${error.message}`);
   }
-  if (!references.main || !references.rashi || !references.ran) throw new Skip("Wikisource references unusable: current amud lacks main, attributed Rashi or Ran text");
+  if (!references.main || (!references.rashi && !references.ran)) throw new Skip("Wikisource references unusable: current amud lacks main or commentary text");
   if (review && (references.revision !== review.revision || references.sha256.main !== review.mainSha256)) throw new Skip("Wikisource main differs from the reviewed main pin");
   const sources = [references, ...references.adjacent].map(({ title, revision: revid, contentSha256 }) => ({ title, revision: revid, contentSha256 }));
   const name = `nedarim-${amud}`;
