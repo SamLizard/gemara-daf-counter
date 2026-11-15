@@ -3,6 +3,29 @@ import { test } from "node:test";
 import { frameForPage } from "./measure-corpus.mjs";
 import { buildShasExport } from "./shas-export.mjs";
 
+test("Kinnim exports and measures each side against its own printed body", () => {
+  const catalog = [{ slug: "kinim", title: "Kinnim", order: "Kodashim", first: "22a", last: "22b" }];
+  const row = { left: 20, right: 80, baseline: 120, pitch: 10 };
+  const shared = { left: 110, right: 140, baseline: 40, pitch: 5 };
+  const data = { kinim: Object.fromEntries([["22a", shared], ["22b", row]].map(([amud, main]) => [amud,
+    { page: { name: `kinim-${amud}`, groups: { main: [main], rashi: [], tosafot: [] } } }])) };
+  const before = structuredClone(data);
+  const book = buildShasExport(catalog, data).tractates[0];
+  assert.equal(book.frame.coordinateSpace, "kinim-per-page-v1");
+  for (const result of book.pages) {
+    const page = data.kinim[result.amud].page;
+    const frame = frameForPage(book.frame, page);
+    const main = page.groups.main[0];
+    const area = (frame.right - frame.left) * (frame.top - frame.bottom);
+    assert.ok(main.left >= frame.left && main.right <= frame.right);
+    assert.ok(main.baseline - main.pitch / 2 >= frame.bottom && main.baseline + main.pitch * 0.7 <= frame.top);
+    assert.ok(Math.abs(result.fractions.main - (main.right - main.left) * main.pitch / area) < 1e-12);
+  }
+  assert.notDeepEqual(book.frame.pageFrames["22a"], book.frame.pageFrames["22b"]);
+  assert.throws(() => frameForPage(book.frame, { name: "kinim-23a" }), /matching measured page/);
+  assert.deepEqual(data, before);
+});
+
 test("numeric Shekalim coverage does not certify recovered or unclassified frames", () => {
   const row = { left: 0, right: 10, baseline: 5, pitch: 10 };
   for (const recovery of [false, true]) for (const unclassified of [false, true]) {

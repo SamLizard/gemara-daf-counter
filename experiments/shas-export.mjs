@@ -69,7 +69,7 @@ export function buildShasExport(catalog, data) {
     schemaVersion: 1,
     classifierVersion,
     methodology: {
-      unit: "fractions of the tractate's fitted text-body rectangle per printed side",
+      unit: "fractions of the tractate's fitted text-body rectangle per printed side; Kinnim uses a separately fitted rectangle for each side",
       mainIncludes: ["Gemara", "Mishnah"],
       equivalentDaf: "two equivalent printed sides",
       warning: "Automatic line-box estimates, not ink area or fully hand-verified. Complete means classifier coverage, not verified accuracy. Different tractates have different reference rectangles. Null means unknown, not zero; inferred absence remains unknown. Some Rashi and Tosafot zeroes rely only on Wikisource sections and can be wrong if the transcription is incomplete; they are not all verified against the PDF. Shekalim user-attested absences are not Wikisource findings or independent visual verification. Partial frames are provisional and may change with further measurements; Shekalim unclassified or main-only frames remain provisional even with numeric category coverage. Other commentators, including Rashbam and Ran, are not included under Rashi or Tosafot.",

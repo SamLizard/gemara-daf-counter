@@ -1704,6 +1704,14 @@ export async function processNedarimPage(definition, index, references, pdfBytes
 }
 
 export function calculateFrame(pages, { horizontal = 0, vertical = 0 } = {}) {
+  if (pages.some((page) => page.name?.startsWith("kinim-"))) {
+    if (pages.some((page) => !/^kinim-\d+[ab]$/.test(page.name))) throw new Error("Kinnim frames require Kinnim pages only");
+    const plain = (page) => ({ ...page, name: undefined, frameGeometry: undefined });
+    const referencePages = pages.filter((page) => page.name !== "kinim-22a");
+    const reference = calculateFrame((referencePages.length ? referencePages : pages).map(plain), { horizontal, vertical });
+    const pageFrames = Object.fromEntries(pages.map((page) => [page.name.slice("kinim-".length), calculateFrame([plain(page)], { horizontal, vertical })]));
+    return { ...reference, coordinateSpace: "kinim-per-page-v1", pageFrames };
+  }
   const aligned = pages.some((page) => page.name?.startsWith("shekalim-") || page.frameGeometry);
   const sideOffsets = { a: shasDefinition({ slug: "shekalim" }, { mainOnly: true }).frameSideOffset, b: 0 };
   if (aligned && pages.some((page) => !/^shekalim-\d+[ab]$/.test(page.name) || page.frameGeometry?.version !== "shekalim-aligned-v1"
@@ -1723,6 +1731,11 @@ export function calculateFrame(pages, { horizontal = 0, vertical = 0 } = {}) {
 }
 
 export function frameForPage(frame, page) {
+  if (frame.coordinateSpace === "kinim-per-page-v1") {
+    const match = /^kinim-(\d+[ab])$/.exec(page?.name || "");
+    if (!match || !frame.pageFrames?.[match[1]]) throw new Error("Kinnim frame placement requires a matching measured page");
+    return frame.pageFrames[match[1]];
+  }
   if (frame.coordinateSpace !== "shekalim-aligned-v1") return frame;
   const expectedOffset = page.name?.endsWith("a") ? shasDefinition({ slug: "shekalim" }, { mainOnly: true }).frameSideOffset : 0;
   if (!/^shekalim-\d+[ab]$/.test(page.name) || page.frameGeometry?.version !== frame.coordinateSpace
@@ -1735,10 +1748,13 @@ export function calculateAreas(pages, frame) {
   const frameArea = (frame.right - frame.left) * (frame.top - frame.bottom);
   if (!(frameArea > 0)) throw new Error("Invalid reference rectangle");
   for (const page of pages) {
+    const placed = frame.coordinateSpace === "kinim-per-page-v1" ? frameForPage(frame, page) : null;
+    const pageFrameArea = placed ? (placed.right - placed.left) * (placed.top - placed.bottom) : frameArea;
+    if (!(pageFrameArea > 0)) throw new Error("Invalid page reference rectangle");
     page.areas = {};
     for (const [kind, rows] of Object.entries(page.groups)) {
       const area = rows.reduce((sum, row) => sum + (row.right - row.left) * row.pitch, 0);
-      page.areas[kind] = { rows: rows.length, area, fraction: area / frameArea };
+      page.areas[kind] = { rows: rows.length, area, fraction: area / pageFrameArea };
     }
   }
   return frameArea;

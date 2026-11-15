@@ -79,6 +79,48 @@ test("Middot cached sides preserve main rows and fit the reviewed right edge", a
   assert.ok(Math.abs(frame.top - 1140.355547312) < 0.001);
 });
 
+test("Kinnim cached sides fit their own body without the lower commentary", async (context) => {
+  const { frameForPage } = await import("./measure-corpus.mjs");
+  let work;
+  try { work = JSON.parse(await readFile("results/shas-work/kinim.json", "utf8")); }
+  catch (error) { if (error.code === "ENOENT") { context.skip("Kinnim checkpoint unavailable"); return; } throw error; }
+  const definition = tractates.find((tractate) => tractate.slug === "kinim");
+  const fixtures = [
+    ["22a", "9a9f7b9d4bb4b5f637c60dfd7312732a7968e37eb929a992e58fb3f9b71d1def", 101.32, 504.13, 559.45, 831.92],
+    ["22b", "d380b6b6b5923492a5327267cfaf4b25211deeba5270e8a3f1d3b864903174ea", 193.48, 617.27, 649.04, 1139.40],
+    ["23a", "65589d25afb918abe49b56bee92e4fdff3fafbcd182869478bbc366484ea0ee6", 193.48, 617.25, 581.36, 1139.40],
+    ["23b", "e91ee9fca0c021ce8f89f4fba638bca236dded4a47d978d5f662beb88ad518bc", 193.47, 617.25, 571.76, 1139.40],
+    ["24a", "840e3c373d810b2e1e3db40edb140a8b6b068f8b44bc6204d3e94190cd3de36e", 193.48, 617.33, 571.76, 1139.40],
+    ["24b", "7859e6aef00f1a42984e79d0f9439d67e434fa3630da2f5f3a448ff5b1deb792", 193.48, 617.39, 581.36, 1139.40],
+    ["25a", "d281b557cb4da8b6f24b96e94957bd852ec0c10298a3e8d29bec04c67bf10699", 193.48, 617.33, 655.52, 1139.40],
+  ];
+  const pages = [];
+  for (const [amud, sha256] of fixtures) {
+    const saved = work.pages[amud].page;
+    assert.equal(saved.sha256, sha256);
+    let bytes;
+    try { bytes = (await getCachedPdf(definition, amud, { expectedHash: sha256, cacheOnly: true })).bytes; }
+    catch (error) { if (error.message.includes("not available in the local cache")) { context.skip(`Pinned PDF fixture unavailable: ${amud}`); return; } throw error; }
+    assert.equal(createHash("sha256").update(bytes).digest("hex"), sha256);
+    pages.push(structuredClone(saved));
+  }
+  const frame = calculateFrame(pages, { horizontal: 2, vertical: 2 });
+  calculateAreas(pages, frame);
+  for (const [index, [, , left, right, bottom, top]] of fixtures.entries()) {
+    const page = pages[index];
+    const placed = frameForPage(frame, page);
+    for (const [actual, expected] of [[placed.left, left], [placed.right, right], [placed.bottom, bottom], [placed.top, top]]) {
+      assert.ok(Math.abs(actual - expected) < 0.02, `${page.name}: unexpected frame edge ${actual}`);
+    }
+    for (const row of [...page.groups.main, ...page.frameRows]) {
+      assert.ok(row.left >= placed.left && row.right <= placed.right);
+      assert.ok((row.bottom ?? row.baseline - row.pitch / 2) >= placed.bottom && row.baseline + row.pitch * 0.7 <= placed.top);
+    }
+    const area = (placed.right - placed.left) * (placed.top - placed.bottom);
+    assert.ok(Math.abs(page.areas.main.fraction * area - page.areas.main.area) < 1e-8);
+  }
+});
+
 test("Shekalim common frame translates sides without changing numerators or denominators", async () => {
   const { frameForPage } = await import("./measure-corpus.mjs");
   const row = { left: 106.19, right: 531.38, baseline: 900, pitch: 9.72 };
