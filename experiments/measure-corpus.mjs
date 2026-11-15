@@ -519,10 +519,17 @@ export function decodeMainGlyphText(text) {
   return [...text].reverse().map((character) => glyphs.get(character) || (/^[\s.,:;'"()\-]$/.test(character) ? character : "|")).join("");
 }
 
-export function matchMainGlyphs(items, reference) {
+export function matchMainGlyphs(items, reference, { unknownGlyphs = false } = {}) {
   const matches = new Set();
   for (const item of items) {
     const text = decodeMainGlyphText(item.str);
+    if (unknownGlyphs) {
+      // "|" stands for any one letter and "ן" may be ה in this font.
+      const parts = text.split("|").map(normalizeHebrew);
+      const fragment = parts.join("|");
+      if (fragment.length >= 10 && new RegExp(parts.map((part) => part.replaceAll("ן", "[ןה]")).join("[א-ת]")).test(reference)) matches.add(fragment);
+      continue;
+    }
     for (const part of text.split("|")) {
       const fragment = normalizeHebrew(part);
       if (fragment.length >= 10 && reference.includes(fragment)) matches.add(fragment);
@@ -808,9 +815,19 @@ export async function processMainPage(definition, index, reference, pdfBytes) {
     const document = await task.promise;
     if (document.numPages !== 1) throw new Error(`${name}: expected one page`);
     const page = await document.getPage(1);
-    const items = (await page.getTextContent()).items.filter((item) => item.str?.trim() && item.width > 0 && item.height > 0);
+    let items = (await page.getTextContent()).items.filter((item) => item.str?.trim() && item.width > 0 && item.height > 0);
+    const shared = definition.sharedFirstSide;
+    const sharedSide = Boolean(shared) && name === `${definition.slug}-${shared.amud}`;
+    if (sharedSide) {
+      const headings = items.filter((item) => decodePdfText(item.str).includes(shared.heading));
+      if (headings.length !== 1) throw new Error(`${name}: expected one "${shared.heading}" heading, found ${headings.length}`);
+      items = items.filter((item) => item.transform[5] < headings[0].transform[5]);
+      const scale = (size) => Math.round(size * shared.scale * 100) / 100;
+      definition = { ...definition, mainSize: scale(definition.mainSize), mainPitch: definition.mainPitch * shared.scale,
+        frameSizes: definition.frameSizes.map(scale), framePitch: definition.framePitch * shared.scale };
+    }
     const mainItems = itemsOfSize(items, [definition.mainSize]);
-    const evidence = matchMainGlyphs(mainItems, reference);
+    const evidence = matchMainGlyphs(mainItems, reference, { unknownGlyphs: sharedSide });
     if (evidence.fragments < 2 || evidence.letters < 30) throw new Error(`${name}: insufficient main-text match`);
     return { name, sha256: createHash("sha256").update(pdfBytes).digest("hex"), view: page.view, groups: { main: lines(mainItems, definition.mainPitch, "main"), rashi: [], tosafot: [] },
       ...mainOnlyFrameGeometry(items, definition, side), matches: [], mainMatch: evidence };

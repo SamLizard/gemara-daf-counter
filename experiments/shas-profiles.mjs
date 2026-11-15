@@ -5,7 +5,8 @@ export function shasDefinition(tractate, { mainOnly = false } = {}) {
     ? { mainSize: 11.4, mainPitch: 9.72, frameSizes: [7.68, 8.4, 8.64, 8.88, 9.12, 9.36], framePitch: 9,
       frameWindow: { left: 104, right: 534 }, frameSideOffset: 85.08 }
     : mainOnly && tractate.slug === "kinim"
-    ? { mainSize: 12.6, mainPitch: 10.44, frameSizes: [10.68, 10.44], framePitch: 10 }
+    // Kinnim opens below Meilah's end on 22a, typeset at 95%.
+    ? { mainSize: 12.6, mainPitch: 10.44, frameSizes: [10.68, 10.44], framePitch: 10, sharedFirstSide: { amud: "22a", heading: "מסכת קינין", scale: 0.95 } }
     : mainOnly && tractate.slug === "tamid"
     ? { mainSize: 13.44, mainPitch: 11.88, frameSizes: [10.68, 10.92], framePitch: 10.44 }
     : mainOnly && tractate.slug === "middos"

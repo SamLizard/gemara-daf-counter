@@ -4,7 +4,7 @@ This research estimates the printed area occupied by Mishnah and Gemara, Rashi, 
 
 ## Full Shas JSON
 
-The generated [results/shas-metrics.json](results/shas-metrics.json) is a frontend-oriented export for 40 separately named sections. All 5,405 sides have a numeric main-text measurement, including a confirmed zero on Nazir 33b. All 40 sections have numeric values for all three categories on every side; no side has an unknown category. These counts describe coverage, not verified accuracy. There are 300 Wikisource-only Rashi zeroes and 414 numeric Tosafot zeroes, including 151 whose recorded basis is the Wikisource-only section check, 180 deliberately excluded on Nedarim, and 31 deliberately excluded on Kinnim, Tamid, and Middot. Forty Shekalim sides have user-attested Rashi and Tosafot zeroes.
+The generated [results/shas-metrics.json](results/shas-metrics.json) is a frontend-oriented export for 40 separately named sections. All 5,406 sides (Meilah and Kinnim each count their part of 22a) have a numeric main-text measurement, including a confirmed zero on Nazir 33b. All 40 sections have numeric values for all three categories on every side; no side has an unknown category. These counts describe coverage, not verified accuracy. There are 300 Wikisource-only Rashi zeroes and 414 numeric Tosafot zeroes, including 151 whose recorded basis is the Wikisource-only section check, 180 deliberately excluded on Nedarim, and 31 deliberately excluded on Kinnim, Tamid, and Middot. Forty Shekalim sides have user-attested Rashi and Tosafot zeroes.
 
 Shekalim, Kinnim, Tamid, and Middot have main-text-only measurements. Their fitted frames also use unclassified printed text, not identified Rashi or Tosafot; they are provisional. Shekalim is checked against the Jerusalem Talmud, Kinnim and Middot against Mishnah, and Tamid against Bavli Tamid. For these four sections, matches are against the entire work because its reference pagination differs from the PDF; this is weaker than a page-specific match. The source lists the Jerusalem Talmud Shekalim version's license as unknown.
 
@@ -12,7 +12,7 @@ Kinnim and Middot have Mishnah but no Gemara in either Talmud ([Kinnim](https://
 
 Middot's frame-only glyphs now exclude the right margin (body window x85-520); all eight PDF fingerprints and all main rows were checked. Its shared right edge moved from 585.78 to 515.21 PDF units, increasing the main-text fractions through the smaller denominator. The top edge remains provisional: 34a's title is included, while lowering one fixed edge would clip actual commentary on 37a. Page-relative top placement remains a TODO.
 
-Kinnim begins on the lower portion of the shared Meilah 22a PDF, after Meilah ends. The catalog assigns that side to Meilah and begins Kinnim at 22b; the Kinnim portion of 22a has not been measured. A future correction must split that side by tractate rather than double-count the PDF.
+Kinnim begins on the lower portion of the shared Meilah 22a PDF, after Meilah ends. That side is split by tractate: Meilah keeps the rows above the "מסכת קינין" heading, and Kinnim 22a measures only the rows below it. Its block is typeset at 95% (main 11.97, commentary 10.15/9.92), and its font maps several letters to one unknown glyph, so its main-text evidence lets that glyph match any one letter.
 
 The export and the source cache are local and Git-ignored. Check source and derived-data rights before publishing. PDF and commentary sources and attribution are recorded in the JSON; original PDFs and source texts are not included in the export.
 

@@ -35,7 +35,7 @@ export const tractates = [
   ["temurah", "Temurah", "Kodashim", "2a", "34a"],
   ["kereisos", "Keritot", "Kodashim", "2a", "28b"],
   ["meilah", "Meilah", "Kodashim", "2a", "22a"],
-  ["kinim", "Kinnim", "Kodashim", "22b", "25a"],
+  ["kinim", "Kinnim", "Kodashim", "22a", "25a"],
   ["tamid", "Tamid", "Kodashim", "25b", "33b"],
   ["middos", "Middot", "Kodashim", "34a", "37b"],
   ["niddah", "Niddah", "Tahorot", "2a", "73a"],

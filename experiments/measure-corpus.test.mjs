@@ -1523,6 +1523,15 @@ test("matches mapped main-text fragments without joining unknown glyphs", () => 
   assert.deepEqual(matchMainGlyphs([{ ...items[0], str: "\u00cc\u00c8\u00af\u201e\u0005?\u00c8\u00c8\u00c2\u0005\u00c8\u00ce" }], text), { fragments: 0, letters: 0 });
 });
 
+test("shared-side main matching treats unknown glyphs as one letter and final nun as he", () => {
+  const text = normalizeHebrew("ועולת העוף נעשית למעלה ועולת בהמה למטה");
+  // Kinnim 22a: "ÔÏÚÓÏ ˙È˘Ú\u0011 ÛÂÚ‰ ˙ÏÂÚ" decodes to "עולת העו| |עשית למעלן".
+  const items = [item("\u00d4\u00cf\u00da\u00d3\u00cf \u02d9\u00c8\u02d8\u00da\u0011 \u00db\u00c2\u00da\u2030 \u02d9\u00cf\u00c2\u00da", 10, 100)];
+  assert.deepEqual(matchMainGlyphs(items, text), { fragments: 0, letters: 0 });
+  assert.deepEqual(matchMainGlyphs(items, text, { unknownGlyphs: true }).fragments, 1);
+  assert.equal(matchMainGlyphs(items, normalizeHebrew("עולת העוף נעשית למטה"), { unknownGlyphs: true }).fragments, 0);
+});
+
 test("splits vertically restarted commentary and measures each line", () => {
   const items = [item("first", 10, 100), item("second", 10, 60), item("third", 70, 100)];
   const runs = splitRuns(items);
