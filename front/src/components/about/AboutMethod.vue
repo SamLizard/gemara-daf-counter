@@ -12,7 +12,6 @@
 
     <h3 class="text-title-medium mt-6 mb-2">{{ $t('about.method.notCalculatedTitle') }}</h3>
     <ul class="ps-6 text-body-medium">
-      <li>{{ $t('about.method.notCalculatedRashbam') }}</li>
       <li>{{ $t('about.method.notCalculatedNedarim') }}</li>
       <li>{{ $t('about.method.notCalculatedSmall') }}</li>
     </ul>

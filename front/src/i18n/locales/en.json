@@ -160,7 +160,6 @@
       "stepArea": "For each text, the area of its line boxes is added up and divided by the text body fitted on the masechet's pages. This gives the share of each amud that the text fills.",
       "stepTotal": "These shares are added up over the masechet and divided by two to get full dafim.",
       "notCalculatedTitle": "Not calculated yet",
-      "notCalculatedRashbam": "Rashbam (Pesachim and Bava Basra): its lines are known but not its area, so Rashi / Rashbam shows \"not calculated\" there.",
       "notCalculatedNedarim": "Tosafot on Nedarim.",
       "notCalculatedSmall": "The commentaries of Shekalim, Kinnim, Tamid and Middos."
     },

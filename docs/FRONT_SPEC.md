@@ -63,19 +63,9 @@ A 0 on one amud of a measured text shows "none on this amud", not "0 %". A text 
 The two masechtot differ:
 
 - **Bava Basra**: Rashi on 2a–29a, then Rashbam from 29a to the end (29a has both).
-- **Pesachim**: Rashbam on 99b–121b, where the data also has Rashi on the same pages (3.8 full dafim on these 45 sides).
+- **Pesachim**: Rashi and Rashbam are both printed on 99b–121b (all 45 sides have both).
 
-They are displayed as one text "Rashi / Rashbam" (`rashi-rashbam`, one color).
-
-**Problem in the data:** for Rashbam, the JSON only records that it is on the page and how many lines it has (`otherCommentary: { sources: ["Rashbam"], rows: 48 }`). It has **no fraction**, so its share of the page is unknown. Ran on Nedarim has a fraction (`otherCommentary.fraction`) because the pipeline measured it; Rashbam was not measured. A line count cannot be converted to area reliably (line widths differ).
-
-Display until the pipeline measures Rashbam:
-
-- Total "Rashi / Rashbam": "Not calculated for the moment".
-- Per amud: Rashi-only sides show the Rashi value; sides with Rashbam show "not calculated".
-- When the pipeline adds a Rashbam fraction, the export sums Rashi + Rashbam per side and the state becomes `measured`, with no front change.
-
-**Request to the pipeline agent**: measure Rashbam as a fraction like Ran (Pesachim 99b–121b, Bava Basra 29a–176b), and confirm the Pesachim layout (are Rashi and Rashbam both printed on 99b–121b?).
+They are displayed as one text "Rashi / Rashbam" (`rashi-rashbam`, one color). Rashbam is measured like Ran (`otherCommentary.fraction`); the export sums Rashi + Rashbam per side.
 
 ## 4. Metrics
 
@@ -114,12 +104,12 @@ Caveats:
       "printedSides": 240,
       "texts": [
         { "id": "main", "state": "measured", "total": 33.21 },
-        { "id": "rashi-rashbam", "state": "not-measured", "total": null },
+        { "id": "rashi-rashbam", "state": "measured", "total": 35.65 },
         { "id": "tosafot", "state": "measured", "total": 23.38 }
       ],
       "otherCommentaries": "none",            // or "not-measured" (Shekalim, Kinnim, Tamid, Middos)
       "columns": ["main", "rashi-rashbam", "tosafot"],
-      "pages": [["2a", 0.2104, 0.1767, 0.3063], ["99b", 0.3012, null, 0.2515]]
+      "pages": [["2a", 0.2104, 0.1767, 0.3063], ["99b", 0.1298, 0.2181, 0.4229]]
     }
   ]
 }
@@ -188,9 +178,9 @@ Every page works from 360 px wide: cards stack, long charts zoom or scroll insid
 ## 10. TODO (later)
 
 - Publish as a static site on GitHub Pages (only the condensed JSON; no PDFs or source texts).
-- Pipeline: measure Rashbam, Nedarim Tosafot, and the commentaries of Shekalim, Kinnim, Tamid and Middos. The front then shows them with no code change.
+- Pipeline: measure Nedarim Tosafot, and the commentaries of Shekalim, Kinnim, Tamid and Middos. The front then shows them with no code change.
 
 ## 11. Open questions
 
 - **[Q1]** Is the repository going to be open source (needed for the GPL Daf Yomi library, §8)?
-- **[Q2]** Can you ask the pipeline agent to measure Rashbam and confirm the Pesachim layout (§3.2)? The front can be built before that.
+- ~~**[Q2]** Measure Rashbam and confirm the Pesachim layout (§3.2).~~ Done.

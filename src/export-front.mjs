@@ -10,8 +10,7 @@ const sumKnown = (values) => (values.some((value) => value === null) ? null : va
 const sourcesOf = (page) => page.otherCommentary?.sources || [];
 const otherFraction = (page, source) => (sourcesOf(page).includes(source) ? (page.otherCommentary.fraction ?? null) : 0);
 
-// Per-side value of each displayed text. Rashbam has no fraction in the source data yet,
-// so sides where it is printed stay null until the pipeline measures it.
+// Per-side value of each displayed text. Rashbam is shown together with Rashi.
 function columnsFor(tractate) {
   const hasRashbam = tractate.pages.some((page) => sourcesOf(page).includes("Rashbam"));
   const hasRan = tractate.pages.some((page) => sourcesOf(page).includes("Ran"));

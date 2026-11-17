@@ -312,5 +312,7 @@ test("fits other commentary into the frame without counting it as Rashi or Tosaf
   assert.equal(book.pages[0].fractions.rashi, null);
   assert.equal(book.pages[0].fractions.tosafot, null);
   assert.equal("other" in book.pages[0].fractions, false);
-  assert.deepEqual(book.pages[0].otherCommentary, { sources: ["Rashbam"], rows: 1 });
+  assert.equal(book.pages[0].otherCommentary.rows, 1);
+  assert.deepEqual(book.pages[0].otherCommentary.sources, ["Rashbam"]);
+  assert.ok(book.pages[0].otherCommentary.fraction > 0);
 });

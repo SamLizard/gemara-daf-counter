@@ -160,7 +160,6 @@
       "stepArea": "Pour chaque texte, la surface de ses boîtes de lignes est additionnée puis divisée par le corps de texte ajusté sur les pages de la massekhet. On obtient ainsi la part de chaque amoud qu'occupe le texte.",
       "stepTotal": "Ces parts sont additionnées sur la massekhet puis divisées par deux pour obtenir des dafim pleins.",
       "notCalculatedTitle": "Pas encore calculé",
-      "notCalculatedRashbam": "Le Rashbam (Pessa'him et Bava Batra) : ses lignes sont connues mais pas sa surface, donc Rachi / Rashbam y affiche « non calculé ».",
       "notCalculatedNedarim": "Les Tossafot sur Nedarim.",
       "notCalculatedSmall": "Les commentaires de Shekalim, Kinnim, Tamid et Middot."
     },

@@ -42,7 +42,7 @@ export function buildShasExport(catalog, data) {
         inferredAbsent: (entry.inferredAbsent || []).filter((kind) => !excludedCategories.includes(kind)),
         ...(entry.commentaryRetry?.state === "error" ? { commentaryRetryError: entry.commentaryRetry.error } : {}),
         ...(page.matches?.some((match) => match.kind === "other" && match.source) ? { otherCommentary: { sources: [...new Set(page.matches.filter((match) => match.kind === "other" && match.source).map((match) => match.source))], rows: page.groups.other?.length || 0,
-          ...(tractate.slug === "nedarim" && entry.nedarimAudit?.outcome === "recomputed" ? { fraction: page.areas.other.fraction } : {}) } } : {}),
+          ...((tractate.slug === "nedarim" && entry.nedarimAudit?.outcome === "recomputed") || page.matches.some((match) => match.kind === "other" && match.source === "Rashbam") ? { fraction: page.areas.other.fraction } : {}) } } : {}),
         ...(confirmedAbsent.length ? { confirmedAbsent } : {}),
         ...(excludedCategories.length ? { excludedCategories } : {}),
         ...(entry.rashiEvidence ? { rashiEvidence: entry.rashiEvidence } : {}),

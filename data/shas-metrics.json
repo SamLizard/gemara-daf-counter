@@ -23818,7 +23818,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 28
+            "rows": 28,
+            "fraction": 0.14402351910520916
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -23852,7 +23853,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 48
+            "rows": 48,
+            "fraction": 0.2515800695869636
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -23886,7 +23888,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 55
+            "rows": 55,
+            "fraction": 0.3163896720804679
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -23920,7 +23923,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 50
+            "rows": 50,
+            "fraction": 0.2272106940611772
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -23954,7 +23958,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 44
+            "rows": 44,
+            "fraction": 0.27485380313533675
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -23988,7 +23993,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 41
+            "rows": 41,
+            "fraction": 0.27920104859437805
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24022,7 +24028,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 51
+            "rows": 51,
+            "fraction": 0.2731924018116938
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24056,7 +24063,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 54
+            "rows": 54,
+            "fraction": 0.3032608920314834
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24090,7 +24098,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 49
+            "rows": 49,
+            "fraction": 0.25965550358932993
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24124,7 +24133,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 47
+            "rows": 47,
+            "fraction": 0.23210449322130458
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24158,7 +24168,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 32
+            "rows": 32,
+            "fraction": 0.17540300019275437
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24192,7 +24203,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 26
+            "rows": 26,
+            "fraction": 0.21844800149375854
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24226,7 +24238,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 43
+            "rows": 43,
+            "fraction": 0.24919222323080384
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24260,7 +24273,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 49
+            "rows": 49,
+            "fraction": 0.28754333806851606
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24294,7 +24308,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 34
+            "rows": 34,
+            "fraction": 0.17346339610220834
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24328,7 +24343,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 44
+            "rows": 44,
+            "fraction": 0.23185353609291928
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24362,7 +24378,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 39
+            "rows": 39,
+            "fraction": 0.37302669669264155
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24396,7 +24413,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 39
+            "rows": 39,
+            "fraction": 0.21512463841218638
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24430,7 +24448,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 48
+            "rows": 48,
+            "fraction": 0.2630848640761178
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24464,7 +24483,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 50
+            "rows": 50,
+            "fraction": 0.2383228633791441
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24498,7 +24518,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 31
+            "rows": 31,
+            "fraction": 0.2899826697354644
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24532,7 +24553,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 33
+            "rows": 33,
+            "fraction": 0.27794691372863456
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24566,7 +24588,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.3233569593025002
           },
           "confirmedAbsent": [
             "tosafot"
@@ -24605,7 +24628,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 26
+            "rows": 26,
+            "fraction": 0.1996504314406588
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24639,7 +24663,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 25
+            "rows": 25,
+            "fraction": 0.17756864176272166
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24673,7 +24698,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 47
+            "rows": 47,
+            "fraction": 0.19503355647123694
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24707,7 +24733,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 60
+            "rows": 60,
+            "fraction": 0.209694351190776
           },
           "confirmedAbsent": [
             "tosafot"
@@ -24746,7 +24773,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 17
+            "rows": 17,
+            "fraction": 0.2163666330132214
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24780,7 +24808,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 46
+            "rows": 46,
+            "fraction": 0.1536555440619736
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24814,7 +24843,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 41
+            "rows": 41,
+            "fraction": 0.24345034903653512
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24848,7 +24878,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 42
+            "rows": 42,
+            "fraction": 0.18622814288487125
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24882,7 +24913,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 27
+            "rows": 27,
+            "fraction": 0.0904856302230031
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24916,7 +24948,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 47
+            "rows": 47,
+            "fraction": 0.262944995546199
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24950,7 +24983,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 44
+            "rows": 44,
+            "fraction": 0.21313598503053036
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -24984,7 +25018,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 58
+            "rows": 58,
+            "fraction": 0.4005934980760592
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -25018,7 +25053,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 31
+            "rows": 31,
+            "fraction": 0.10335434570154338
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -25052,7 +25088,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 60
+            "rows": 60,
+            "fraction": 0.30410993238050404
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -25086,7 +25123,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 60
+            "rows": 60,
+            "fraction": 0.2089039912514466
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -25120,7 +25158,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 49
+            "rows": 49,
+            "fraction": 0.2205402769775943
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -25154,7 +25193,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 31
+            "rows": 31,
+            "fraction": 0.20707195191013575
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -25188,7 +25228,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 44
+            "rows": 44,
+            "fraction": 0.3069169972833572
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -25222,7 +25263,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 51
+            "rows": 51,
+            "fraction": 0.19349372617678992
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -25256,7 +25298,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 51
+            "rows": 51,
+            "fraction": 0.2913597756320762
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -25290,7 +25333,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 38
+            "rows": 38,
+            "fraction": 0.27448786448737367
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -25324,7 +25368,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 2
+            "rows": 2,
+            "fraction": 0.02045732866699288
           },
           "confirmedAbsent": [
             "tosafot",
@@ -94869,7 +94914,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 48
+            "rows": 48,
+            "fraction": 0.32019222999982755
           },
           "confirmedAbsent": [],
           "tosafotEvidence": {
@@ -94903,7 +94949,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 64
+            "rows": 64,
+            "fraction": 0.30249963277926545
           },
           "confirmedAbsent": [
             "rashi"
@@ -94949,7 +94996,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 50
+            "rows": 50,
+            "fraction": 0.226945013354144
           },
           "confirmedAbsent": [
             "rashi"
@@ -94995,7 +95043,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 64
+            "rows": 64,
+            "fraction": 0.5534413840405945
           },
           "confirmedAbsent": [
             "rashi"
@@ -95041,7 +95090,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.3125647181620332
           },
           "confirmedAbsent": [
             "rashi"
@@ -95087,7 +95137,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.35475119141495426
           },
           "confirmedAbsent": [
             "rashi"
@@ -95133,7 +95184,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.3357316311917212
           },
           "confirmedAbsent": [
             "rashi"
@@ -95179,7 +95231,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.4028932325866417
           },
           "confirmedAbsent": [
             "rashi"
@@ -95225,7 +95278,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 47
+            "rows": 47,
+            "fraction": 0.21980361320582628
           },
           "confirmedAbsent": [
             "rashi"
@@ -95271,7 +95325,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.45108035843566546
           },
           "confirmedAbsent": [
             "rashi"
@@ -95317,7 +95372,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.359711408380761
           },
           "confirmedAbsent": [
             "rashi"
@@ -95364,7 +95420,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 56
+            "rows": 56,
+            "fraction": 0.30122747104851727
           },
           "confirmedAbsent": [
             "rashi"
@@ -95410,7 +95467,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 56
+            "rows": 56,
+            "fraction": 0.32079837738088557
           },
           "confirmedAbsent": [
             "rashi"
@@ -95456,7 +95514,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.47813455932848276
           },
           "confirmedAbsent": [
             "rashi"
@@ -95502,7 +95561,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.46488582750622165
           },
           "confirmedAbsent": [
             "rashi"
@@ -95548,7 +95608,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 72
+            "rows": 72,
+            "fraction": 0.32928432306348776
           },
           "confirmedAbsent": [
             "rashi"
@@ -95594,7 +95655,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.4116408655856155
           },
           "confirmedAbsent": [
             "rashi"
@@ -95640,7 +95702,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.3645506836728034
           },
           "confirmedAbsent": [
             "rashi"
@@ -95686,7 +95749,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.4907734813017294
           },
           "confirmedAbsent": [
             "rashi"
@@ -95732,7 +95796,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.43364215841693055
           },
           "confirmedAbsent": [
             "rashi"
@@ -95778,7 +95843,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.5365243763715891
           },
           "confirmedAbsent": [
             "rashi"
@@ -95824,7 +95890,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.47632727549345955
           },
           "confirmedAbsent": [
             "rashi"
@@ -95870,7 +95937,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 73
+            "rows": 73,
+            "fraction": 0.40074336857284226
           },
           "confirmedAbsent": [
             "rashi"
@@ -95916,7 +95984,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.5831474381643837
           },
           "confirmedAbsent": [
             "rashi"
@@ -95962,7 +96031,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.3019285643136919
           },
           "confirmedAbsent": [
             "rashi"
@@ -96008,7 +96078,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.47092550287791907
           },
           "confirmedAbsent": [
             "rashi"
@@ -96054,7 +96125,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.5389965653420339
           },
           "confirmedAbsent": [
             "rashi"
@@ -96100,7 +96172,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.36514505580145495
           },
           "confirmedAbsent": [
             "rashi"
@@ -96146,7 +96219,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 73
+            "rows": 73,
+            "fraction": 0.5091546082687863
           },
           "confirmedAbsent": [
             "rashi"
@@ -96192,7 +96266,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.5174396955182802
           },
           "confirmedAbsent": [
             "rashi"
@@ -96238,7 +96313,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 72
+            "rows": 72,
+            "fraction": 0.6509452154075779
           },
           "confirmedAbsent": [
             "rashi"
@@ -96284,7 +96360,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.47225379262961287
           },
           "confirmedAbsent": [
             "rashi"
@@ -96330,7 +96407,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.4617325160683208
           },
           "confirmedAbsent": [
             "rashi"
@@ -96376,7 +96454,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.33912946939093
           },
           "confirmedAbsent": [
             "rashi"
@@ -96422,7 +96501,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.41079378811719247
           },
           "confirmedAbsent": [
             "rashi"
@@ -96468,7 +96548,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.4383807145115243
           },
           "confirmedAbsent": [
             "rashi"
@@ -96514,7 +96595,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.3595551953768953
           },
           "confirmedAbsent": [
             "rashi"
@@ -96560,7 +96642,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.44888116985826937
           },
           "confirmedAbsent": [
             "rashi"
@@ -96606,7 +96689,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 56
+            "rows": 56,
+            "fraction": 0.25008583970549675
           },
           "confirmedAbsent": [
             "rashi"
@@ -96652,7 +96736,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.32571046906946516
           },
           "confirmedAbsent": [
             "rashi"
@@ -96698,7 +96783,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.4321150154757511
           },
           "confirmedAbsent": [
             "rashi"
@@ -96744,7 +96830,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 73
+            "rows": 73,
+            "fraction": 0.416650562303872
           },
           "confirmedAbsent": [
             "rashi"
@@ -96790,7 +96877,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 75
+            "rows": 75,
+            "fraction": 0.5089206088206565
           },
           "confirmedAbsent": [
             "rashi"
@@ -96836,7 +96924,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 73
+            "rows": 73,
+            "fraction": 0.4442838671290874
           },
           "confirmedAbsent": [
             "rashi"
@@ -96882,7 +96971,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.33616304314951234
           },
           "confirmedAbsent": [
             "rashi"
@@ -96928,7 +97018,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 45
+            "rows": 45,
+            "fraction": 0.18752336373068026
           },
           "confirmedAbsent": [
             "rashi"
@@ -96974,7 +97065,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.5074331374808474
           },
           "confirmedAbsent": [
             "rashi"
@@ -97020,7 +97112,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.36802447165005164
           },
           "confirmedAbsent": [
             "rashi"
@@ -97066,7 +97159,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 73
+            "rows": 73,
+            "fraction": 0.46904495619473113
           },
           "confirmedAbsent": [
             "rashi"
@@ -97112,7 +97206,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.44816401019080926
           },
           "confirmedAbsent": [
             "rashi"
@@ -97158,7 +97253,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.5016852379782729
           },
           "confirmedAbsent": [
             "rashi"
@@ -97204,7 +97300,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.4051741876487755
           },
           "confirmedAbsent": [
             "rashi"
@@ -97250,7 +97347,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.5693763767828396
           },
           "confirmedAbsent": [
             "rashi"
@@ -97296,7 +97394,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 34
+            "rows": 34,
+            "fraction": 0.16191328653673054
           },
           "confirmedAbsent": [
             "rashi"
@@ -97342,7 +97441,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.3357791530360571
           },
           "confirmedAbsent": [
             "rashi"
@@ -97388,7 +97488,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.4129941892547828
           },
           "confirmedAbsent": [
             "rashi"
@@ -97434,7 +97535,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.5852060701852815
           },
           "confirmedAbsent": [
             "rashi"
@@ -97480,7 +97582,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.4602370784947162
           },
           "confirmedAbsent": [
             "rashi"
@@ -97526,7 +97629,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.3724256460139184
           },
           "confirmedAbsent": [
             "rashi"
@@ -97572,7 +97676,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.4057281175381457
           },
           "confirmedAbsent": [
             "rashi"
@@ -97618,7 +97723,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.36321932442263016
           },
           "confirmedAbsent": [
             "rashi"
@@ -97664,7 +97770,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.42827370829652117
           },
           "confirmedAbsent": [
             "rashi"
@@ -97710,7 +97817,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 62
+            "rows": 62,
+            "fraction": 0.43275044733106843
           },
           "confirmedAbsent": [
             "rashi"
@@ -97756,7 +97864,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.2601964042348221
           },
           "confirmedAbsent": [
             "rashi"
@@ -97802,7 +97911,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 53
+            "rows": 53,
+            "fraction": 0.2595203728631103
           },
           "confirmedAbsent": [
             "rashi"
@@ -97848,7 +97958,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 61
+            "rows": 61,
+            "fraction": 0.23570041272684084
           },
           "confirmedAbsent": [
             "rashi"
@@ -97894,7 +98005,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.3021249025032247
           },
           "confirmedAbsent": [
             "rashi"
@@ -97940,7 +98052,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 60
+            "rows": 60,
+            "fraction": 0.44585691517253684
           },
           "confirmedAbsent": [
             "rashi"
@@ -97986,7 +98099,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.549369031223153
           },
           "confirmedAbsent": [
             "rashi"
@@ -98032,7 +98146,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.5086729161340184
           },
           "confirmedAbsent": [
             "rashi"
@@ -98078,7 +98193,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 59
+            "rows": 59,
+            "fraction": 0.27117172204373896
           },
           "confirmedAbsent": [
             "rashi"
@@ -98124,7 +98240,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.6623984126055741
           },
           "confirmedAbsent": [
             "rashi"
@@ -98170,7 +98287,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 61
+            "rows": 61,
+            "fraction": 0.4126175286204291
           },
           "confirmedAbsent": [
             "rashi"
@@ -98216,7 +98334,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.40181999025428117
           },
           "confirmedAbsent": [
             "rashi"
@@ -98262,7 +98381,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.445243946263627
           },
           "confirmedAbsent": [
             "rashi"
@@ -98308,7 +98428,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 49
+            "rows": 49,
+            "fraction": 0.25475281062871763
           },
           "confirmedAbsent": [
             "rashi"
@@ -98354,7 +98475,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.5492198251584918
           },
           "confirmedAbsent": [
             "rashi"
@@ -98400,7 +98522,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.4417510385994933
           },
           "confirmedAbsent": [
             "rashi"
@@ -98446,7 +98569,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.44175994527423545
           },
           "confirmedAbsent": [
             "rashi"
@@ -98492,7 +98616,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.43221464763814443
           },
           "confirmedAbsent": [
             "rashi"
@@ -98538,7 +98663,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.48293090209489775
           },
           "confirmedAbsent": [
             "rashi"
@@ -98584,7 +98710,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.6242203496611142
           },
           "confirmedAbsent": [
             "rashi"
@@ -98630,7 +98757,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 64
+            "rows": 64,
+            "fraction": 0.44125484712139473
           },
           "confirmedAbsent": [
             "rashi"
@@ -98676,7 +98804,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.3409267274922797
           },
           "confirmedAbsent": [
             "rashi"
@@ -98722,7 +98851,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.5519482689582927
           },
           "confirmedAbsent": [
             "rashi"
@@ -98768,7 +98898,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 56
+            "rows": 56,
+            "fraction": 0.3125191577523037
           },
           "confirmedAbsent": [
             "rashi"
@@ -98814,7 +98945,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.435584381939194
           },
           "confirmedAbsent": [
             "rashi"
@@ -98860,7 +98992,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.4102137697868822
           },
           "confirmedAbsent": [
             "rashi"
@@ -98906,7 +99039,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 62
+            "rows": 62,
+            "fraction": 0.4260680057876021
           },
           "confirmedAbsent": [
             "rashi"
@@ -98952,7 +99086,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.30637880770905956
           },
           "confirmedAbsent": [
             "rashi"
@@ -98998,7 +99133,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.23061785153399417
           },
           "confirmedAbsent": [
             "rashi"
@@ -99044,7 +99180,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.22251070673063564
           },
           "confirmedAbsent": [
             "rashi"
@@ -99090,7 +99227,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.24525638799946714
           },
           "confirmedAbsent": [
             "rashi"
@@ -99136,7 +99274,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 64
+            "rows": 64,
+            "fraction": 0.22564738300898313
           },
           "confirmedAbsent": [
             "rashi"
@@ -99182,7 +99321,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 39
+            "rows": 39,
+            "fraction": 0.17325320654766063
           },
           "confirmedAbsent": [
             "rashi"
@@ -99228,7 +99368,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.32337692411014657
           },
           "confirmedAbsent": [
             "rashi"
@@ -99274,7 +99415,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 28
+            "rows": 28,
+            "fraction": 0.13074376458177292
           },
           "confirmedAbsent": [
             "rashi"
@@ -99320,7 +99462,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.4020805872980257
           },
           "confirmedAbsent": [
             "rashi"
@@ -99366,7 +99509,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.4521699131530585
           },
           "confirmedAbsent": [
             "rashi"
@@ -99412,7 +99556,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.45538186368673905
           },
           "confirmedAbsent": [
             "rashi"
@@ -99458,7 +99603,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.44234799204448744
           },
           "confirmedAbsent": [
             "rashi"
@@ -99504,7 +99650,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 56
+            "rows": 56,
+            "fraction": 0.2700400367782269
           },
           "confirmedAbsent": [
             "rashi"
@@ -99550,7 +99697,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.5972746513131002
           },
           "confirmedAbsent": [
             "rashi"
@@ -99596,7 +99744,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 64
+            "rows": 64,
+            "fraction": 0.3289995960601174
           },
           "confirmedAbsent": [
             "rashi"
@@ -99642,7 +99791,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 47
+            "rows": 47,
+            "fraction": 0.21145141845487953
           },
           "confirmedAbsent": [
             "rashi"
@@ -99688,7 +99838,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.35145635622508037
           },
           "confirmedAbsent": [
             "rashi"
@@ -99734,7 +99885,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 58
+            "rows": 58,
+            "fraction": 0.2824066846884667
           },
           "confirmedAbsent": [
             "rashi"
@@ -99780,7 +99932,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 73
+            "rows": 73,
+            "fraction": 0.5090933828550517
           },
           "confirmedAbsent": [
             "rashi"
@@ -99826,7 +99979,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.34915442560452953
           },
           "confirmedAbsent": [
             "rashi"
@@ -99872,7 +100026,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.5298625377220123
           },
           "confirmedAbsent": [
             "rashi"
@@ -99918,7 +100073,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.35018019688351015
           },
           "confirmedAbsent": [
             "rashi"
@@ -99964,7 +100120,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.3765128079678408
           },
           "confirmedAbsent": [
             "rashi"
@@ -100010,7 +100167,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.4479730107744793
           },
           "confirmedAbsent": [
             "rashi"
@@ -100056,7 +100214,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 62
+            "rows": 62,
+            "fraction": 0.31146154251911334
           },
           "confirmedAbsent": [
             "rashi"
@@ -100102,7 +100261,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.4675662641054741
           },
           "confirmedAbsent": [
             "rashi"
@@ -100148,7 +100308,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.5627529991258113
           },
           "confirmedAbsent": [
             "rashi"
@@ -100194,7 +100355,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.4548400437318594
           },
           "confirmedAbsent": [
             "rashi"
@@ -100240,7 +100402,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.36949202039100704
           },
           "confirmedAbsent": [
             "rashi"
@@ -100286,7 +100449,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.4904399255901547
           },
           "confirmedAbsent": [
             "rashi"
@@ -100332,7 +100496,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.38770693065328715
           },
           "confirmedAbsent": [
             "rashi"
@@ -100378,7 +100543,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.4901495861224614
           },
           "confirmedAbsent": [
             "rashi"
@@ -100424,7 +100590,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.40534171875933084
           },
           "confirmedAbsent": [
             "rashi"
@@ -100470,7 +100637,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.49360253390205877
           },
           "confirmedAbsent": [
             "rashi"
@@ -100516,7 +100684,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.4006746704931679
           },
           "confirmedAbsent": [
             "rashi"
@@ -100562,7 +100731,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.3724750597601923
           },
           "confirmedAbsent": [
             "rashi"
@@ -100608,7 +100778,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 79
+            "rows": 79,
+            "fraction": 0.2860821395097381
           },
           "confirmedAbsent": [
             "tosafot",
@@ -100656,7 +100827,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.4802391997259393
           },
           "confirmedAbsent": [
             "rashi"
@@ -100702,7 +100874,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 51
+            "rows": 51,
+            "fraction": 0.23053872832755684
           },
           "confirmedAbsent": [
             "rashi"
@@ -100748,7 +100921,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.5015402736144686
           },
           "confirmedAbsent": [
             "rashi"
@@ -100794,7 +100968,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.3703142729342563
           },
           "confirmedAbsent": [
             "rashi"
@@ -100840,7 +101015,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.46177646301078434
           },
           "confirmedAbsent": [
             "rashi"
@@ -100886,7 +101062,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 55
+            "rows": 55,
+            "fraction": 0.24961133841606367
           },
           "confirmedAbsent": [
             "rashi"
@@ -100932,7 +101109,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.4564798236960355
           },
           "confirmedAbsent": [
             "rashi"
@@ -100978,7 +101156,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.5522845384350695
           },
           "confirmedAbsent": [
             "rashi"
@@ -101024,7 +101203,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.4751629640583632
           },
           "confirmedAbsent": [
             "rashi"
@@ -101070,7 +101250,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 42
+            "rows": 42,
+            "fraction": 0.1918424177821424
           },
           "confirmedAbsent": [
             "rashi"
@@ -101116,7 +101297,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.3401927405729082
           },
           "confirmedAbsent": [
             "rashi"
@@ -101162,7 +101344,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.40285516342904587
           },
           "confirmedAbsent": [
             "rashi"
@@ -101208,7 +101391,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.5364903947307538
           },
           "confirmedAbsent": [
             "rashi"
@@ -101254,7 +101438,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.4950040915513413
           },
           "confirmedAbsent": [
             "rashi"
@@ -101300,7 +101485,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.5221479376167955
           },
           "confirmedAbsent": [
             "rashi"
@@ -101346,7 +101532,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.5519379306135539
           },
           "confirmedAbsent": [
             "rashi"
@@ -101392,7 +101579,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.386466804757844
           },
           "confirmedAbsent": [
             "rashi"
@@ -101438,7 +101626,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 74
+            "rows": 74,
+            "fraction": 0.34254583519630893
           },
           "confirmedAbsent": [
             "rashi"
@@ -101484,7 +101673,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 48
+            "rows": 48,
+            "fraction": 0.31352246513488863
           },
           "confirmedAbsent": [
             "rashi"
@@ -101530,7 +101720,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.509473400881928
           },
           "confirmedAbsent": [
             "rashi"
@@ -101576,7 +101767,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.3881711841210551
           },
           "confirmedAbsent": [
             "rashi"
@@ -101622,7 +101814,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 58
+            "rows": 58,
+            "fraction": 0.4014283633555448
           },
           "confirmedAbsent": [
             "rashi"
@@ -101668,7 +101861,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.5057350480695212
           },
           "confirmedAbsent": [
             "rashi"
@@ -101714,7 +101908,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.6508341515393464
           },
           "confirmedAbsent": [
             "rashi"
@@ -101760,7 +101955,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.39042429469091117
           },
           "confirmedAbsent": [
             "rashi"
@@ -101806,7 +102002,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.7091499603068004
           },
           "confirmedAbsent": [
             "tosafot",
@@ -101854,7 +102051,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.3972348744455092
           },
           "confirmedAbsent": [
             "rashi"
@@ -101900,7 +102098,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.5735291342496116
           },
           "confirmedAbsent": [
             "rashi"
@@ -101946,7 +102145,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 64
+            "rows": 64,
+            "fraction": 0.42768289291550976
           },
           "confirmedAbsent": [
             "rashi"
@@ -101992,7 +102192,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.4328757065928976
           },
           "confirmedAbsent": [
             "rashi"
@@ -102038,7 +102239,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.5378892632472656
           },
           "confirmedAbsent": [
             "rashi"
@@ -102084,7 +102286,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.5298175797871707
           },
           "confirmedAbsent": [
             "rashi"
@@ -102130,7 +102333,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 61
+            "rows": 61,
+            "fraction": 0.3929927438305649
           },
           "confirmedAbsent": [
             "rashi"
@@ -102176,7 +102380,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.3693168003126545
           },
           "confirmedAbsent": [
             "rashi"
@@ -102222,7 +102427,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 64
+            "rows": 64,
+            "fraction": 0.4101994602353978
           },
           "confirmedAbsent": [
             "rashi"
@@ -102268,7 +102474,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.3321712316992567
           },
           "confirmedAbsent": [
             "rashi"
@@ -102314,7 +102521,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.34606266907547956
           },
           "confirmedAbsent": [
             "rashi"
@@ -102360,7 +102568,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.483006463002785
           },
           "confirmedAbsent": [
             "rashi"
@@ -102406,7 +102615,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.2932668650204461
           },
           "confirmedAbsent": [
             "rashi"
@@ -102452,7 +102662,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.5235241096286558
           },
           "confirmedAbsent": [
             "rashi"
@@ -102498,7 +102709,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.36004179223659055
           },
           "confirmedAbsent": [
             "rashi"
@@ -102544,7 +102756,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.6528372536243255
           },
           "confirmedAbsent": [
             "rashi"
@@ -102590,7 +102803,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.39392212341880656
           },
           "confirmedAbsent": [
             "rashi"
@@ -102636,7 +102850,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.56938148637568
           },
           "confirmedAbsent": [
             "rashi"
@@ -102682,7 +102897,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 56
+            "rows": 56,
+            "fraction": 0.30118371397601434
           },
           "confirmedAbsent": [
             "rashi"
@@ -102728,7 +102944,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 55
+            "rows": 55,
+            "fraction": 0.2865321348885269
           },
           "confirmedAbsent": [
             "rashi"
@@ -102774,7 +102991,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 59
+            "rows": 59,
+            "fraction": 0.3367495587248721
           },
           "confirmedAbsent": [
             "rashi"
@@ -102820,7 +103038,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 59
+            "rows": 59,
+            "fraction": 0.4621825412488665
           },
           "confirmedAbsent": [
             "rashi"
@@ -102866,7 +103085,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 60
+            "rows": 60,
+            "fraction": 0.36210902981965354
           },
           "confirmedAbsent": [
             "rashi"
@@ -102912,7 +103132,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.612491946328269
           },
           "confirmedAbsent": [
             "rashi"
@@ -102958,7 +103179,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.41245807080848146
           },
           "confirmedAbsent": [
             "rashi"
@@ -103004,7 +103226,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 60
+            "rows": 60,
+            "fraction": 0.3640764723406597
           },
           "confirmedAbsent": [
             "rashi"
@@ -103050,7 +103273,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 62
+            "rows": 62,
+            "fraction": 0.5088609090892159
           },
           "confirmedAbsent": [
             "rashi"
@@ -103096,7 +103320,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.44847966779892456
           },
           "confirmedAbsent": [
             "rashi"
@@ -103142,7 +103367,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.3856857460002654
           },
           "confirmedAbsent": [
             "rashi"
@@ -103188,7 +103414,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.42604979733961557
           },
           "confirmedAbsent": [
             "rashi"
@@ -103234,7 +103461,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.5557419749215986
           },
           "confirmedAbsent": [
             "rashi"
@@ -103280,7 +103508,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.5398990625774535
           },
           "confirmedAbsent": [
             "rashi"
@@ -103326,7 +103555,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.31925485010628274
           },
           "confirmedAbsent": [
             "rashi"
@@ -103372,7 +103602,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.5403163097537272
           },
           "confirmedAbsent": [
             "rashi"
@@ -103418,7 +103649,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.44212176088166677
           },
           "confirmedAbsent": [
             "rashi"
@@ -103464,7 +103696,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.5519289143295819
           },
           "confirmedAbsent": [
             "rashi"
@@ -103510,7 +103743,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.34037180417387847
           },
           "confirmedAbsent": [
             "rashi"
@@ -103556,7 +103790,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 64
+            "rows": 64,
+            "fraction": 0.36607788791659474
           },
           "confirmedAbsent": [
             "rashi"
@@ -103602,7 +103837,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 62
+            "rows": 62,
+            "fraction": 0.4815993042673706
           },
           "confirmedAbsent": [
             "rashi"
@@ -103648,7 +103884,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.345686829750896
           },
           "confirmedAbsent": [
             "rashi"
@@ -103694,7 +103931,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 72
+            "rows": 72,
+            "fraction": 0.42354528508724854
           },
           "confirmedAbsent": [
             "rashi"
@@ -103740,7 +103978,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.5188253199974474
           },
           "confirmedAbsent": [
             "rashi"
@@ -103786,7 +104025,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.5040517564740474
           },
           "confirmedAbsent": [
             "rashi"
@@ -103832,7 +104072,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.37921364083913955
           },
           "confirmedAbsent": [
             "rashi"
@@ -103878,7 +104119,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.6304620470219822
           },
           "confirmedAbsent": [
             "rashi"
@@ -103924,7 +104166,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.5015085650786956
           },
           "confirmedAbsent": [
             "rashi"
@@ -103970,7 +104213,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 72
+            "rows": 72,
+            "fraction": 0.5190995142297528
           },
           "confirmedAbsent": [
             "rashi"
@@ -104016,7 +104260,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 62
+            "rows": 62,
+            "fraction": 0.39720940273297556
           },
           "confirmedAbsent": [
             "rashi"
@@ -104062,7 +104307,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.4615031425857262
           },
           "confirmedAbsent": [
             "rashi"
@@ -104108,7 +104354,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 72
+            "rows": 72,
+            "fraction": 0.5816049941604261
           },
           "confirmedAbsent": [
             "rashi"
@@ -104154,7 +104401,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.5365957218079919
           },
           "confirmedAbsent": [
             "rashi"
@@ -104200,7 +104448,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 64
+            "rows": 64,
+            "fraction": 0.4602261871456153
           },
           "confirmedAbsent": [
             "rashi"
@@ -104246,7 +104495,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.43434990353884373
           },
           "confirmedAbsent": [
             "rashi"
@@ -104292,7 +104542,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.6622107017626737
           },
           "confirmedAbsent": [
             "rashi"
@@ -104338,7 +104589,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.5399305722715201
           },
           "confirmedAbsent": [
             "rashi"
@@ -104384,7 +104636,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.5861183118356363
           },
           "confirmedAbsent": [
             "rashi"
@@ -104430,7 +104683,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 72
+            "rows": 72,
+            "fraction": 0.7005329256786291
           },
           "confirmedAbsent": [
             "tosafot",
@@ -104478,7 +104732,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.44886827311516947
           },
           "confirmedAbsent": [
             "rashi"
@@ -104524,7 +104779,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 64
+            "rows": 64,
+            "fraction": 0.4315331076017654
           },
           "confirmedAbsent": [
             "rashi"
@@ -104570,7 +104826,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 75
+            "rows": 75,
+            "fraction": 0.5797005803466633
           },
           "confirmedAbsent": [
             "rashi"
@@ -104616,7 +104873,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.3058323668869136
           },
           "confirmedAbsent": [
             "rashi"
@@ -104662,7 +104920,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.4360677619766127
           },
           "confirmedAbsent": [
             "rashi"
@@ -104708,7 +104967,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 72
+            "rows": 72,
+            "fraction": 0.5500708608879316
           },
           "confirmedAbsent": [
             "rashi"
@@ -104754,7 +105014,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.361731844705529
           },
           "confirmedAbsent": [
             "rashi"
@@ -104800,7 +105061,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 142
+            "rows": 142,
+            "fraction": 0.6289802371683682
           },
           "confirmedAbsent": [
             "tosafot",
@@ -104848,7 +105110,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.5361741486148626
           },
           "confirmedAbsent": [
             "rashi"
@@ -104894,7 +105157,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.3845939483567793
           },
           "confirmedAbsent": [
             "rashi"
@@ -104940,7 +105204,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.4545206718276992
           },
           "confirmedAbsent": [
             "rashi"
@@ -104986,7 +105251,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 64
+            "rows": 64,
+            "fraction": 0.4301092589878736
           },
           "confirmedAbsent": [
             "rashi"
@@ -105032,7 +105298,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 54
+            "rows": 54,
+            "fraction": 0.22508316351209348
           },
           "confirmedAbsent": [
             "rashi"
@@ -105078,7 +105345,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 58
+            "rows": 58,
+            "fraction": 0.27672613997015194
           },
           "confirmedAbsent": [
             "rashi"
@@ -105124,7 +105392,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.4709027639571147
           },
           "confirmedAbsent": [
             "rashi"
@@ -105170,7 +105439,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 53
+            "rows": 53,
+            "fraction": 0.20502126118040287
           },
           "confirmedAbsent": [
             "rashi"
@@ -105216,7 +105486,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.4664997502771076
           },
           "confirmedAbsent": [
             "rashi"
@@ -105262,7 +105533,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.3863620946592349
           },
           "confirmedAbsent": [
             "rashi"
@@ -105308,7 +105580,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.43312010371951315
           },
           "confirmedAbsent": [
             "rashi"
@@ -105354,7 +105627,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 70
+            "rows": 70,
+            "fraction": 0.3677678167606171
           },
           "confirmedAbsent": [
             "rashi"
@@ -105400,7 +105674,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.2846730437599438
           },
           "confirmedAbsent": [
             "rashi"
@@ -105446,7 +105721,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 62
+            "rows": 62,
+            "fraction": 0.25888105080094387
           },
           "confirmedAbsent": [
             "rashi"
@@ -105492,7 +105768,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.34927644973892324
           },
           "confirmedAbsent": [
             "rashi"
@@ -105538,7 +105815,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.35437362326754845
           },
           "confirmedAbsent": [
             "rashi"
@@ -105584,7 +105862,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.3892322361155986
           },
           "confirmedAbsent": [
             "rashi"
@@ -105630,7 +105909,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.4454899101006078
           },
           "confirmedAbsent": [
             "rashi"
@@ -105676,7 +105956,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.48247869279701777
           },
           "confirmedAbsent": [
             "rashi"
@@ -105722,7 +106003,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.3229243858987466
           },
           "confirmedAbsent": [
             "rashi"
@@ -105768,7 +106050,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 55
+            "rows": 55,
+            "fraction": 0.275150061184802
           },
           "confirmedAbsent": [
             "rashi"
@@ -105814,7 +106097,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 72
+            "rows": 72,
+            "fraction": 0.37711801884610624
           },
           "confirmedAbsent": [
             "rashi"
@@ -105860,7 +106144,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.512190845269175
           },
           "confirmedAbsent": [
             "rashi"
@@ -105906,7 +106191,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 45
+            "rows": 45,
+            "fraction": 0.19341896032297093
           },
           "confirmedAbsent": [
             "rashi"
@@ -105952,7 +106238,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 29
+            "rows": 29,
+            "fraction": 0.12554356379142453
           },
           "confirmedAbsent": [
             "rashi"
@@ -105998,7 +106285,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.47375090388074653
           },
           "confirmedAbsent": [
             "rashi"
@@ -106044,7 +106332,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.4480827434454514
           },
           "confirmedAbsent": [
             "rashi"
@@ -106090,7 +106379,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.39520249070170566
           },
           "confirmedAbsent": [
             "rashi"
@@ -106136,7 +106426,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 58
+            "rows": 58,
+            "fraction": 0.20821214569456578
           },
           "confirmedAbsent": [
             "rashi"
@@ -106182,7 +106473,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.34720356073827047
           },
           "confirmedAbsent": [
             "rashi"
@@ -106228,7 +106520,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 57
+            "rows": 57,
+            "fraction": 0.27333520896316393
           },
           "confirmedAbsent": [
             "rashi"
@@ -106274,7 +106567,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.4025515311146542
           },
           "confirmedAbsent": [
             "rashi"
@@ -106320,7 +106614,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 57
+            "rows": 57,
+            "fraction": 0.28684711417323183
           },
           "confirmedAbsent": [
             "rashi"
@@ -106366,7 +106661,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.39990655017563403
           },
           "confirmedAbsent": [
             "rashi"
@@ -106412,7 +106708,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.25730876737227626
           },
           "confirmedAbsent": [
             "rashi"
@@ -106458,7 +106755,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 34
+            "rows": 34,
+            "fraction": 0.14231296538535293
           },
           "confirmedAbsent": [
             "rashi"
@@ -106504,7 +106802,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.37916603044455954
           },
           "confirmedAbsent": [
             "rashi"
@@ -106550,7 +106849,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 62
+            "rows": 62,
+            "fraction": 0.2840586961408199
           },
           "confirmedAbsent": [
             "rashi"
@@ -106596,7 +106896,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 60
+            "rows": 60,
+            "fraction": 0.25503369801757836
           },
           "confirmedAbsent": [
             "rashi"
@@ -106642,7 +106943,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.38151536903929584
           },
           "confirmedAbsent": [
             "rashi"
@@ -106688,7 +106990,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.40083235370099257
           },
           "confirmedAbsent": [
             "rashi"
@@ -106734,7 +107037,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 20
+            "rows": 20,
+            "fraction": 0.09542368371104887
           },
           "confirmedAbsent": [
             "rashi"
@@ -106780,7 +107084,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 71
+            "rows": 71,
+            "fraction": 0.5651598218416174
           },
           "confirmedAbsent": [
             "rashi"
@@ -106826,7 +107131,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.2723522694265972
           },
           "confirmedAbsent": [
             "rashi"
@@ -106872,7 +107178,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 59
+            "rows": 59,
+            "fraction": 0.2520707458193013
           },
           "confirmedAbsent": [
             "rashi"
@@ -106918,7 +107225,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 30
+            "rows": 30,
+            "fraction": 0.13682571844344318
           },
           "confirmedAbsent": [
             "rashi"
@@ -106964,7 +107272,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 54
+            "rows": 54,
+            "fraction": 0.19191473769154893
           },
           "confirmedAbsent": [
             "rashi"
@@ -107010,7 +107319,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 46
+            "rows": 46,
+            "fraction": 0.22794322620761878
           },
           "confirmedAbsent": [
             "rashi"
@@ -107056,7 +107366,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 50
+            "rows": 50,
+            "fraction": 0.2637041034961585
           },
           "confirmedAbsent": [
             "rashi"
@@ -107102,7 +107413,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 19
+            "rows": 19,
+            "fraction": 0.08920831640221266
           },
           "confirmedAbsent": [
             "rashi"
@@ -107148,7 +107460,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 39
+            "rows": 39,
+            "fraction": 0.19002142013794204
           },
           "confirmedAbsent": [
             "rashi"
@@ -107194,7 +107507,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 58
+            "rows": 58,
+            "fraction": 0.26501400216437904
           },
           "confirmedAbsent": [
             "rashi"
@@ -107240,7 +107554,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 48
+            "rows": 48,
+            "fraction": 0.22899735454528958
           },
           "confirmedAbsent": [
             "rashi"
@@ -107286,7 +107601,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 40
+            "rows": 40,
+            "fraction": 0.15107532193550546
           },
           "confirmedAbsent": [
             "rashi"
@@ -107332,7 +107648,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 66
+            "rows": 66,
+            "fraction": 0.33571474368727117
           },
           "confirmedAbsent": [
             "rashi"
@@ -107378,7 +107695,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 48
+            "rows": 48,
+            "fraction": 0.20061398099371133
           },
           "confirmedAbsent": [
             "rashi"
@@ -107424,7 +107742,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.32361713888117777
           },
           "confirmedAbsent": [
             "rashi"
@@ -107470,7 +107789,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 41
+            "rows": 41,
+            "fraction": 0.1799848083702123
           },
           "confirmedAbsent": [
             "rashi"
@@ -107516,7 +107836,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 33
+            "rows": 33,
+            "fraction": 0.13861457061413432
           },
           "confirmedAbsent": [
             "rashi"
@@ -107562,7 +107883,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 61
+            "rows": 61,
+            "fraction": 0.280840243462305
           },
           "confirmedAbsent": [
             "rashi"
@@ -107608,7 +107930,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 53
+            "rows": 53,
+            "fraction": 0.197547818630617
           },
           "confirmedAbsent": [
             "rashi"
@@ -107654,7 +107977,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.3315574789126905
           },
           "confirmedAbsent": [
             "rashi"
@@ -107700,7 +108024,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 55
+            "rows": 55,
+            "fraction": 0.23545061478517554
           },
           "confirmedAbsent": [
             "rashi"
@@ -107746,7 +108071,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.3900826145474248
           },
           "confirmedAbsent": [
             "rashi"
@@ -107792,7 +108118,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 69
+            "rows": 69,
+            "fraction": 0.4312861474334895
           },
           "confirmedAbsent": [
             "rashi"
@@ -107838,7 +108165,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 130
+            "rows": 130,
+            "fraction": 0.45831343664304136
           },
           "confirmedAbsent": [
             "tosafot",
@@ -107886,7 +108214,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 30
+            "rows": 30,
+            "fraction": 0.13419884242643626
           },
           "confirmedAbsent": [
             "rashi"
@@ -107932,7 +108261,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.38697218846967
           },
           "confirmedAbsent": [
             "rashi"
@@ -107978,7 +108308,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.46129391984388396
           },
           "confirmedAbsent": [
             "rashi"
@@ -108024,7 +108355,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.4826988059167081
           },
           "confirmedAbsent": [
             "rashi"
@@ -108070,7 +108402,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 60
+            "rows": 60,
+            "fraction": 0.300448796972174
           },
           "confirmedAbsent": [
             "rashi"
@@ -108116,7 +108449,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 68
+            "rows": 68,
+            "fraction": 0.37983221536983997
           },
           "confirmedAbsent": [
             "rashi"
@@ -108162,7 +108496,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.24126620044739053
           },
           "confirmedAbsent": [
             "rashi"
@@ -108208,7 +108543,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 65
+            "rows": 65,
+            "fraction": 0.3748549507522091
           },
           "confirmedAbsent": [
             "rashi"
@@ -108254,7 +108590,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 67
+            "rows": 67,
+            "fraction": 0.26365417479161135
           },
           "confirmedAbsent": [
             "rashi"
@@ -108300,7 +108637,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 33
+            "rows": 33,
+            "fraction": 0.12194991073940607
           },
           "confirmedAbsent": [
             "rashi"
@@ -108346,7 +108684,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 49
+            "rows": 49,
+            "fraction": 0.17536282291941568
           },
           "confirmedAbsent": [
             "rashi"
@@ -108392,7 +108731,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 63
+            "rows": 63,
+            "fraction": 0.24003198612682247
           },
           "confirmedAbsent": [
             "rashi"
@@ -108438,7 +108778,8 @@
             "sources": [
               "Rashbam"
             ],
-            "rows": 6
+            "rows": 6,
+            "fraction": 0.036675008984026064
           },
           "confirmedAbsent": [
             "tosafot",
