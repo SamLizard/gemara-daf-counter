@@ -1,0 +1,264 @@
+{
+  "language": "Français",
+  "app": {
+    "title": "Gemara Daf Counter",
+    "loading": "Chargement des données…",
+    "loadError": "Les données n'ont pas pu être chargées ({error}).",
+    "notFound": "Cette massekhet n'existe pas."
+  },
+  "menu": {
+    "home": "Accueil",
+    "masechtot": "Massekhtot",
+    "about": "À propos",
+    "preferences": "Préférences",
+    "openMenu": "Ouvrir le menu"
+  },
+  "prefs": {
+    "title": "Préférences",
+    "theme": "Thème",
+    "themeParchment": "Parchemin",
+    "themeNight": "Nuit",
+    "unit": "Unité",
+    "texts": "Textes affichés",
+    "viewer": "Visionneuse de pages",
+    "close": "Fermer les préférences"
+  },
+  "unit": {
+    "dafim": "Dafim pleins",
+    "amudim": "Amoudim pleins",
+    "percent": "% du corps de texte",
+    "dafimValue": "{value} dafim pleins",
+    "amudimValue": "{value} amoudim pleins",
+    "dafimShort": "dafim pleins",
+    "tooltip": "Un daf plein = deux corps de texte entiers remplis par ce seul texte. Voir À propos.",
+    "printedDafimValue": "{value} dafim imprimés"
+  },
+  "value": {
+    "notCalculated": "Pas encore calculé",
+    "noneOnAmud": "Aucun sur cet amoud",
+    "otherCommentariesNotCalculated": "Commentaires : pas encore calculés",
+    "rest": "Reste de la page"
+  },
+  "viewer": {
+    "sefaria": "Sefaria",
+    "hebrewbooks": "HebrewBooks",
+    "shas-org": "PDF Shas.org"
+  },
+  "text": {
+    "main": "Guemara + Michna",
+    "rashi": "Rachi",
+    "rashi-rashbam": "Rachi / Rachbam",
+    "ran": "Ran",
+    "tosafot": "Tossefot"
+  },
+  "order": {
+    "Zeraim": "Zeraïm",
+    "Moed": "Moèd",
+    "Nashim": "Nachim",
+    "Nezikin": "Nezikin",
+    "Kodashim": "Kodachim",
+    "Tahorot": "Taharot"
+  },
+  "tractate": {
+    "berachos": "Berakhot",
+    "shabbos": "Chabbat",
+    "eruvin": "Erouvin",
+    "pesachim": "Pessa'him",
+    "shekalim": "Chekalim",
+    "yoma": "Yoma",
+    "sukkah": "Soucca",
+    "beitzah": "Beitsa",
+    "rosh-hashanah": "Roch Hachana",
+    "taanis": "Taanit",
+    "megillah": "Méguila",
+    "moed-katan": "Moèd Katan",
+    "chagigah": "'Haguiga",
+    "yevamos": "Yevamot",
+    "kesubos": "Ketoubot",
+    "nedarim": "Nedarim",
+    "nazir": "Nazir",
+    "sotah": "Sota",
+    "gittin": "Guittin",
+    "kiddushin": "Kiddouchin",
+    "bava-kamma": "Baba Kama",
+    "bava-metzia": "Baba Metsia",
+    "bava-basra": "Baba Batra",
+    "sanhedrin": "Sanhédrin",
+    "makkos": "Makot",
+    "shevuos": "Chevouot",
+    "avodah-zarah": "Avoda Zara",
+    "horayos": "Horayot",
+    "zevachim": "Zeva'him",
+    "menachos": "Mena'hot",
+    "chullin": "'Houlin",
+    "bechoros": "Bekhorot",
+    "arachin": "Arakhin",
+    "temurah": "Temoura",
+    "kereisos": "Keritot",
+    "meilah": "Meïla",
+    "kinim": "Kinim",
+    "tamid": "Tamid",
+    "middos": "Midot",
+    "niddah": "Nida"
+  },
+  "chart": {
+    "amud": "Amoud",
+    "shasBar": "Part du corps de texte de tout le Chass par texte"
+  },
+  "home": {
+    "title": "La longueur réelle de chaque massekhet",
+    "intro": "Le nombre de dafim imprimés ne dit pas combien il y a à apprendre. Voici combien de pages pleines chaque texte remplirait s'il était imprimé seul.",
+    "unitLink": "Qu'est-ce qu'un daf plein ?",
+    "dafYomi": {
+      "title": "Daf Yomi",
+      "previousDay": "Jour précédent",
+      "nextDay": "Jour suivant",
+      "today": "Aujourd'hui",
+      "daf": "{tractate} {daf}",
+      "amud": "Amoud {amud}",
+      "openAmud": "Ouvrir l'amoud {amud} dans la page de la massekhet",
+      "details": "Détails",
+      "barLabel": "Part du corps de texte de l'amoud {amud} par texte",
+      "noEnabledText": "Aucun texte n'est sélectionné. Choisissez des textes dans les préférences.",
+      "unavailable": "Le Daf Yomi de ce jour n'est pas disponible.",
+      "progressTitle": "Avancement dans la massekhet",
+      "printed": "Longueur de la massekhet : {value} dafim imprimés.",
+      "progress": "{done} sur {total} dafim pleins",
+      "progressLabel": "Partie de la massekhet apprise jusqu'à ce daf"
+    },
+    "shas": {
+      "title": "Tout le Shas",
+      "printed": "Dafim imprimés",
+      "tractates": "{count} massekhtot",
+      "barTitle": "Part du corps de texte de tout le Shas",
+      "barNote": "Le reste de la page contient les titres, les espaces et les textes non mesurés."
+    },
+    "facts": {
+      "title": "Le saviez-vous ?",
+      "open": "Voir la massekhet",
+      "printedVsGemara": "{long} compte {longPrinted} dafim imprimés et {short} seulement {shortPrinted}, et pourtant leur Guemara a à peu près la même longueur : {longMain} et {shortMain} dafim pleins.",
+      "tosafotRatio": "Dans {tractate}, les Tossafot remplissent {tosafot} dafim pleins, {ratio} fois la Guemara ({main} dafim pleins).",
+      "densestGemara": "L'amoud qui contient le plus de Guemara dans tout le Shas est {tractate} {amud} : {share} de son corps de texte.",
+      "densestTosafot": "En {tractate} {amud}, les Tossafot occupent {share} du corps de texte, plus que sur tout autre amoud.",
+      "gemaraShare": "{tractate} a le plus de Guemara pour sa taille : {main} dafim pleins sur {printed} dafim imprimés ({share} du corps de texte)."
+    }
+  },
+  "about": {
+    "title": "À propos",
+    "intro": "Comment le site mesure la longueur réelle d'une massekhet, et ce que les chiffres peuvent dire ou non.",
+    "unit": {
+      "title": "L'unité : les dafim pleins",
+      "definition": "Prenez un seul texte, par exemple la Guemara, et imaginez-le imprimé sans rien autour, remplissant tout le corps de texte de chaque page. Le nombre de dafim qu'il remplirait est sa longueur en dafim pleins. Un daf plein correspond à deux corps de texte complets (les deux amoudim) de ce seul texte.",
+      "examplePrinted": "{tractate} : dafim imprimés",
+      "example": "{tractate} compte {printed} dafim imprimés, mais sa Guemara seule remplirait {main} dafim pleins : {share} de son corps de texte. Le reste, ce sont Rachi, les Tossafot, les titres et les espaces.",
+      "units": "Dans les préférences, vous pouvez aussi afficher des amoudim pleins (un demi-daf plein) ou la part du corps de texte en pourcentage."
+    },
+    "method": {
+      "title": "Comment c'est mesuré",
+      "stepPdf": "Les pages du Shas de Vilna sont lues à partir des PDF publiés par Shas.org.",
+      "stepMatch": "Chaque ligne de texte de la page est comparée aux textes de Sefaria et de Wikisource, pour savoir si elle appartient à la Guemara, à Rachi, aux Tossafot ou à un autre commentaire.",
+      "stepArea": "Pour chaque texte, la surface de ses boîtes de lignes est additionnée puis divisée par le corps de texte ajusté sur les pages de la massekhet. On obtient ainsi la part de chaque amoud qu'occupe le texte.",
+      "stepTotal": "Ces parts sont additionnées sur la massekhet puis divisées par deux pour obtenir des dafim pleins.",
+      "notCalculatedTitle": "Pas encore calculé",
+      "notCalculatedRashbam": "Le Rashbam (Pessa'him et Bava Batra) : ses lignes sont connues mais pas sa surface, donc Rachi / Rashbam y affiche « non calculé ».",
+      "notCalculatedNedarim": "Les Tossafot sur Nedarim.",
+      "notCalculatedSmall": "Les commentaires de Shekalim, Kinnim, Tamid et Middot."
+    },
+    "caveats": {
+      "title": "Précautions",
+      "estimate": "Chaque valeur est une estimation automatique. Elle n'a pas été vérifiée à la main.",
+      "frames": "Chaque massekhet a son propre cadre de texte ajusté : les comparaisons entre massekhtot sont donc approximatives.",
+      "unknown": "« Non calculé » signifie inconnu, jamais zéro. Les valeurs inconnues ne sont jamais ajoutées à un total."
+    },
+    "sources": {
+      "title": "Sources et attribution",
+      "warningTitle": "Note du traitement des données (en anglais)",
+      "shasOrgApi": "API PDF de Shas.org",
+      "shasOrgApiUse": "Images des pages du Shas de Vilna",
+      "sefariaExport": "Archive d'export de Sefaria",
+      "sefariaExportUse": "Textes de la Guemara, de Rachi et des Tossafot utilisés pour reconnaître les lignes",
+      "wikisource": "Wikisource en hébreu",
+      "wikisourceUse": "Textes complémentaires utilisés pour reconnaître les lignes",
+      "hebcal": "{'@'}hebcal/learning",
+      "hebcalUse": "Calendrier du Daf Yomi",
+      "attributionTitle": "Attribution",
+      "pdfAttribution": "Pages PDF :",
+      "hebcalCredit": "Le Daf Yomi de la page d'accueil est calculé avec la bibliothèque {'@'}hebcal/learning (Hebcal, GPL-2.0)."
+    }
+  },
+  "masechet": {
+    "texts": "Textes de la page",
+    "amudRange": "Amudim {first} à {last}",
+    "rank": "Rang {rank} sur {count} par longueur réelle des textes affichés",
+    "rankUnknown": "Rang par longueur réelle : pas encore calculé",
+    "shareHint": "{share} du corps de texte",
+    "shareRatioHint": "{share} du corps de texte · × {ratio} la Guemara",
+    "extremes": {
+      "title": "Amud le plus dense et le plus léger",
+      "densest": "Le plus dense : {amud} ({value})",
+      "lightest": "Le plus léger : {amud} ({value})",
+      "densestAria": "Afficher l’amud le plus dense, {amud} ({value})",
+      "lightestAria": "Afficher l’amud le plus léger, {amud} ({value})"
+    },
+    "strip": {
+      "title": "Amud par amud",
+      "ariaLabel": "Part du corps de texte de chaque texte sur chaque amud de {tractate}",
+      "summary": "{count} amudim de {tractate}, de {first} à {last}. Chaque colonne montre la part de la page occupée par chaque texte. Sélectionnez une colonne pour voir l’amud."
+    },
+    "heatmap": {
+      "title": "Carte de densité",
+      "pickText": "Texte affiché sur la carte",
+      "ariaLabel": "Densité de {text} sur chaque amud de {tractate}",
+      "summary": "{text} : amud le plus dense {max} ({maxValue}), amud le plus léger {min} ({minValue})."
+    },
+    "amud": {
+      "title": "Amud sélectionné",
+      "previous": "Amud précédent",
+      "next": "Amud suivant",
+      "barLabel": "Part du corps de texte de chaque texte sur l’amud {amud}",
+      "open": "Ouvrir sur {viewer}"
+    }
+  },
+  "masechtot": {
+    "title": "Comparer les massekhtot",
+    "intro": "Longueur réelle de chaque massekhet pour les textes affichés, à côté de sa longueur imprimée. Sélectionnez une barre pour ouvrir la massekhet.",
+    "search": {
+      "label": "Rechercher une massekhet",
+      "none": "Aucune massekhet ne correspond à cette recherche."
+    },
+    "sort": {
+      "label": "Trier par",
+      "shas": "Ordre du Shas",
+      "real": "Longueur réelle",
+      "printed": "Longueur imprimée",
+      "ratio": "Commentaires ÷ Guemara"
+    },
+    "mode": {
+      "label": "Échelle des barres",
+      "absolute": "Absolue",
+      "percent": "100 %"
+    },
+    "chart": {
+      "ariaLabel": "Longueur réelle des textes affichés et longueur imprimée de {count} massekhtot",
+      "ariaLabelPercent": "Part de chaque texte affiché dans {count} massekhtot",
+      "hint": "Barre épaisse : longueur réelle de chaque texte affiché. Barre fine : longueur imprimée. Les textes non calculés ne sont pas dessinés.",
+      "hintPercent": "Chaque barre montre la part de chaque texte parmi les textes affichés connus de la massekhet.",
+      "printed": "Longueur imprimée",
+      "realLength": "Longueur réelle : {value}"
+    },
+    "table": {
+      "title": "Valeurs sous forme de tableau",
+      "masechet": "Massekhet",
+      "real": "Longueur réelle",
+      "printed": "Dafim imprimés"
+    },
+    "similar": {
+      "title": "Longueur réelle semblable",
+      "intro": "Choisissez une massekhet pour lister les massekhtot dont la longueur réelle, pour les textes affichés, est à 15 % près la même.",
+      "pick": "Massekhet",
+      "target": "Longueur réelle : {value}",
+      "unknown": "La longueur réelle de cette massekhet n'est pas encore calculée, elle ne peut donc pas être comparée.",
+      "none": "Aucune autre massekhet n'est à moins de 15 %."
+    }
+  }
+}

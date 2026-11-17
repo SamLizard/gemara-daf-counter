@@ -1,0 +1,264 @@
+{
+  "language": "English",
+  "app": {
+    "title": "Gemara Daf Counter",
+    "loading": "Loading the data…",
+    "loadError": "The data could not be loaded ({error}).",
+    "notFound": "This masechet does not exist."
+  },
+  "menu": {
+    "home": "Home",
+    "masechtot": "Masechtot",
+    "about": "About",
+    "preferences": "Preferences",
+    "openMenu": "Open the menu"
+  },
+  "prefs": {
+    "title": "Preferences",
+    "theme": "Theme",
+    "themeParchment": "Parchment",
+    "themeNight": "Night",
+    "unit": "Unit",
+    "texts": "Texts shown",
+    "viewer": "Page viewer",
+    "close": "Close the preferences"
+  },
+  "unit": {
+    "dafim": "Full dafim",
+    "amudim": "Full amudim",
+    "percent": "% of the text body",
+    "dafimValue": "{value} full dafim",
+    "amudimValue": "{value} full amudim",
+    "dafimShort": "full dafim",
+    "tooltip": "One full daf = two complete text bodies filled by this text alone. See About.",
+    "printedDafimValue": "{value} printed dafim"
+  },
+  "value": {
+    "notCalculated": "Not calculated for the moment",
+    "noneOnAmud": "None on this amud",
+    "otherCommentariesNotCalculated": "Commentaries: not calculated for the moment",
+    "rest": "Rest of the page"
+  },
+  "viewer": {
+    "sefaria": "Sefaria",
+    "hebrewbooks": "HebrewBooks",
+    "shas-org": "Shas.org PDF"
+  },
+  "text": {
+    "main": "Gemara + Mishnah",
+    "rashi": "Rashi",
+    "rashi-rashbam": "Rashi / Rashbam",
+    "ran": "Ran",
+    "tosafot": "Tosafot"
+  },
+  "order": {
+    "Zeraim": "Zeraim",
+    "Moed": "Moed",
+    "Nashim": "Nashim",
+    "Nezikin": "Nezikin",
+    "Kodashim": "Kodashim",
+    "Tahorot": "Tahorot"
+  },
+  "tractate": {
+    "berachos": "Berachos",
+    "shabbos": "Shabbos",
+    "eruvin": "Eruvin",
+    "pesachim": "Pesachim",
+    "shekalim": "Shekalim",
+    "yoma": "Yoma",
+    "sukkah": "Sukkah",
+    "beitzah": "Beitzah",
+    "rosh-hashanah": "Rosh Hashanah",
+    "taanis": "Taanis",
+    "megillah": "Megillah",
+    "moed-katan": "Moed Katan",
+    "chagigah": "Chagigah",
+    "yevamos": "Yevamos",
+    "kesubos": "Kesubos",
+    "nedarim": "Nedarim",
+    "nazir": "Nazir",
+    "sotah": "Sotah",
+    "gittin": "Gittin",
+    "kiddushin": "Kiddushin",
+    "bava-kamma": "Bava Kamma",
+    "bava-metzia": "Bava Metzia",
+    "bava-basra": "Bava Basra",
+    "sanhedrin": "Sanhedrin",
+    "makkos": "Makkos",
+    "shevuos": "Shevuos",
+    "avodah-zarah": "Avodah Zarah",
+    "horayos": "Horayos",
+    "zevachim": "Zevachim",
+    "menachos": "Menachos",
+    "chullin": "Chullin",
+    "bechoros": "Bechoros",
+    "arachin": "Arachin",
+    "temurah": "Temurah",
+    "kereisos": "Kereisos",
+    "meilah": "Meilah",
+    "kinim": "Kinnim",
+    "tamid": "Tamid",
+    "middos": "Middos",
+    "niddah": "Niddah"
+  },
+  "chart": {
+    "amud": "Amud",
+    "shasBar": "Share of the whole Shas text body per text"
+  },
+  "home": {
+    "title": "The real length of each masechet",
+    "intro": "Printed dafim do not tell how much there is to learn. Here is how many full pages each text would fill if it were printed alone.",
+    "unitLink": "What is a full daf?",
+    "dafYomi": {
+      "title": "Daf Yomi",
+      "previousDay": "Previous day",
+      "nextDay": "Next day",
+      "today": "Today",
+      "daf": "{tractate} {daf}",
+      "amud": "Amud {amud}",
+      "openAmud": "Open amud {amud} in the masechet page",
+      "details": "Details",
+      "barLabel": "Share of the text body of amud {amud} per text",
+      "noEnabledText": "No text is selected. Choose texts in the preferences.",
+      "unavailable": "The Daf Yomi of this day is not available.",
+      "progressTitle": "Progress in the masechet",
+      "printed": "Length of the masechet: {value} printed dafim.",
+      "progress": "{done} of {total} full dafim",
+      "progressLabel": "Part of the masechet learned up to this daf"
+    },
+    "shas": {
+      "title": "The whole Shas",
+      "printed": "Printed dafim",
+      "tractates": "{count} masechtot",
+      "barTitle": "Share of the text body of the whole Shas",
+      "barNote": "The rest of the page holds headings, spacing and the texts not measured."
+    },
+    "facts": {
+      "title": "Did you know?",
+      "open": "See the masechet",
+      "printedVsGemara": "{long} has {longPrinted} printed dafim and {short} only {shortPrinted}, yet their Gemara is about the same length: {longMain} and {shortMain} full dafim.",
+      "tosafotRatio": "In {tractate}, Tosafot fill {tosafot} full dafim, {ratio} times the Gemara ({main} full dafim).",
+      "densestGemara": "The amud with the most Gemara in the whole Shas is {tractate} {amud}: {share} of its text body.",
+      "densestTosafot": "On {tractate} {amud}, Tosafot take {share} of the text body, more than on any other amud.",
+      "gemaraShare": "{tractate} has the most Gemara for its size: {main} full dafim in {printed} printed dafim ({share} of the text body)."
+    }
+  },
+  "about": {
+    "title": "About",
+    "intro": "How the site measures the real length of a masechet, and what the numbers can and cannot tell.",
+    "unit": {
+      "title": "The unit: full dafim",
+      "definition": "Take one text alone, for example the Gemara, and imagine it printed with nothing else around it, filling the whole text body of each page. The number of dafim it would fill is its length in full dafim. One full daf is two complete text bodies (both amudim) of that single text.",
+      "examplePrinted": "{tractate}: printed dafim",
+      "example": "{tractate} has {printed} printed dafim, but its Gemara alone would fill {main} full dafim: {share} of its text body. The rest is Rashi, Tosafot, headings and spacing.",
+      "units": "In the preferences you can also show full amudim (half a full daf) or the share of the text body in percent."
+    },
+    "method": {
+      "title": "How it is measured",
+      "stepPdf": "The pages of the Vilna Shas are read from the PDFs published by Shas.org.",
+      "stepMatch": "Each line of text on the page is matched against the texts of Sefaria and Wikisource, to know whether it belongs to the Gemara, Rashi, Tosafot or another commentary.",
+      "stepArea": "For each text, the area of its line boxes is added up and divided by the text body fitted on the masechet's pages. This gives the share of each amud that the text fills.",
+      "stepTotal": "These shares are added up over the masechet and divided by two to get full dafim.",
+      "notCalculatedTitle": "Not calculated yet",
+      "notCalculatedRashbam": "Rashbam (Pesachim and Bava Basra): its lines are known but not its area, so Rashi / Rashbam shows \"not calculated\" there.",
+      "notCalculatedNedarim": "Tosafot on Nedarim.",
+      "notCalculatedSmall": "The commentaries of Shekalim, Kinnim, Tamid and Middos."
+    },
+    "caveats": {
+      "title": "Caveats",
+      "estimate": "Every value is an automatic estimate. It has not been checked by hand.",
+      "frames": "Each masechet has its own fitted text frame, so comparisons between masechtot are approximate.",
+      "unknown": "\"Not calculated\" means unknown, never zero. Unknown values are never added into a total."
+    },
+    "sources": {
+      "title": "Sources and attribution",
+      "warningTitle": "Note from the data pipeline (in English)",
+      "shasOrgApi": "Shas.org PDF API",
+      "shasOrgApiUse": "Page images of the Vilna Shas",
+      "sefariaExport": "Sefaria Export Archive",
+      "sefariaExportUse": "Texts of the Gemara, Rashi and Tosafot used to recognize the lines",
+      "wikisource": "Hebrew Wikisource",
+      "wikisourceUse": "Additional texts used to recognize the lines",
+      "hebcal": "{'@'}hebcal/learning",
+      "hebcalUse": "Daf Yomi calendar",
+      "attributionTitle": "Attribution",
+      "pdfAttribution": "PDF pages:",
+      "hebcalCredit": "The Daf Yomi of the home page is computed with the {'@'}hebcal/learning library (Hebcal, GPL-2.0)."
+    }
+  },
+  "masechet": {
+    "texts": "Texts on the page",
+    "amudRange": "Amudim {first} to {last}",
+    "rank": "Rank {rank} of {count} by real length of the texts shown",
+    "rankUnknown": "Rank by real length: not calculated for the moment",
+    "shareHint": "{share} of the text body",
+    "shareRatioHint": "{share} of the text body · × {ratio} the Gemara",
+    "extremes": {
+      "title": "Densest and lightest amud",
+      "densest": "Densest: {amud} ({value})",
+      "lightest": "Lightest: {amud} ({value})",
+      "densestAria": "Show the densest amud, {amud} ({value})",
+      "lightestAria": "Show the lightest amud, {amud} ({value})"
+    },
+    "strip": {
+      "title": "Amud by amud",
+      "ariaLabel": "Share of the text body per text on each amud of {tractate}",
+      "summary": "{count} amudim of {tractate}, from {first} to {last}. Each column shows the share of the page taken by each text. Select a column to see the amud."
+    },
+    "heatmap": {
+      "title": "Density map",
+      "pickText": "Text shown on the map",
+      "ariaLabel": "Density of {text} on each amud of {tractate}",
+      "summary": "{text}: densest amud {max} ({maxValue}), lightest amud {min} ({minValue})."
+    },
+    "amud": {
+      "title": "Selected amud",
+      "previous": "Previous amud",
+      "next": "Next amud",
+      "barLabel": "Share of the text body per text on amud {amud}",
+      "open": "Open on {viewer}"
+    }
+  },
+  "masechtot": {
+    "title": "Compare the masechtot",
+    "intro": "Real length of each masechet for the texts shown, next to its printed length. Select a bar to open the masechet.",
+    "search": {
+      "label": "Search a masechet",
+      "none": "No masechet matches this search."
+    },
+    "sort": {
+      "label": "Sort by",
+      "shas": "Shas order",
+      "real": "Real length",
+      "printed": "Printed length",
+      "ratio": "Commentary ÷ Gemara"
+    },
+    "mode": {
+      "label": "Bar scale",
+      "absolute": "Absolute",
+      "percent": "100 %"
+    },
+    "chart": {
+      "ariaLabel": "Real length of the texts shown and printed length of {count} masechtot",
+      "ariaLabelPercent": "Share of each text shown in {count} masechtot",
+      "hint": "Thick bar: real length of each text shown. Thin bar: printed length. Texts not calculated are not drawn.",
+      "hintPercent": "Each bar shows the share of each text in the known texts shown of the masechet.",
+      "printed": "Printed length",
+      "realLength": "Real length: {value}"
+    },
+    "table": {
+      "title": "Values as a table",
+      "masechet": "Masechet",
+      "real": "Real length",
+      "printed": "Printed dafim"
+    },
+    "similar": {
+      "title": "Similar real length",
+      "intro": "Pick a masechet to list the masechtot whose real length, for the texts shown, is within 15 % of it.",
+      "pick": "Masechet",
+      "target": "Real length: {value}",
+      "unknown": "The real length of this masechet is not calculated for the moment, so it cannot be compared.",
+      "none": "No other masechet is within 15 %."
+    }
+  }
+}

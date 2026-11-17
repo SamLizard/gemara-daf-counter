@@ -10,6 +10,8 @@
     "test": "node --test src/*.test.mjs research/*.test.mjs",
     "measure:shas": "node src/measure-shas.mjs",
     "export:shas": "node src/shas-export.mjs",
+    "export:front": "node src/export-front.mjs",
+    "deploy": "npm --prefix front run deploy",
     "review:problems": "node src/problem-review.mjs",
     "research:renderer": "node research/renderer.mjs",
     "research:pdf": "node research/pdf.mjs",
