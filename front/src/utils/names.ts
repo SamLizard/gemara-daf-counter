@@ -1,31 +1,17 @@
+import he from '@/i18n/locales/he.json'
 import type { TextId } from '@/types/metrics'
 
-// Hebrew names are shown in every locale (spec §7), so they live here and not in the locale files.
-const tractateHebrew: Record<string, string> = {
-  berachos: 'ברכות', shabbos: 'שבת', eruvin: 'עירובין', pesachim: 'פסחים', shekalim: 'שקלים', yoma: 'יומא',
-  sukkah: 'סוכה', beitzah: 'ביצה', 'rosh-hashanah': 'ראש השנה', taanis: 'תענית', megillah: 'מגילה',
-  'moed-katan': 'מועד קטן', chagigah: 'חגיגה', yevamos: 'יבמות', kesubos: 'כתובות', nedarim: 'נדרים',
-  nazir: 'נזיר', sotah: 'סוטה', gittin: 'גיטין', kiddushin: 'קידושין', 'bava-kamma': 'בבא קמא',
-  'bava-metzia': 'בבא מציעא', 'bava-basra': 'בבא בתרא', sanhedrin: 'סנהדרין', makkos: 'מכות',
-  shevuos: 'שבועות', 'avodah-zarah': 'עבודה זרה', horayos: 'הוריות', zevachim: 'זבחים', menachos: 'מנחות',
-  chullin: 'חולין', bechoros: 'בכורות', arachin: 'ערכין', temurah: 'תמורה', kereisos: 'כריתות',
-  meilah: 'מעילה', kinim: 'קינים', tamid: 'תמיד', middos: 'מידות', niddah: 'נדה',
-}
-
-const textHebrew: Record<TextId, string> = {
-  main: 'גמרא ומשנה',
-  rashi: 'רש״י',
-  'rashi-rashbam': 'רש״י / רשב״ם',
-  ran: 'ר״ן',
-  tosafot: 'תוספות',
-}
+// Hebrew names are shown in every locale (spec §7). They come from the Hebrew locale file,
+// so there is one source for them.
+const tractateHebrew: Record<string, string> = he.tractate
+const textHebrew: Record<string, string> = he.text
 
 export function tractateHebrewName(id: string): string {
   return tractateHebrew[id] ?? id
 }
 
 export function textHebrewName(id: TextId): string {
-  return textHebrew[id]
+  return textHebrew[id] ?? id
 }
 
 const HEBREW_RUN = /([\u0590-\u05FF][\u0590-\u05FF\s״׳"'.,:\-–/()]*[\u0590-\u05FF״׳]|[\u0590-\u05FF])/g

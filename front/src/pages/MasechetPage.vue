@@ -10,6 +10,7 @@
     <v-card variant="outlined">
       <v-card-title class="text-title-medium">{{ $t('masechet.strip.title') }}</v-card-title>
       <v-card-text>
+        <TextSelector v-model="enabledTexts" :available="available" class="mb-3" />
         <PageStrip :tractate-id="id" :selected="amud" @select="select" />
       </v-card-text>
     </v-card>
@@ -32,10 +33,15 @@ import MasechetHeader from '@/components/masechet/MasechetHeader.vue'
 import AmudDetail from '@/components/masechet/AmudDetail.vue'
 import HeatmapCard from '@/components/masechet/HeatmapCard.vue'
 import PageStrip from '@/components/charts/PageStrip.vue'
+import TextSelector from '@/components/common/TextSelector.vue'
+import { usePreferences } from '@/composables/usePreferences'
 
 const props = defineProps<{ id: string }>()
 
 const { tractate } = useMetrics()
+const { enabledTexts } = usePreferences()
 const current = computed(() => tractate(props.id))
+// Only the texts printed on this masechet can be toggled here; the choice is shared with the other pages.
+const available = computed(() => current.value?.texts.map((text) => text.id) ?? [])
 const { amud, select } = useSelectedAmud(() => props.id)
 </script>

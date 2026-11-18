@@ -47,7 +47,7 @@
   "text": {
     "main": "Gemara + Mishnah",
     "rashi": "Rashi",
-    "rashi-rashbam": "Rashi / Rashbam",
+    "rashbam": "Rashbam",
     "ran": "Ran",
     "tosafot": "Tosafot"
   },
@@ -220,7 +220,7 @@
   },
   "masechtot": {
     "title": "Compare the masechtot",
-    "intro": "Real length of each masechet for the texts shown, next to its printed length. Select a bar to open the masechet.",
+    "intro": "Real length of each masechet for the selected texts, next to its printed length. Tap a masechet to open it.",
     "search": {
       "label": "Search a masechet",
       "none": "No masechet matches this search."
@@ -237,20 +237,6 @@
       "absolute": "Absolute",
       "percent": "100 %"
     },
-    "chart": {
-      "ariaLabel": "Real length of the texts shown and printed length of {count} masechtot",
-      "ariaLabelPercent": "Share of each text shown in {count} masechtot",
-      "hint": "Thick bar: real length of each text shown. Thin bar: printed length. Texts not calculated are not drawn.",
-      "hintPercent": "Each bar shows the share of each text in the known texts shown of the masechet.",
-      "printed": "Printed length",
-      "realLength": "Real length: {value}"
-    },
-    "table": {
-      "title": "Values as a table",
-      "masechet": "Masechet",
-      "real": "Real length",
-      "printed": "Printed dafim"
-    },
     "similar": {
       "title": "Similar real length",
       "intro": "Pick a masechet to list the masechtot whose real length, for the texts shown, is within 15 % of it.",
@@ -258,6 +244,11 @@
       "target": "Real length: {value}",
       "unknown": "The real length of this masechet is not calculated for the moment, so it cannot be compared.",
       "none": "No other masechet is within 15 %."
+    },
+    "list": {
+      "hint": "Each bar shows the real length of the texts selected above, on one common scale. The thin line under it is the printed length.",
+      "hintPercent": "Each bar shows the share of each selected text among the selected texts of the masechet.",
+      "mainShare": "Gemara: {share}"
     }
   }
 }

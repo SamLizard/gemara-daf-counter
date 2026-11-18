@@ -2,13 +2,14 @@
   <div>
     <v-chart
       class="stacked-bar"
+      :class="{ 'stacked-bar--silent': silent }"
       :style="{ height: `${height}px` }"
       :option="option"
       autoresize
       role="img"
       :aria-label="ariaLabel"
     />
-    <div v-if="legend" class="d-flex flex-wrap ga-3 mt-2 text-body-small" :aria-label="ariaLabel">
+    <div v-if="legend" class="d-flex flex-wrap ga-3 mt-2 text-body-small">
       <span v-for="segment in segments" :key="segment.id">
         <TextName v-if="isText(segment.id)" :id="segment.id" dot />
         <template v-else>{{ $t('value.rest') }}</template>
@@ -30,8 +31,17 @@ import { useTextColor } from '@/composables/useTextColor'
 import TextName from '@/components/common/TextName.vue'
 
 const props = withDefaults(
-  defineProps<{ segments: BarSegment[]; ariaLabel: string; height?: number; legend?: boolean }>(),
-  { height: 28, legend: true },
+  defineProps<{
+    segments: BarSegment[]
+    ariaLabel: string
+    height?: number
+    legend?: boolean
+    /** Value of the full width; defaults to the sum of the segments. */
+    max?: number
+    /** No tooltip, clicks go through to the parent (e.g. a list item link). */
+    silent?: boolean
+  }>(),
+  { height: 28, legend: true, max: undefined, silent: false },
 )
 
 const { t } = useI18n()
@@ -50,6 +60,7 @@ const option = computed(() =>
     })),
     context.value,
     (value) => formatPercent(value / total.value),
+    { max: props.max, silent: props.silent },
   ),
 )
 </script>
@@ -59,5 +70,9 @@ const option = computed(() =>
   width: 100%;
   border-radius: 6px;
   overflow: hidden;
+}
+
+.stacked-bar--silent {
+  pointer-events: none;
 }
 </style>

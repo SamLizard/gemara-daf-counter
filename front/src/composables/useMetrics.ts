@@ -34,15 +34,11 @@ export interface Totals {
 /**
  * Totals per text over a group of masechtot. A text is summed only over masechtot where it is
  * printed (absent texts are skipped); one `not-measured` masechet makes the whole total null.
- * "rashi-rashbam" is counted under "rashi".
  */
 function totalsOf(tractates: readonly Tractate[]): Totals {
   const byText = new Map<TextId, (number | null)[]>()
   for (const tractate of tractates) {
-    for (const text of tractate.texts) {
-      const id: TextId = text.id === 'rashi-rashbam' ? 'rashi' : text.id
-      byText.set(id, [...(byText.get(id) ?? []), text.total])
-    }
+    for (const text of tractate.texts) byText.set(text.id, [...(byText.get(text.id) ?? []), text.total])
   }
   const texts: Partial<Record<TextId, number | null>> = {}
   for (const [id, values] of byText) texts[id] = sumKnown(values)

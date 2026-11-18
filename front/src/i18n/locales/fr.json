@@ -47,7 +47,7 @@
   "text": {
     "main": "Guemara + Michna",
     "rashi": "Rachi",
-    "rashi-rashbam": "Rachi / Rachbam",
+    "rashbam": "Rachbam",
     "ran": "Ran",
     "tosafot": "Tossefot"
   },
@@ -220,7 +220,7 @@
   },
   "masechtot": {
     "title": "Comparer les massekhtot",
-    "intro": "Longueur réelle de chaque massekhet pour les textes affichés, à côté de sa longueur imprimée. Sélectionnez une barre pour ouvrir la massekhet.",
+    "intro": "Longueur réelle de chaque massekhet pour les textes choisis, à côté de sa longueur imprimée. Touchez une massekhet pour l'ouvrir.",
     "search": {
       "label": "Rechercher une massekhet",
       "none": "Aucune massekhet ne correspond à cette recherche."
@@ -237,20 +237,6 @@
       "absolute": "Absolue",
       "percent": "100 %"
     },
-    "chart": {
-      "ariaLabel": "Longueur réelle des textes affichés et longueur imprimée de {count} massekhtot",
-      "ariaLabelPercent": "Part de chaque texte affiché dans {count} massekhtot",
-      "hint": "Barre épaisse : longueur réelle de chaque texte affiché. Barre fine : longueur imprimée. Les textes non calculés ne sont pas dessinés.",
-      "hintPercent": "Chaque barre montre la part de chaque texte parmi les textes affichés connus de la massekhet.",
-      "printed": "Longueur imprimée",
-      "realLength": "Longueur réelle : {value}"
-    },
-    "table": {
-      "title": "Valeurs sous forme de tableau",
-      "masechet": "Massekhet",
-      "real": "Longueur réelle",
-      "printed": "Dafim imprimés"
-    },
     "similar": {
       "title": "Longueur réelle semblable",
       "intro": "Choisissez une massekhet pour lister les massekhtot dont la longueur réelle, pour les textes affichés, est à 15 % près la même.",
@@ -258,6 +244,11 @@
       "target": "Longueur réelle : {value}",
       "unknown": "La longueur réelle de cette massekhet n'est pas encore calculée, elle ne peut donc pas être comparée.",
       "none": "Aucune autre massekhet n'est à moins de 15 %."
+    },
+    "list": {
+      "hint": "Chaque barre montre la longueur réelle des textes choisis ci-dessus, sur une même échelle. Le trait fin dessous est la longueur imprimée.",
+      "hintPercent": "Chaque barre montre la part de chaque texte choisi parmi les textes choisis de la massekhet.",
+      "mainShare": "Guemara : {share}"
     }
   }
 }

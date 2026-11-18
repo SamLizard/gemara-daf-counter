@@ -54,18 +54,18 @@ A 0 on one amud of a measured text shows "none on this amud", not "0 %". A text 
 |---|---|
 | 35 regular masechtot | Gemara, Rashi, Tosafot: `measured` |
 | Nedarim | Gemara, Rashi, **Ran**: `measured` (Ran measured on all 180 sides, ~31.5 full dafim). Tosafot: `not-measured` (deliberately excluded by the pipeline, stored as 0) |
-| Pesachim | Gemara, Tosafot: `measured`. **Rashi / Rashbam**: see §3.2 |
-| Bava Basra | Gemara, Tosafot: `measured`. **Rashi / Rashbam**: see §3.2 |
+| Pesachim | Gemara, Rashi, **Rashbam**, Tosafot: `measured` (see §3.2) |
+| Bava Basra | Gemara, Rashi, **Rashbam**, Tosafot: `measured` (see §3.2) |
 | Shekalim, Kinnim, Tamid, Middos | Gemara/Mishnah: `measured`. One line "Commentaries: not calculated for the moment". Rashi and Tosafot are not displayed (Shekalim: confirmed absent; the other three: excluded by the pipeline) |
 
-### 3.2 Rashi / Rashbam
+### 3.2 Rashi and Rashbam
 
 The two masechtot differ:
 
 - **Bava Basra**: Rashi on 2a–29a, then Rashbam from 29a to the end (29a has both).
 - **Pesachim**: Rashi and Rashbam are both printed on 99b–121b (all 45 sides have both).
 
-They are displayed as one text "Rashi / Rashbam" (`rashi-rashbam`, one color). Rashbam is measured like Ran (`otherCommentary.fraction`); the export sums Rashi + Rashbam per side.
+Rashbam is its own text (`rashbam`, its own color), measured like Ran (`otherCommentary.fraction`). It is not merged with Rashi: on Pesachim 99b–121b both are printed, and merging would hide which one fills the page. The learner toggles each separately.
 
 ## 4. Metrics
 
@@ -104,12 +104,13 @@ Caveats:
       "printedSides": 240,
       "texts": [
         { "id": "main", "state": "measured", "total": 33.21 },
-        { "id": "rashi-rashbam", "state": "measured", "total": 35.65 },
+        { "id": "rashi", "state": "measured", "total": 30.37 },
+        { "id": "rashbam", "state": "measured", "total": 5.28 },
         { "id": "tosafot", "state": "measured", "total": 23.38 }
       ],
       "otherCommentaries": "none",            // or "not-measured" (Shekalim, Kinnim, Tamid, Middos)
-      "columns": ["main", "rashi-rashbam", "tosafot"],
-      "pages": [["2a", 0.2104, 0.1767, 0.3063], ["99b", 0.1298, 0.2181, 0.4229]]
+      "columns": ["main", "rashi", "rashbam", "tosafot"],
+      "pages": [["2a", 0.2104, 0.1767, 0, 0.3063], ["99b", 0.1298, 0.074, 0.144, 0.4229]]
     }
   ]
 }
@@ -134,6 +135,7 @@ Vue 3 + Vuetify 4, folder `front/`, hash router.
 - One horizontal stacked bar per masechet, grouped by seder, for the enabled texts, next to a thin bar of its printed length.
 - Sort: Shas order, real length, printed length, commentary ÷ Gemara.
 - Toggle: absolute / 100 %.
+- Layout: a list, one row per masechet (name, real length, printed length, stacked bar on a common scale, thin printed-length line); the whole row is a link to the masechet. The texts can be toggled directly on the page (same preference as the drawer).
 - Search, and "similar real length": pick a masechet, list the masechtot within ±15 %.
 
 ### 6.3 Masechet (`/masechet/:id`, query `amud`)

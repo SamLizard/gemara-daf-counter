@@ -4,7 +4,7 @@ import { pageIndex, ratio, shareOfBody, textEntry } from '@/utils/metrics'
 
 /**
  * Value of one text on one amud (fraction of the text body), null = not calculated.
- * A `not-measured` text keeps its positive values (e.g. the Rashi-only sides of "rashi-rashbam"),
+ * A `not-measured` text keeps its positive values (none at the moment),
  * but its zeros mean "not measured" (the pipeline stores excluded texts as 0), never "none".
  */
 export function amudValue(tractate: Tractate, rowIndex: number, id: TextId): number | null {

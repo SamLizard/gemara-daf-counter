@@ -10,21 +10,15 @@ const sumKnown = (values) => (values.some((value) => value === null) ? null : va
 const sourcesOf = (page) => page.otherCommentary?.sources || [];
 const otherFraction = (page, source) => (sourcesOf(page).includes(source) ? (page.otherCommentary.fraction ?? null) : 0);
 
-// Per-side value of each displayed text. Rashbam is shown together with Rashi.
+// Per-side value of each displayed text. Rashbam is its own text: on Pesachim 99b–121b it is
+// printed next to Rashi, so merging them would hide which commentary fills the page.
 function columnsFor(tractate) {
   const hasRashbam = tractate.pages.some((page) => sourcesOf(page).includes("Rashbam"));
   const hasRan = tractate.pages.some((page) => sourcesOf(page).includes("Ran"));
   const fraction = (kind) => (page) => page.fractions?.[kind] ?? null;
   const columns = [{ id: "main", value: fraction("main"), category: "main" }];
-  if (hasRashbam) {
-    columns.push({
-      id: "rashi-rashbam",
-      category: "rashi",
-      value: (page) => sumKnown([fraction("rashi")(page), otherFraction(page, "Rashbam")]),
-    });
-  } else {
-    columns.push({ id: "rashi", value: fraction("rashi"), category: "rashi" });
-  }
+  columns.push({ id: "rashi", value: fraction("rashi"), category: "rashi" });
+  if (hasRashbam) columns.push({ id: "rashbam", value: (page) => otherFraction(page, "Rashbam") });
   if (hasRan) columns.push({ id: "ran", value: (page) => otherFraction(page, "Ran") });
   columns.push({ id: "tosafot", value: fraction("tosafot"), category: "tosafot" });
   return columns;

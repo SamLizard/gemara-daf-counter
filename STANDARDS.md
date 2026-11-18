@@ -59,7 +59,7 @@ Read first `docs/FRONT_SPEC.md` (the specification) and `front/src/types/metrics
 ## Data pipeline
 
 - The front never loads `data/shas-metrics.json`. `npm run export:front` (root, `src/export-front.mjs`) writes `front/public/shas-front.json`. Regenerate it after every data change.
-- The export script applies all per-masechet rules (text states, Rashi / Rashbam, Ran, "other commentaries not calculated"). The front only reads states.
+- The export script applies all per-masechet rules (text states, Rashbam, Ran, "other commentaries not calculated"). The front only reads states.
 - The condensed format is defined once in `front/src/types/metrics.ts`; the export script and the types change together.
 
 ## Base modules (reuse, do not rewrite)

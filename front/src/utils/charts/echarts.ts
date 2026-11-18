@@ -25,6 +25,8 @@ use([
 
 export interface ChartContext {
   isRtl: boolean
+  /** Coarse pointer (phone, tablet). */
+  touch: boolean
   /** Text color of the current theme, for axis labels. */
   foreground: string
   /** Muted color for grid lines. */

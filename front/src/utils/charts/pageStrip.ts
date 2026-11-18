@@ -77,8 +77,9 @@ export function pageStripOption(input: StripInput, context: ChartContext): EChar
     },
     dataZoom: zoomed
       ? [
-          { type: 'inside', xAxisIndex: 0, ...window },
-          { type: 'slider', xAxisIndex: 0, bottom: 8, height: 20, ...window },
+          // On touch screens the slider alone moves the window, so a drag on the bars scrolls the page.
+          ...(context.touch ? [] : [{ type: 'inside', xAxisIndex: 0, ...window }]),
+          { type: 'slider', xAxisIndex: 0, bottom: 8, height: context.touch ? 28 : 20, ...window },
         ]
       : [],
     series: input.series.map((series) => ({

@@ -24,9 +24,8 @@ export function visibleTexts(tractate: Tractate, ids?: readonly TextId[]): TextE
   return ids ? tractate.texts.filter((text) => matchesEnabled(text.id, ids)) : tractate.texts
 }
 
-/** "rashi" enabled in the preferences also enables the combined "rashi-rashbam" text. */
 export function matchesEnabled(id: TextId, enabled: readonly TextId[]): boolean {
-  return enabled.includes(id) || (id === 'rashi-rashbam' && enabled.includes('rashi'))
+  return enabled.includes(id)
 }
 
 /** Values of one page row keyed by text id (only the texts listed in `columns`). */

@@ -9,5 +9,12 @@ export const router = createRouter({
     { path: '/about', name: 'about', component: () => import('@/pages/AboutPage.vue') },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
-  scrollBehavior: () => ({ top: 0 }),
+  // Selecting an amud only changes the query: keep the scroll position then, or the page jumps
+  // to the top on every tap of a chart.
+  scrollBehavior: (to, from, savedPosition) => {
+    if (savedPosition) return savedPosition
+    if (to.path === from.path) return false
+    if (to.hash) return { el: to.hash }
+    return { top: 0 }
+  },
 })

@@ -1,9 +1,9 @@
 // Schema of public/shas-front.json, written by src/export-front.mjs at the repository root.
 // The export script and these types change together.
 
-export type TextId = 'main' | 'rashi' | 'rashi-rashbam' | 'ran' | 'tosafot'
+export type TextId = 'main' | 'rashi' | 'rashbam' | 'ran' | 'tosafot'
 
-export const TEXT_IDS: readonly TextId[] = ['main', 'rashi', 'rashi-rashbam', 'ran', 'tosafot']
+export const TEXT_IDS: readonly TextId[] = ['main', 'rashi', 'rashbam', 'ran', 'tosafot']
 
 export type TextState = 'measured' | 'not-measured'
 
