@@ -49,7 +49,7 @@
     "rashi": "Rashi",
     "rashbam": "Rashbam",
     "ran": "Ran",
-    "tosafot": "Tosafot"
+    "tosafot": "Tosfos"
   },
   "order": {
     "Zeraim": "Zeraim",
@@ -138,9 +138,9 @@
       "title": "Did you know?",
       "open": "See the masechet",
       "printedVsGemara": "{long} has {longPrinted} printed dafim and {short} only {shortPrinted}, yet their Gemara is about the same length: {longMain} and {shortMain} full dafim.",
-      "tosafotRatio": "In {tractate}, Tosafot fill {tosafot} full dafim, {ratio} times the Gemara ({main} full dafim).",
+      "tosafotRatio": "In {tractate}, Tosfos fill {tosafot} full dafim, {ratio} times the Gemara ({main} full dafim).",
       "densestGemara": "The amud with the most Gemara in the whole Shas is {tractate} {amud}: {share} of its text body.",
-      "densestTosafot": "On {tractate} {amud}, Tosafot take {share} of the text body, more than on any other amud.",
+      "densestTosafot": "On {tractate} {amud}, Tosfos take {share} of the text body, more than on any other amud.",
       "gemaraShare": "{tractate} has the most Gemara for its size: {main} full dafim in {printed} printed dafim ({share} of the text body)."
     }
   },
@@ -151,17 +151,17 @@
       "title": "The unit: full dafim",
       "definition": "Take one text alone, for example the Gemara, and imagine it printed with nothing else around it, filling the whole text body of each page. The number of dafim it would fill is its length in full dafim. One full daf is two complete text bodies (both amudim) of that single text.",
       "examplePrinted": "{tractate}: printed dafim",
-      "example": "{tractate} has {printed} printed dafim, but its Gemara alone would fill {main} full dafim: {share} of its text body. The rest is Rashi, Tosafot, headings and spacing.",
+      "example": "{tractate} has {printed} printed dafim, but its Gemara alone would fill {main} full dafim: {share} of its text body. The rest is Rashi, Tosfos, headings and spacing.",
       "units": "In the preferences you can also show full amudim (half a full daf) or the share of the text body in percent."
     },
     "method": {
       "title": "How it is measured",
       "stepPdf": "The pages of the Vilna Shas are read from the PDFs published by Shas.org.",
-      "stepMatch": "Each line of text on the page is matched against the texts of Sefaria and Wikisource, to know whether it belongs to the Gemara, Rashi, Tosafot or another commentary.",
+      "stepMatch": "Each line of text on the page is matched against the texts of Sefaria and Wikisource, to know whether it belongs to the Gemara, Rashi, Tosfos or another commentary.",
       "stepArea": "For each text, the area of its line boxes is added up and divided by the text body fitted on the masechet's pages. This gives the share of each amud that the text fills.",
       "stepTotal": "These shares are added up over the masechet and divided by two to get full dafim.",
       "notCalculatedTitle": "Not calculated yet",
-      "notCalculatedNedarim": "Tosafot on Nedarim.",
+      "notCalculatedNedarim": "Tosfos on Nedarim.",
       "notCalculatedSmall": "The commentaries of Shekalim, Kinnim, Tamid and Middos."
     },
     "caveats": {
@@ -176,7 +176,7 @@
       "shasOrgApi": "Shas.org PDF API",
       "shasOrgApiUse": "Page images of the Vilna Shas",
       "sefariaExport": "Sefaria Export Archive",
-      "sefariaExportUse": "Texts of the Gemara, Rashi and Tosafot used to recognize the lines",
+      "sefariaExportUse": "Texts of the Gemara, Rashi and Tosfos used to recognize the lines",
       "wikisource": "Hebrew Wikisource",
       "wikisourceUse": "Additional texts used to recognize the lines",
       "hebcal": "{'@'}hebcal/learning",

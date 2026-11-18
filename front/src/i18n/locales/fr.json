@@ -138,9 +138,9 @@
       "title": "Le saviez-vous ?",
       "open": "Voir la massekhet",
       "printedVsGemara": "{long} compte {longPrinted} dafim imprimés et {short} seulement {shortPrinted}, et pourtant leur Guemara a à peu près la même longueur : {longMain} et {shortMain} dafim pleins.",
-      "tosafotRatio": "Dans {tractate}, les Tossafot remplissent {tosafot} dafim pleins, {ratio} fois la Guemara ({main} dafim pleins).",
+      "tosafotRatio": "Dans {tractate}, les Tossefot remplissent {tosafot} dafim pleins, {ratio} fois la Guemara ({main} dafim pleins).",
       "densestGemara": "L'amoud qui contient le plus de Guemara dans tout le Shas est {tractate} {amud} : {share} de son corps de texte.",
-      "densestTosafot": "En {tractate} {amud}, les Tossafot occupent {share} du corps de texte, plus que sur tout autre amoud.",
+      "densestTosafot": "En {tractate} {amud}, les Tossefot occupent {share} du corps de texte, plus que sur tout autre amoud.",
       "gemaraShare": "{tractate} a le plus de Guemara pour sa taille : {main} dafim pleins sur {printed} dafim imprimés ({share} du corps de texte)."
     }
   },
@@ -151,17 +151,17 @@
       "title": "L'unité : les dafim pleins",
       "definition": "Prenez un seul texte, par exemple la Guemara, et imaginez-le imprimé sans rien autour, remplissant tout le corps de texte de chaque page. Le nombre de dafim qu'il remplirait est sa longueur en dafim pleins. Un daf plein correspond à deux corps de texte complets (les deux amoudim) de ce seul texte.",
       "examplePrinted": "{tractate} : dafim imprimés",
-      "example": "{tractate} compte {printed} dafim imprimés, mais sa Guemara seule remplirait {main} dafim pleins : {share} de son corps de texte. Le reste, ce sont Rachi, les Tossafot, les titres et les espaces.",
+      "example": "{tractate} compte {printed} dafim imprimés, mais sa Guemara seule remplirait {main} dafim pleins : {share} de son corps de texte. Le reste, ce sont Rachi, les Tossefot, les titres et les espaces.",
       "units": "Dans les préférences, vous pouvez aussi afficher des amoudim pleins (un demi-daf plein) ou la part du corps de texte en pourcentage."
     },
     "method": {
       "title": "Comment c'est mesuré",
       "stepPdf": "Les pages du Shas de Vilna sont lues à partir des PDF publiés par Shas.org.",
-      "stepMatch": "Chaque ligne de texte de la page est comparée aux textes de Sefaria et de Wikisource, pour savoir si elle appartient à la Guemara, à Rachi, aux Tossafot ou à un autre commentaire.",
+      "stepMatch": "Chaque ligne de texte de la page est comparée aux textes de Sefaria et de Wikisource, pour savoir si elle appartient à la Guemara, à Rachi, aux Tossefot ou à un autre commentaire.",
       "stepArea": "Pour chaque texte, la surface de ses boîtes de lignes est additionnée puis divisée par le corps de texte ajusté sur les pages de la massekhet. On obtient ainsi la part de chaque amoud qu'occupe le texte.",
       "stepTotal": "Ces parts sont additionnées sur la massekhet puis divisées par deux pour obtenir des dafim pleins.",
       "notCalculatedTitle": "Pas encore calculé",
-      "notCalculatedNedarim": "Les Tossafot sur Nedarim.",
+      "notCalculatedNedarim": "Les Tossefot sur Nedarim.",
       "notCalculatedSmall": "Les commentaires de Shekalim, Kinnim, Tamid et Middot."
     },
     "caveats": {
@@ -176,7 +176,7 @@
       "shasOrgApi": "API PDF de Shas.org",
       "shasOrgApiUse": "Images des pages du Shas de Vilna",
       "sefariaExport": "Archive d'export de Sefaria",
-      "sefariaExportUse": "Textes de la Guemara, de Rachi et des Tossafot utilisés pour reconnaître les lignes",
+      "sefariaExportUse": "Textes de la Guemara, de Rachi et des Tossefot utilisés pour reconnaître les lignes",
       "wikisource": "Wikisource en hébreu",
       "wikisourceUse": "Textes complémentaires utilisés pour reconnaître les lignes",
       "hebcal": "{'@'}hebcal/learning",

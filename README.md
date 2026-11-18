@@ -1,6 +1,8 @@
 # Gemara Daf Counter
 
-Measures how much of each printed page of the Vilna Shas is occupied by the main text (Mishnah and Gemara), Rashi and Tosafot, for all 40 sections of the Babylonian Talmud (5,406 printed sides).
+**Website: <https://samlizard.github.io/gemara-daf-counter/>** (English, French, Hebrew): the real length of each masechet, amud by amud.
+
+Measures how much of each printed page of the Vilna Shas is occupied by the main text (Mishnah and Gemara), Rashi and Tosfos, for all 40 sections of the Babylonian Talmud (5,406 printed sides).
 
 The result is [data/shas-metrics.json](data/shas-metrics.json): for every side, the fraction of the page's text body taken by each category, plus per-tractate totals in sides and in equivalent dafim.
 
@@ -9,7 +11,7 @@ The result is [data/shas-metrics.json](data/shas-metrics.json): for every side, 
 For each side, the original printed page is downloaded as a PDF from the [Shas.org daf PDF API](https://www.shas.org/daf-pdf/api/). The text lines are read with PDF.js and attributed to a category by matching their glyphs against reference texts:
 
 - main text and Rashi from the [Sefaria export archive](https://github.com/Sefaria/Sefaria-Export-Archive/tree/3f1013631fdfe452e953a93a2c5f921319e394ed) (pinned commit);
-- Tosafot (and some Rashi) from [Hebrew Wikisource](https://he.wikisource.org/) page transcriptions.
+- Tosfos (and some Rashi) from [Hebrew Wikisource](https://he.wikisource.org/) page transcriptions.
 
 The area of each line box is divided by the tractate's fitted text-body rectangle. These are automatic estimates of line-box area, not ink area, and they are not hand-verified. See [docs/methodology.md](docs/methodology.md) for the methodology, the JSON contract, known limitations and the per-tractate special cases.
 
@@ -33,6 +35,18 @@ npm run compare
 - `research/` – earlier experiments and visual review tools, kept for reference.
 - `data/` – the published result.
 - `docs/` – methodology and development notes.
+- `front/` – the website (Vue 3 + Vuetify 4). See [docs/FRONT_SPEC.md](docs/FRONT_SPEC.md) and [STANDARDS.md](STANDARDS.md).
+
+## Website
+
+The site reads only a condensed copy of the data, `front/public/shas-front.json`.
+
+```sh
+npm run export:front        # regenerate front/public/shas-front.json from data/shas-metrics.json
+cd front && npm ci
+npm run dev                 # local development server
+npm run deploy              # type check, build and publish front/dist to the gh-pages branch
+```
 
 Other commands: `npm test` runs the tests; `npm run review:problems` starts a local page viewer that draws the measured boxes over each PDF.
 
