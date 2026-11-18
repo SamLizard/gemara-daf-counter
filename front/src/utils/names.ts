@@ -1,17 +1,16 @@
-import he from '@/i18n/locales/he.json'
+import { t } from '@/i18n'
 import type { TextId } from '@/types/metrics'
 
-// Hebrew names are shown in every locale (spec §7). They come from the Hebrew locale file,
-// so there is one source for them.
-const tractateHebrew: Record<string, string> = he.tractate
-const textHebrew: Record<string, string> = he.text
+// Hebrew names are shown in every locale (spec §7). They come from the Hebrew locale file
+// through vue-i18n: importing the JSON directly gives compiled message objects in the build.
+const hebrew = (key: string) => t(key, {}, { locale: 'he' })
 
 export function tractateHebrewName(id: string): string {
-  return tractateHebrew[id] ?? id
+  return hebrew(`tractate.${id}`)
 }
 
 export function textHebrewName(id: TextId): string {
-  return textHebrew[id] ?? id
+  return hebrew(`text.${id}`)
 }
 
 const HEBREW_RUN = /([\u0590-\u05FF][\u0590-\u05FF\s״׳"'.,:\-–/()]*[\u0590-\u05FF״׳]|[\u0590-\u05FF])/g

@@ -20,6 +20,8 @@ for (const locale of ['en', 'fr', 'he']) {
       await page.waitForTimeout(900)
       const report = await page.evaluate(() => {
         const text = document.body.innerText
+        // Compiled vue-i18n messages leaking into the page look like {"t":0,"b":…}.
+        if (/"t":\s*\d/.test(text)) return { raw: ['compiled message object in the page'], overflow: 0, dir: document.documentElement.dir }
         const raw = [...new Set(text.match(/\b(home|about|masechet|masechtot|app|menu|prefs|unit|value|viewer|text|order|tractate|chart)\.[a-zA-Z.-]+\b/g) || [])]
         return { raw, overflow: document.documentElement.scrollWidth - window.innerWidth, dir: document.documentElement.dir, length: text.length }
       })
