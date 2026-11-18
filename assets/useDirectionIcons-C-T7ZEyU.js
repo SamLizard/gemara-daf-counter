@@ -1,0 +1,1 @@
+import{Nt as e,mr as t}from"./VAlert-DWbDgQww.js";function n(){let{isRtl:n}=e();return{backIcon:t(()=>n.value?`$next`:`$prev`),forwardIcon:t(()=>n.value?`$prev`:`$next`)}}export{n as t};
