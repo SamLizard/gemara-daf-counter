@@ -131,7 +131,8 @@
       "printed": "Dafim imprimés",
       "tractates": "{count} massekhtot",
       "barTitle": "Part du corps de texte de tout le Shas",
-      "barNote": "Le reste de la page contient les titres, les espaces et les textes non mesurés."
+      "barNote": "Le reste de la page contient les titres, les espaces et les commentaires des massekhtot pas encore calculées.",
+      "missing": "Sans {list} : pas encore calculé dans cette massekhet. | Sans {list} : pas encore calculé dans ces massekhtot."
     },
     "facts": {
       "title": "Le saviez-vous ?",

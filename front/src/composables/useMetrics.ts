@@ -1,6 +1,5 @@
 import { computed, shallowRef } from 'vue'
 import type { MetricsFile, OrderId, TextId, Tractate } from '@/types/metrics'
-import { sumKnown } from '@/utils/metrics'
 
 const data = shallowRef<MetricsFile | null>(null)
 const loading = shallowRef(false)
@@ -24,24 +23,39 @@ function load(): Promise<void> {
   return request
 }
 
+export interface TextTotal {
+  /** Full dafim over the masechtot where the text is measured. */
+  total: number
+  /** Masechtot left out because the text is not calculated there yet (Shas order). */
+  missing: string[]
+}
+
 export interface Totals {
   printedSides: number
   tractateCount: number
-  /** Full dafim per text, null if one masechet has it not measured. */
-  texts: Partial<Record<TextId, number | null>>
+  texts: Partial<Record<TextId, TextTotal>>
 }
 
+// Commentaries that the masechtot with `otherCommentaries: 'not-measured'` would have.
+const USUAL_COMMENTARIES: readonly TextId[] = ['rashi', 'tosafot']
+
 /**
- * Totals per text over a group of masechtot. A text is summed only over masechtot where it is
- * printed (absent texts are skipped); one `not-measured` masechet makes the whole total null.
+ * Totals per text over a group of masechtot. Masechtot where a text is not calculated yet
+ * (whole masechet left out by the pipeline) are listed in `missing` instead of making the total
+ * unknown: they are known gaps, not measurement errors.
  */
 function totalsOf(tractates: readonly Tractate[]): Totals {
-  const byText = new Map<TextId, (number | null)[]>()
+  const texts: Partial<Record<TextId, TextTotal>> = {}
+  const entry = (id: TextId) => (texts[id] ??= { total: 0, missing: [] })
   for (const tractate of tractates) {
-    for (const text of tractate.texts) byText.set(text.id, [...(byText.get(text.id) ?? []), text.total])
+    for (const text of tractate.texts) {
+      if (text.total === null) entry(text.id).missing.push(tractate.id)
+      else entry(text.id).total += text.total
+    }
+    if (tractate.otherCommentaries === 'not-measured') {
+      for (const id of USUAL_COMMENTARIES) entry(id).missing.push(tractate.id)
+    }
   }
-  const texts: Partial<Record<TextId, number | null>> = {}
-  for (const [id, values] of byText) texts[id] = sumKnown(values)
   return {
     printedSides: tractates.reduce((sum, tractate) => sum + tractate.printedSides, 0),
     tractateCount: tractates.length,

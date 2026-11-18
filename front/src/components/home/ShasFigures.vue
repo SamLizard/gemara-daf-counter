@@ -8,6 +8,7 @@
           :value="row.total"
           :unit="unit"
           :printed-sides="shasTotals.printedSides"
+          :hint="missingNote(row.missing)"
         />
       </v-col>
       <v-col cols="12" sm="6" md="3">
@@ -33,7 +34,7 @@ import { computed } from 'vue'
 import { useMetrics } from '@/composables/useMetrics'
 import { usePreferences } from '@/composables/usePreferences'
 import { formatNumber } from '@/utils/format'
-import { shasRows, shasSegments } from '@/utils/shasSummary'
+import { missingNote, shasRows, shasSegments } from '@/utils/shasSummary'
 import StatCard from '@/components/common/StatCard.vue'
 import StackedBar from '@/components/charts/StackedBar.vue'
 

@@ -1,16 +1,34 @@
+import { i18n, t } from '@/i18n'
 import type { TextId } from '@/types/metrics'
 import type { Totals } from '@/composables/useMetrics'
 import type { BarSegment } from '@/utils/charts/stackedBar'
 import { shareOfBody } from '@/utils/metrics'
 
-const SHAS_ORDER: readonly TextId[] = ['main', 'rashi', 'tosafot', 'ran']
+const SHAS_ORDER: readonly TextId[] = ['main', 'rashi', 'rashbam', 'ran', 'tosafot']
 
-/** Texts of the whole Shas in display order, with their total (null = not calculated). */
-export function shasRows(totals: Totals): { id: TextId; total: number | null }[] {
-  return SHAS_ORDER.filter((id) => id in totals.texts).map((id) => ({ id, total: totals.texts[id] ?? null }))
+export interface ShasRow {
+  id: TextId
+  total: number
+  missing: string[]
 }
 
-/** Share of the whole Shas text body per text; texts with an unknown total are left out. */
+/** Texts of the whole Shas in display order. Texts measured nowhere are left out. */
+export function shasRows(totals: Totals): ShasRow[] {
+  return SHAS_ORDER.flatMap((id) => {
+    const entry = totals.texts[id]
+    return entry && entry.total > 0 ? [{ id, ...entry }] : []
+  })
+}
+
+/** "Without Nedarim" / "Without Shekalim, Kinnim, Tamid and Middos": masechtot not calculated yet. */
+export function missingNote(missing: readonly string[]): string | undefined {
+  if (!missing.length) return undefined
+  const names = missing.map((id) => t(`tractate.${id}`))
+  const list = new Intl.ListFormat(i18n.global.locale.value, { type: 'conjunction' }).format(names)
+  return t('home.shas.missing', { list }, missing.length)
+}
+
+/** Share of the whole Shas text body per text, plus the rest. */
 export function shasSegments(totals: Totals): BarSegment[] {
   const segments: BarSegment[] = []
   for (const { id, total } of shasRows(totals)) {

@@ -131,7 +131,8 @@
       "printed": "Printed dafim",
       "tractates": "{count} masechtot",
       "barTitle": "Share of the text body of the whole Shas",
-      "barNote": "The rest of the page holds headings, spacing and the texts not measured."
+      "barNote": "The rest of the page holds headings, spacing, and the commentaries of the masechtot not calculated yet.",
+      "missing": "Without {list}: not calculated there yet. | Without {list}: not calculated there yet."
     },
     "facts": {
       "title": "Did you know?",
