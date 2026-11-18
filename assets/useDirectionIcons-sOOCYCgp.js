@@ -1,0 +1,1 @@
+import{Tr as e,Wt as t}from"./VAlert-DBWKJo-y.js";function n(){let{isRtl:n}=t();return{backIcon:e(()=>n.value?`$next`:`$prev`),forwardIcon:e(()=>n.value?`$prev`:`$next`)}}export{n as t};
