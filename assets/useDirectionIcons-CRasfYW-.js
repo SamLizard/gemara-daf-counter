@@ -1,1 +1,0 @@
-import{Nt as e,mr as t}from"./VAlert-Cl52q-8Q.js";function n(){let{isRtl:n}=e();return{backIcon:t(()=>n.value?`$next`:`$prev`),forwardIcon:t(()=>n.value?`$prev`:`$next`)}}export{n as t};
