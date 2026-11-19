@@ -1,5 +1,31 @@
 <template>
   <div>
+    <div v-if="zoomable" class="d-flex flex-wrap justify-end ga-1 mb-1">
+      <v-btn
+        size="small"
+        variant="tonal"
+        prepend-icon="mdi-arrow-expand-horizontal"
+        :disabled="isFull"
+        @click="zoom = { ...FULL_ZOOM }"
+      >
+        {{ $t('masechet.strip.showAll') }}
+      </v-btn>
+      <v-btn
+        size="small"
+        variant="text"
+        icon="mdi-magnify-minus-outline"
+        :disabled="isFull"
+        :aria-label="$t('masechet.strip.zoomOut')"
+        @click="zoom = scaleZoom(zoom, 2, amudim.length)"
+      />
+      <v-btn
+        size="small"
+        variant="text"
+        icon="mdi-magnify-plus-outline"
+        :aria-label="$t('masechet.strip.zoomIn')"
+        @click="zoom = scaleZoom(zoom, 0.5, amudim.length)"
+      />
+    </div>
     <v-chart
       class="page-strip"
       :option="option"
@@ -19,7 +45,7 @@ import { useI18n } from 'vue-i18n'
 import VChart from 'vue-echarts'
 import { useChartContext } from '@/composables/useChartContext'
 import { usePageSeries } from '@/composables/usePageSeries'
-import { initialZoom, pageStripOption, type ZoomWindow } from '@/utils/charts/pageStrip'
+import { FULL_ZOOM, initialZoom, needsZoom, pageStripOption, scaleZoom, type ZoomWindow } from '@/utils/charts/pageStrip'
 import { stripSummary } from '@/utils/masechetSummary'
 
 const props = defineProps<{ tractateId: string; selected: string | null }>()
@@ -30,7 +56,9 @@ const context = useChartContext()
 const { current, amudim, series, tooltip } = usePageSeries(() => props.tractateId)
 
 const selectedIndex = computed(() => (props.selected ? amudim.value.indexOf(props.selected) : -1))
-const zoom = ref<ZoomWindow>({ start: 0, end: 100 })
+const zoom = ref<ZoomWindow>({ ...FULL_ZOOM })
+const zoomable = computed(() => needsZoom(amudim.value.length))
+const isFull = computed(() => zoom.value.start <= 0.01 && zoom.value.end >= 99.99)
 
 // The window follows the selection only when it leaves the visible range (e.g. prev/next buttons).
 watch(

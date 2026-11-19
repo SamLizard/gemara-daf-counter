@@ -32,7 +32,7 @@
         </v-col>
       </v-row>
       <v-divider class="my-3" />
-      <DafYomiProgress v-if="lastAmud" :tractate-id="tractate.id" :last-amud="lastAmud" />
+      <MasechetProgress v-if="lastAmud" :tractate-id="tractate.id" :last-amud="lastAmud" />
     </template>
     <p v-else class="text-body-medium my-4">{{ $t('home.dafYomi.unavailable') }}</p>
   </v-card>
@@ -48,7 +48,7 @@ import { visibleTexts } from '@/utils/metrics'
 import { formatLongDate } from '@/utils/dafYomiStats'
 import TractateName from '@/components/common/TractateName.vue'
 import DafYomiAmud from './DafYomiAmud.vue'
-import DafYomiProgress from './DafYomiProgress.vue'
+import MasechetProgress from '@/components/common/MasechetProgress.vue'
 
 const props = defineProps<{ date?: Date }>()
 

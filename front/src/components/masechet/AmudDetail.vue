@@ -48,6 +48,8 @@
           </v-list-item-title>
         </v-list-item>
       </v-list>
+      <v-divider class="my-3" />
+      <MasechetProgress :tractate-id="tractateId" :last-amud="amud" :show-printed="false" />
     </v-card-text>
     <v-card-actions>
       <v-btn :href="link" target="_blank" rel="noopener" append-icon="mdi-open-in-new" variant="tonal" color="primary">
@@ -68,6 +70,7 @@ import { pageUrl } from '@/utils/links'
 import StackedBar from '@/components/charts/StackedBar.vue'
 import TextName from '@/components/common/TextName.vue'
 import TractateName from '@/components/common/TractateName.vue'
+import MasechetProgress from '@/components/common/MasechetProgress.vue'
 
 const props = defineProps<{ tractateId: string; amud: string }>()
 const emit = defineEmits<{ select: [amud: string] }>()

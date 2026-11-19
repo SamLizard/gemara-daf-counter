@@ -120,11 +120,7 @@
       "details": "Détails",
       "barLabel": "Part du corps de texte de l'amoud {amud} par texte",
       "noEnabledText": "Aucun texte n'est sélectionné. Choisissez des textes dans les préférences.",
-      "unavailable": "Le Daf Yomi de ce jour n'est pas disponible.",
-      "progressTitle": "Avancement dans la massekhet",
-      "printed": "Longueur de la massekhet : {value} dafim imprimés.",
-      "progress": "{done} sur {total} dafim pleins",
-      "progressLabel": "Partie de la massekhet apprise jusqu'à ce daf"
+      "unavailable": "Le Daf Yomi de ce jour n'est pas disponible."
     },
     "shas": {
       "title": "Tout le Shas",
@@ -203,7 +199,10 @@
     "strip": {
       "title": "Amud par amud",
       "ariaLabel": "Part du corps de texte de chaque texte sur chaque amud de {tractate}",
-      "summary": "{count} amudim de {tractate}, de {first} à {last}. Chaque colonne montre la part de la page occupée par chaque texte. Sélectionnez une colonne pour voir l’amud."
+      "summary": "{count} amudim de {tractate}, de {first} à {last}. Chaque colonne montre la part de la page occupée par chaque texte. Sélectionnez une colonne pour voir l’amud.",
+      "showAll": "Toute la massekhet",
+      "zoomIn": "Zoomer",
+      "zoomOut": "Dézoomer"
     },
     "heatmap": {
       "title": "Carte de densité",
@@ -251,5 +250,13 @@
       "hintPercent": "Chaque barre montre la part de chaque texte choisi parmi les textes choisis de la massekhet.",
       "mainShare": "Guemara : {share}"
     }
+  },
+  "progress": {
+    "title": "Avancement dans la massekhet",
+    "until": "jusqu'à {amud}",
+    "printed": "Longueur de la massekhet : {value} dafim imprimés.",
+    "value": "{done} sur {total} dafim pleins",
+    "label": "Partie de la massekhet apprise jusqu'à {amud}",
+    "noText": "Aucun texte n'est choisi."
   }
 }

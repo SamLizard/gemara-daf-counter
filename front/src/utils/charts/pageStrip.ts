@@ -39,6 +39,17 @@ export function initialZoom(count: number, center: number): ZoomWindow {
   return { start: (first / count) * 100, end: ((first + WINDOW) / count) * 100 }
 }
 
+/** Window scaled around its center by `factor` (< 1 zooms in), kept within 0–100 and at least 10 amudim. */
+export function scaleZoom(window: ZoomWindow, factor: number, count: number): ZoomWindow {
+  const minSpan = count ? Math.min(100, (10 / count) * 100) : 100
+  const span = Math.min(100, Math.max(minSpan, (window.end - window.start) * factor))
+  const center = (window.start + window.end) / 2
+  const start = Math.min(100 - span, Math.max(0, center - span / 2))
+  return { start, end: start + span }
+}
+
+export const FULL_ZOOM: ZoomWindow = { start: 0, end: 100 }
+
 /** One stacked column per amud (fractions of the text body), with zoom for long masechtot. */
 export function pageStripOption(input: StripInput, context: ChartContext): EChartsCoreOption {
   const zoomed = needsZoom(input.amudim.length)
@@ -79,7 +90,17 @@ export function pageStripOption(input: StripInput, context: ChartContext): EChar
       ? [
           // On touch screens the slider alone moves the window, so a drag on the bars scrolls the page.
           ...(context.touch ? [] : [{ type: 'inside', xAxisIndex: 0, ...window }]),
-          { type: 'slider', xAxisIndex: 0, bottom: 8, height: context.touch ? 28 : 20, ...window },
+          {
+            type: 'slider',
+            xAxisIndex: 0,
+            bottom: 8,
+            height: context.touch ? 28 : 20,
+            // Off: a touch next to a handle would start a new selection instead of moving the handle.
+            brushSelect: false,
+            handleSize: context.touch ? '160%' : '100%',
+            moveHandleSize: context.touch ? 14 : 7,
+            ...window,
+          },
         ]
       : [],
     series: input.series.map((series) => ({

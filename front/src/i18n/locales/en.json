@@ -120,11 +120,7 @@
       "details": "Details",
       "barLabel": "Share of the text body of amud {amud} per text",
       "noEnabledText": "No text is selected. Choose texts in the preferences.",
-      "unavailable": "The Daf Yomi of this day is not available.",
-      "progressTitle": "Progress in the masechet",
-      "printed": "Length of the masechet: {value} printed dafim.",
-      "progress": "{done} of {total} full dafim",
-      "progressLabel": "Part of the masechet learned up to this daf"
+      "unavailable": "The Daf Yomi of this day is not available."
     },
     "shas": {
       "title": "The whole Shas",
@@ -203,7 +199,10 @@
     "strip": {
       "title": "Amud by amud",
       "ariaLabel": "Share of the text body per text on each amud of {tractate}",
-      "summary": "{count} amudim of {tractate}, from {first} to {last}. Each column shows the share of the page taken by each text. Select a column to see the amud."
+      "summary": "{count} amudim of {tractate}, from {first} to {last}. Each column shows the share of the page taken by each text. Select a column to see the amud.",
+      "showAll": "Whole masechet",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
     },
     "heatmap": {
       "title": "Density map",
@@ -251,5 +250,13 @@
       "hintPercent": "Each bar shows the share of each selected text among the selected texts of the masechet.",
       "mainShare": "Gemara: {share}"
     }
+  },
+  "progress": {
+    "title": "Progress in the masechet",
+    "until": "up to {amud}",
+    "printed": "Length of the masechet: {value} printed dafim.",
+    "value": "{done} of {total} full dafim",
+    "label": "Part of the masechet learned up to {amud}",
+    "noText": "No text is selected."
   }
 }
